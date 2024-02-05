@@ -1,17 +1,114 @@
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resturant Site</title>
+    <style>
+        .accordion {
+            text-align: left;
+            border: none;
+            outline: none;
+            transition: .4s;
+        }
+
+        .active,
+        .accordion:hover {
+            background-color: lightgray;
+        }
+
+        .panel {
+            padding: 0 18px;
+            display: none;
+            overflow: hidden;
+        }
+
+        .wrapper {
+            display: grid;
+            grid-gap: 5px;
+            grid-template-columns: 200px 400px;
+            background-color: cornflowerblue;
+            color: #111;
+        }
+
+        .box {
+            background-color: #ccc;
+            color: #111;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 1em;
+            border: solid black 1px;
+        }
+
+        button {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 2em;
+            font-weight: bold;
+            padding-left: 2em;
+            padding-right: 2em;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Resturant Site</h1>
-    <div id="div tab">
-        <textarea name="tabSummary" id="txaTabSummary" cols="30" rows="10" disabled="true"></textarea>
-        <button></button>
+    <h1>Resturant Site!!</h1>
+    <div class="wrapper">
+        <div class="box" style="grid-column: 1 / span 2;">Choose your order</div>
+        <div class="box">
+            <div id="div tab">
+                <textarea name="tabSummary" id="txaTabSummary" cols="30" rows="10" disabled="true"></textarea>
+            </div>
+        </div>
+        <div class="box">
+            <button id="Drinks" class="accordion">Drinks</button>
+
+            <div id="divDrinkButtons" class="panel">
+                <button id="soda" class="btnMenu">Water</button>
+                <button id="btnSoda">Soda</button>
+                <button id="btnBeer">Beer</button>
+
+            </div>
+            <br />
+            <button id="btnFood" class="accordion">Food</button>
+            <div id="divFoodButtons" class="panel">
+                <button id="btnBurger">Burger</button>
+                <button id="btnChickenSand">Chicken Sandwich</button>
+
+            </div>
+        </div>
 
     </div>
 
+
 </body>
+<script>
+    let order = []
+
+
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function () {
+            /* Toggle between adding and removing the "active" class,
+            to highlight the button that controls the panel */
+            this.classList.toggle("active");
+
+            /* Toggle between hiding and showing the active panel */
+            var panel = this.nextElementSibling;
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
+        });
+    }
+
+    document.getElementById("txaTabSummary").value += order;
+</script>
+
 </html>
