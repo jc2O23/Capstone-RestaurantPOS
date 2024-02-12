@@ -1,114 +1,156 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resturant Site</title>
+    <!-- The VUE CDN ! Next version 3 -->
+    <!--<script src="https://unpkg.com/vue@next"></script>-->
+    <script src="https://unpkg.com/vue@3"></script>
     <style>
-        .accordion {
-            text-align: left;
-            border: none;
-            outline: none;
-            transition: .4s;
-        }
-
-        .active,
-        .accordion:hover {
-            background-color: lightgray;
-        }
-
-        .panel {
-            padding: 0 18px;
-            display: none;
-            overflow: hidden;
-        }
-
-        .wrapper {
-            display: grid;
-            grid-gap: 5px;
-            grid-template-columns: 200px 400px;
+        body {
             background-color: cornflowerblue;
-            color: #111;
+            color: white;
         }
 
-        .box {
-            background-color: #ccc;
-            color: #111;
-            border-radius: 5px;
-            padding: 10px;
-            font-size: 1em;
-            border: solid black 1px;
+        /* remove the horizontal space between the RadioGroup items */
+        .label {
+            display: flex;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            opacity: 0;
+            position: absolute;
+            border-left-width: 1px;
+            border-radius: .2em 0 0 .2em;
+            background-color: #ff6358;
+            color: #fff;
         }
 
-        button {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            font-size: 2em;
-            font-weight: bold;
-            padding-left: 2em;
-            padding-right: 2em;
-        }
+      
+        
     </style>
+
 </head>
 
 <body>
-    <h1>Resturant Site!!</h1>
-    <div class="wrapper">
-        <div class="box" style="grid-column: 1 / span 2;">Choose your order</div>
-        <div class="box">
-            <div id="div tab">
-                <textarea name="tabSummary" id="txaTabSummary" cols="30" rows="10" disabled="true"></textarea>
-            </div>
+    <h1>Resturant Site</h1>
+    <h2>Five Guys in Vue</h2>
+    <div id="vueRadio">
+        <div>
+            <input type="button" :id="btnAddOrder" v-on:click = "addToOrder" value="Add To Order Final Order">
+            <input type="text" :id="txtFinalOrder" v-model="finalOrder">
         </div>
-        <div class="box">
-            <button id="Drinks" class="accordion">Drinks</button>
-
-            <div id="divDrinkButtons" class="panel">
-                <button id="soda" class="btnMenu">Water</button>
-                <button id="btnSoda">Soda</button>
-                <button id="btnBeer">Beer</button>
-
-            </div>
+        <div id="divEntre">
             <br />
-            <button id="btnFood" class="accordion">Food</button>
-            <div id="divFoodButtons" class="panel">
-                <button id="btnBurger">Burger</button>
-                <button id="btnChickenSand">Chicken Sandwich</button>
+            <span v-for="(ent, index) in entres" v-on:change="calc">
+                <input type="radio" :id="ent.entreName" name="radEntre" :value="ent" v-model="entreChoice" />
+                <label :for="ent.entreName">{{ent.entreName}}</label>
 
-            </div>
-        </div>
+            </span>
+        </div><!--ends sandwich-->
 
-    </div>
+        <br />
+        <div id="divToppings">
+            <span v-for="(top, index) in toppings" v-on:change="calc">
+                <input type="checkbox" :id="top.topping_name" :value="top" v-model="toppingChoice" />
+                <label :for="top.topping_name">{{top.topping_name}}</label>
+            </span>
+        </div><!--ends toppings-->
+        <div id="divSides">
+            <br />
+            <span v-for="(side, index) in sides" v-on:change="calc">
+                <input type="checkbox" :id="side.side_name" name="radSid" :value="side" v-model="sideChoice" />
+                <label :for="side.side_name">{{side.side_name}}</label>
+            </span>
+        </div><!--ends sides-->
+        <br />
+        <div id="divOrderDetails">
+            <span id="spnOrderDeets">
+                <span>Entre: {{entreChoice.entreName}} --- {{entreChoice.Price}}</span>
+                <br />
+                Toppings: <span v-for="(top,i) in toppingChoice">{{toppingChoice[i].topping_name}} | </span>
+                <br />
+                Sides: <span v-for="(side,i) in sideChoice"> {{sideChoice[i].side_name}} --{{sideChoice[i].side_price}} | </span>
+                <br />
+                <span>Total: {{total}}</span>
+                <br>
 
+                <span>Total Order: {{entreChoice.entreName}} |<span v-for="(side,i) in sideChoice"> {{sideChoice[i].side_name}}|</span> <span v-for="(top,i) in toppingChoice">{{toppingChoice[i].topping_name}} | </span>
+                    | </span></span>
+
+            </span>
+
+        </div><!--ends OrderDetails-->
+        
+        
+    </div><!--end of the vue div-->
+
+  
+
+    <script>
+        const Order = {
+
+            data() {
+                return {
+                    entres: [],
+                    toppings: [],
+                    sides: [],
+                    entreChoice: [],
+                    toppingChoice: [],
+                    sideChoice: [],
+                    total: 0,
+                    totalOrder:[],
+                    finalOrder:""
+
+                }//end return
+            }, //end data property
+
+            mounted() {
+                console.log("mounted")
+            },
+
+            created() {
+                fetch('menu.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        this.entres = data.entres;
+                        this.toppings = data.toppings;
+                        this.sides = data.sides;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+
+            },
+            methods: {
+
+                calc() {
+                    //alert("HI");
+                    this.total = 0.0;
+                    if (this.entreChoice) {
+                        this.total = this.entreChoice.price;
+                        
+                    }
+                    for (i = 0; i < this.sideChoice.length; i++) {
+                        this.total += parseFloat(this.sideChoice[i].side_price);
+                        
+                    }
+                    this.total = parseFloat(this.total).toFixed(2);
+
+                },//end Calc 
+                addToFinal(){
+                    this.finalOrder
+                }
+
+               
+            }//end Methods
+
+        } //end Order
+
+        Vue.createApp(Order).mount('#vueRadio')
+
+    </script>
 
 </body>
-<script>
-    let order = []
-
-
-    var acc = document.getElementsByClassName("accordion");
-    var i;
-
-    for (i = 0; i < acc.length; i++) {
-        acc[i].addEventListener("click", function () {
-            /* Toggle between adding and removing the "active" class,
-            to highlight the button that controls the panel */
-            this.classList.toggle("active");
-
-            /* Toggle between hiding and showing the active panel */
-            var panel = this.nextElementSibling;
-            if (panel.style.display === "block") {
-                panel.style.display = "none";
-            } else {
-                panel.style.display = "block";
-            }
-        });
-    }
-
-    document.getElementById("txaTabSummary").value += order;
-</script>
 
 </html>
