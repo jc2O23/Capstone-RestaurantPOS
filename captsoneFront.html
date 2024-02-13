@@ -52,7 +52,7 @@
         /*changes the color of the selected item*/
         .child input[type="radio"]:checked+label,
         .child input[type="checkbox"]:checked+label {
-            background: #20b8be;
+            background: lightgrey;
             border-radius: 4px;
         }
     </style>
@@ -71,6 +71,16 @@
                 style="background-color: lightgrey;">
             <input type="button" id="btnClearOrder" v-on:click="clearOrder" value="Clear the whole order"
                 style="background-color: lightgrey;">
+                <input type="button" id="btnPrint" v-on:click="printOrder" value="Print the whole order"
+                style="background-color: lightgrey;">
+            <div class="child">
+                <span>Entre Description: {{entreChoice.description}}</span>
+                <br>
+                <br>
+                <span style="font-size:xx-large;">Total: ${{overallTotal}}</span>
+            </div>
+
+            
         </div>
         <div id="menu_side" class="child">
             <div id="divEntre" class="child">
@@ -118,7 +128,7 @@
                     --{{sideChoice[i].side_price}}
                     | </span>
                 <br />
-                <span>Total: {{total}}</span>
+                <span>Total: {{indTotal}}</span>
                 <br>
                 <span>Total Order: {{entreChoice.entre_name}} |<span v-for="(side,i) in sideChoice">
                         {{sideChoice[i].side_name}}|</span> <span
@@ -143,7 +153,8 @@
                     toppingChoice: [],
                     sideChoice: [],
                     drinkChoice: [],
-                    total: 0,
+                    indTotal: 0,
+                    overallTotal:0,
                     totalOrder: [],
                     finalOrder: ""
 
@@ -172,16 +183,22 @@
 
                 calc() {
                     //alert("HI");
-                    this.total = 0.0;
+                    this.indTotal = 0;
                     if (this.entreChoice) {
-                        this.total = this.entreChoice.price;
+                        this.indTotal = this.entreChoice.price;
 
                     }
                     for (i = 0; i < this.sideChoice.length; i++) {
-                        this.total += parseFloat(this.sideChoice[i].side_price);
+                        this.indTotal += parseFloat(this.sideChoice[i].side_price);
 
                     }
-                    this.total = parseFloat(this.total).toFixed(2);
+                    for (i = 0; i < this.drinkChoice.length; i++) {
+                        this.indTotal += parseFloat(this.drinkChoice[i].drink_price);
+
+                    }
+                    this.indTotal = parseFloat(this.indTotal).toFixed(2);
+                   
+                   
 
                 },//end Calc 
                 addToFinal() {
@@ -195,13 +212,20 @@
                     for (i = 0; i < this.drinkChoice.length; i++) {
                         this.finalOrder += this.drinkChoice[i].drink_name + " ";
                     }
-                    this.finalOrder += "---$" + this.total
+                    this.overallTotal += this.indTotal
+                    this.finalOrder += this.indTotal
                     this.finalOrder += "\n"
+                    
                 },
 
                 clearOrder() {
                     this.finalOrder = "";
-                    this.total = 0
+                    this.indTotal = 0;
+                    this.overallTotal = 0;
+                },
+                /* our version of "printing" the recipt for the customer */
+                printOrder(){
+                    alert(this.finalOrder)
                 }
 
             }//end Methods
