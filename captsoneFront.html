@@ -63,8 +63,16 @@
     <h1>Resturant Site</h1>
     <h2>Five Guys in Vue</h2>
     <div id="vueRadio" class="parent">
+
+        <!-- Loops though the list of tables and creates the buttons -->
+        <div style="text-align: left;">
+            <div>
+                <button v-for="table in tables" :key="table.id" @click="switchTable(table.id)">Table {{ table.id }}</button>
+            </div>
+        </div>
+
         <div id="checkoutSide" class="child">
-            <textarea :id="txaFinalOrder" :value="finalOrder"
+            <textarea :id="txaFinalOrder" v-model="textareaValue" :value="finalOrder" 
                 style="height:250px; width:350px; background-color: white;" disabled="disabled"></textarea>
             <br />
             <input type="button" :id="btnAddOrder" v-on:click="addToFinal" value="Add To Order Final Order"
@@ -145,6 +153,16 @@
 
             data() {
                 return {
+                    // List of tables that are used to hold the orders
+                    // Works like a JSON, id for the id, orders holds all of the data to keep on the table and total is the price
+                    tables: [
+                        { id: 1, orders: [], total: 0 },
+                        { id: 2, orders: [], total: 0 },
+                        { id: 3, orders: [], total: 0 },
+                        { id: 4, orders: [], total: 0 },
+                        { id: 5, orders: [], total: 0 }
+                    ],
+                    currentTableId: 1,
                     entres: [],
                     toppings: [],
                     sides: [],
@@ -226,7 +244,47 @@
                 /* our version of "printing" the recipt for the customer */
                 printOrder(){
                     alert(this.finalOrder)
-                }
+                },
+
+            /*** New table switch stuff ***/
+                // Used to switch to the other tables
+                // Takes the table ID to know which table number it is on
+                switchTable(tableId) {
+                    // Save the current order to the current table
+                    const currentTable = this.tables.find(table => table.id == this.currentTableId);
+
+                    // Pushed the current table order onto the array and updates what is shown
+                    currentTable.orders.push({
+                        entre: this.entreChoice,
+                        toppings: this.toppingChoice,
+                        sides: this.sideChoice,
+                        drinks: this.drinkChoice,
+                        total: this.indTotal,
+                        finalOrder: this.finalOrder
+                    });
+
+                    // Gets the current table total price
+                    currentTable.total += parseFloat(this.indTotal);
+
+                    // Switch to the new table and clear out some data
+                    this.currentTableId = tableId;
+                    const newTable = this.tables.find(table => table.id === tableId);
+                    this.textareaValue = ""
+
+                    // Creates a new table if there is nothing in the table 
+                    if (newTable.orders.length > 0) {
+                        const lastOrder = newTable.orders[newTable.orders.length - 1];
+                        this.entreChoice = lastOrder.entre;
+                        this.toppingChoice = lastOrder.toppings;
+                        this.sideChoice = lastOrder.sides;
+                        this.drinkChoice = lastOrder.drinks;
+                        this.indTotal = lastOrder.total;
+                        this.finalOrder = lastOrder.finalOrder
+                    } else {
+                        // Just clears the order if there is no data stored in the table
+                        this.clearOrder();
+                    }
+                },
 
             }//end Methods
 
