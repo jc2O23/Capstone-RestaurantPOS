@@ -1,0 +1,119 @@
+{
+    "entres": [
+        {
+            "entreID": 1,
+            "entre_name": "Burger",
+            "description": "Beef burger on a sesame bun",
+            "stock": 99,
+            "price": 10.95
+        },
+        {
+            "entreID": 2,
+            "entre_name": "Chicken Sandwich",
+            "description": "Grilled chicken on a brioche bun",
+            "stock": 99,
+            "price": 10.95
+        },
+        {
+            "entreID": 3,
+            "entre_name": "Chicken Fingers",
+            "description": "Fried chicken fingers with honey mustard",
+            "stock": 99,
+            "price": 9.95
+        },
+        {
+            "entreID": 4,
+            "entre_name": "Pasta and meatballs",
+            "description": "Spagetti with ground beef meatballs, a Tomatoe Sauce, and Parm cheese",
+            "stock": 99,
+            "price": 13.95
+        },
+        {
+            "entreID": 5,
+            "entre_name": "Salmon and Mashed Potatoes",
+            "description": "Pan Seared salmon with honey glaze and a side of mashed potatoes ",
+            "stock": 99,
+            "price": 14.95
+        },
+        {
+            "entreID": 6,
+            "entre_name": "NY Strip",
+            "description": "Chared grilled NY strip steak",
+            "stock": 99,
+            "price": 16.95
+        },
+        {
+            "entreID": 6,
+            "entre_name": "House Salad",
+            "description": "crisp lettuce, tomatoes, croutons, cheese, and cucumbers",
+            "stock": 99,
+            "price": 12.95
+        }
+    ],
+    "toppings": [
+        {
+            "topping_name": "Mayo"
+        },
+        {
+            "topping_name": "Lettuce"
+        },
+        {
+            "topping_name": "Pickles"
+        },
+        {
+            "topping_name": "Tomatoes"
+        },
+        {
+            "topping_name": "Grilled onions"
+        },
+        {
+            "topping_name": "Grilled mushrooms"
+        },
+        {
+            "topping_name": "Ketchup"
+        },
+        {
+            "topping_name": "Mustard"
+        }
+    ],
+    "sides": [
+        {
+            "side_name": "Fries",
+            "side_price": 4.50
+        },
+        {
+            "side_name": "Mashed Potatoes",
+            "side_price": 4.00
+        },
+        {
+            "side_name": "Onion Rings",
+            "side_price": 4.50
+        },
+        {
+            "side_name": "Veggie of the Day",
+            "side_price": 4
+        }
+    ],
+    "drinks": [
+        {
+            "drink_name": "water",
+            "drink_price": 0.00
+        },
+        {
+            "drink_name": "soda",
+            "drink_price": 3.50
+        },
+        {
+            "drink_name": "beer",
+            "drink_price": 5.00
+        },
+        {
+            "drink_name": "wine",
+            "drink_price": 6.00
+        },
+        {
+            "drink_name": "cocktail",
+            "drink_price": 7.50
+        }
+    ]
+}
