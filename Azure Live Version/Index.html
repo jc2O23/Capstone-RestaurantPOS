@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Resturant Site</title>
+    <!-- The VUE CDN ! Next version 3 -->
+    <!--<script src="https://unpkg.com/vue@next"></script>-->
+    <script src="https://unpkg.com/vue@3"></script>
+    <style>
+        body {
+            background-color: cornflowerblue;
+            color: white;
+
+        }
+
+        /* sets the heirarchy for what elements go below it */
+        .parent {
+            display: inline-block;
+            padding: 12px 20px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        /*gets the divs to display next to eachother  */
+        .child {
+            display: inline-block;
+            border: 1px solid white;
+            padding: 10px;
+            vertical-align: top;
+
+        }
+
+        /* changes the backgroun and the boxes */
+        .child label,
+        .child input {
+            display: grid;
+            background-color: lightcyan;
+            color: black;
+            padding: 10px 10px 10px 10px;
+
+        }
+
+        /* edits the actual dot for the radio button */
+        .child input[type="radio"],
+        .child input[type="checkbox"] {
+            opacity: 0.011;
+            z-index: 100;
+        }
+
+        /*changes the color of the selected item*/
+        .child input[type="radio"]:checked+label,
+        .child input[type="checkbox"]:checked+label {
+            background: lightgrey;
+            border-radius: 4px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <h1>Resturant Site</h1>
+    <h2>Five Guys in Vue</h2>
+    <div id="vueRadio" class="parent">
+        <div id="checkoutSide" class="child">
+            <textarea :id="txaFinalOrder" :value="finalOrder"
+                style="height:250px; width:350px; background-color: white;" disabled="disabled"></textarea>
+            <br />
+            <input type="button" :id="btnAddOrder" v-on:click="addToFinal" value="Add To Order Final Order"
+                style="background-color: lightgrey;">
+            <input type="button" id="btnClearOrder" v-on:click="clearOrder" value="Clear the whole order"
+                style="background-color: lightgrey;">
+                <input type="button" id="btnPrint" v-on:click="printOrder" value="Print the whole order"
+                style="background-color: lightgrey;">
+            <div class="child">
+                <span>Entre Description: {{entreChoice.description}}</span>
+                <br>
+                <br>
+                <span style="font-size:xx-large;">Total: ${{overallTotal}}</span>
+            </div>
+
+            
+        </div>
+        <div id="menu_side" class="child">
+            <div id="divEntre" class="child">
+                <h1>Entres</h1>
+                <span v-for="(ent, index) in entres" v-on:change="calc">
+                    <input type="radio" :id="ent.entre_name" name="radEntre" :value="ent" v-model="entreChoice" />
+                    <label :for="ent.entre_name">{{ent.entre_name}}</label>
+                </span>
+            </div><!--ends entre-->
+
+
+            <div id="divToppings" class="child">
+                <h1>Toppings</h1>
+                <span v-for="(top, index) in toppings" v-on:change="calc">
+                    <input type="checkbox" :id="top.topping_name" :value="top" v-model="toppingChoice" />
+                    <label :for="top.topping_name">{{top.topping_name}}</label>
+                </span>
+            </div><!--ends toppings-->
+            <div id="divSides" class="child">
+                <h1>Sides</h1>
+                <span v-for="(side, index) in sides" v-on:change="calc">
+                    <input type="checkbox" :id="side.side_name" name="radSid" :value="side" v-model="sideChoice" />
+                    <label :for="side.side_name">{{side.side_name}}</label>
+                </span>
+            </div><!--ends sides-->
+
+            <div id="divDrinks" class="child">
+                <h1>Drinks</h1>
+                <span v-for="(drink, index) in drinks" v-on:change="calc">
+                    <input type="checkbox" :id="drink.drink_name" name="radDri" :value="drink" v-model="drinkChoice" />
+                    <label :for="drink.drink_name">{{drink.drink_name}}</label>
+                </span>
+            </div><!--ends sides-->
+        </div> <!--ends child-->
+        <br />
+        <br />
+
+        <div id="divOrderDetails">
+            <span id="spnOrderDeets">
+                <span>Entre: {{entreChoice.entreName}} --- {{entreChoice.Price}}</span>
+                <br />
+                Toppings: <span v-for="(top,i) in toppingChoice">{{toppingChoice[i].topping_name}} | </span>
+                <br />
+                Sides: <span v-for="(side,i) in sideChoice"> {{sideChoice[i].side_name}}
+                    --{{sideChoice[i].side_price}}
+                    | </span>
+                <br />
+                <span>Total: {{indTotal}}</span>
+                <br>
+                <span>Total Order: {{entreChoice.entre_name}} |<span v-for="(side,i) in sideChoice">
+                        {{sideChoice[i].side_name}}|</span> <span
+                        v-for="(top,i) in toppingChoice">{{toppingChoice[i].topping_name}} | </span>
+                </span></span>
+
+            </span>
+
+        </div><!--ends OrderDetails-->
+    </div><!--end of the vue div-->
+
+    <script>
+        const Order = {
+
+            data() {
+                return {
+                    entres: [],
+                    toppings: [],
+                    sides: [],
+                    drinks: [],
+                    entreChoice: [],
+                    toppingChoice: [],
+                    sideChoice: [],
+                    drinkChoice: [],
+                    indTotal: 0,
+                    overallTotal:0,
+                    totalOrder: [],
+                    finalOrder: ""
+
+                }//end return
+            }, //end data property
+
+            mounted() {
+                console.log("mounted")
+            },
+
+            created() {
+                fetch('menu.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        this.entres = data.entres;
+                        this.toppings = data.toppings;
+                        this.sides = data.sides;
+                        this.drinks = data.drinks;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+
+            },
+            methods: {
+
+                calc() {
+                    //alert("HI");
+                    this.indTotal = 0;
+                    if (this.entreChoice) {
+                        this.indTotal = this.entreChoice.price;
+
+                    }
+                    for (i = 0; i < this.sideChoice.length; i++) {
+                        this.indTotal += parseFloat(this.sideChoice[i].side_price);
+
+                    }
+                    for (i = 0; i < this.drinkChoice.length; i++) {
+                        this.indTotal += parseFloat(this.drinkChoice[i].drink_price);
+
+                    }
+                    this.indTotal = parseFloat(this.indTotal).toFixed(2);
+                   
+                   
+
+                },//end Calc 
+                addToFinal() {
+                    this.finalOrder += this.entreChoice.entre_name + " "
+                    for (i = 0; i < this.toppingChoice.length; i++) {
+                        this.finalOrder += this.toppingChoice[i].topping_name + " ";
+                    }
+                    for (i = 0; i < this.sideChoice.length; i++) {
+                        this.finalOrder += this.sideChoice[i].side_name + " ";
+                    }
+                    for (i = 0; i < this.drinkChoice.length; i++) {
+                        this.finalOrder += this.drinkChoice[i].drink_name + " ";
+                    }
+                    this.overallTotal += this.indTotal
+                    this.finalOrder += this.indTotal
+                    this.finalOrder += "\n"
+                    
+                },
+
+                clearOrder() {
+                    this.finalOrder = "";
+                    this.indTotal = 0;
+                    this.overallTotal = 0;
+                },
+                /* our version of "printing" the recipt for the customer */
+                printOrder(){
+                    alert(this.finalOrder)
+                }
+
+            }//end Methods
+
+        } //end Order
+
+        Vue.createApp(Order).mount('#vueRadio')
+
+    </script>
+
+</body>
+
+</html>
