@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Resturant Site Working</title>
+    <title>Resturant Site Switch</title>
     <!-- The VUE CDN ! Next version 3 -->
     <!--<script src="https://unpkg.com/vue@next"></script>-->
     <script src="https://unpkg.com/vue@3"></script>
@@ -86,7 +86,6 @@
             border: 1px solid #ccc;
             border-top: none;
         }
-        
     </style>
 
 </head>
@@ -121,30 +120,32 @@
             </div>
         </div><!--end table 1 checkout-->
         <div id="menu_side" class="child">
-            <div id="divEntre" class="child" >
-                <h1>Entres</h1>
-                <div style="column-count: 2;">
-                <span v-for="(ent, index) in entres" v-on:change="calc">
-                    <input type="radio" :id="ent.menu_item_name" name="radEntre" :value="ent" v-model="entreChoice" />
-                    <label :for="ent.menu_item_name">{{ent.menu_item_name}}</label>
-                </span></div>
+            <div id="divEntre" class="child">
+                <h1>Food/Drinks</h1>
+                <div style="column-count: 3;">
+                    <span v-for="(ent, index) in entres" v-on:change="calc">
+                        <input type="radio" :id="ent.menu_item_name" name="radEntre" :value="ent"
+                            v-model="entreChoice" />
+                        <label :for="ent.menu_item_name">{{ent.menu_item_name}}</label>
+                    </span>
+                </div>
             </div><!--ends entre-->
             <div id="divToppings" class="child">
                 <h1>Toppings</h1>
                 <span v-for="(top, index) in toppings" v-on:change="calc">
-                    <input type="checkbox" :id="top.topping_name" :value="top" v-model="toppingChoice"  />
-                    <label :for="top.topping_name" >{{top.topping_name}}</label>
+                    <input type="checkbox" :id="top.topping_name" :value="top" v-model="toppingChoice" />
+                    <label :for="top.topping_name">{{top.topping_name}}</label>
                 </span>
             </div><!--ends toppings-->
-            <!-- <div id="divSides" class="child tabContent">
+            <!--<div id="divSides" class="child tabContent">
                 <h1>Sides</h1>
                 <span v-for="(side, index) in sides" v-on:change="calc">
                     <input type="checkbox" :id="side.side_name" name="radSid" :value="side" v-model="sideChoice" />
-                    <label :for="side.side_name" >{{side.side_name}}</label>
+                    <label :for="side.side_name">{{side.side_name}}</label>
                 </span>
-            </div> --><!--ends sides-->
+            </div> ends sides-->
 
-            <div id="divDrinks" class="child">
+            <!--<div id="divDrinks" class="child">
                 <h1>Beverages</h1>
                 <span v-for="(drink, index) in drinks" v-on:change="calc">
                     <input type="checkbox" :id="drink.drink_name" name="radDri" :value="drink" v-model="drinkChoice" />
@@ -180,6 +181,7 @@
                     overallTotal: 0,
                     totalOrder: [],
                     finalOrder: "",
+                    
 
                 }//end return
             }, //end data property
@@ -192,10 +194,14 @@
                 fetch('new_men.json')
                     .then(response => response.json())
                     .then(data => {
-                        this.entres = data.entres;
+                        this.entres = data.menu_items; 
+                    })
+                fetch('toppings.json')
+                    .then(response => response.json())
+                    .then(data => {
                         this.toppings = data.toppings;
                         //this.sides = data.sides;
-                        this.drinks = data.drinks;
+                        //this.drinks = data.drinks;
                     })
                     .catch(function (error) {
                         console.log(error);
@@ -212,10 +218,10 @@
                     }
                     /* for (i = 0; i < this.sideChoice.length; i++) {
                         this.indTotal += parseFloat(this.sideChoice[i].side_price);
-                    } */
+                    } 
                     for (i = 0; i < this.drinkChoice.length; i++) {
                         this.indTotal += parseFloat(this.drinkChoice[i].drink_price);
-                    }
+                    }*/
                     this.indTotal = parseFloat(this.indTotal).toFixed(2);
 
 
@@ -229,10 +235,12 @@
                     }
                     /* for (i = 0; i < this.sideChoice.length; i++) {
                         this.finalOrder += this.sideChoice[i].side_name + " ";
-                    } */
+                    } 
                     for (i = 0; i < this.drinkChoice.length; i++) {
                         this.finalOrder += this.drinkChoice[i].drink_name + " ";
-                    }
+                    }*/
+                    this.toppingChoice =[];
+                    this.entreChoice=[]
                     this.overallTotal = parseFloat(this.overallTotal) + parseFloat(this.indTotal)
                     this.finalOrder += this.indTotal
                     this.finalOrder += "\n"
@@ -260,8 +268,8 @@
                     currentTable.orders.push({
                         entre: this.entreChoice,
                         toppings: this.toppingChoice,
-                       // sides: this.sideChoice,
-                        drinks: this.drinkChoice,
+                        // sides: this.sideChoice,
+                        //drinks: this.drinkChoice,
                         total: this.indTotal,
                         finalOrder: this.finalOrder,
                         overallTotal: this.overallTotal
@@ -282,7 +290,7 @@
                         this.entreChoice = lastOrder.entre;
                         this.toppingChoice = lastOrder.toppings;
                         //this.sideChoice = lastOrder.sides;
-                        this.drinkChoice = lastOrder.drinks;
+                        //this.drinkChoice = lastOrder.drinks;
                         this.indTotal = lastOrder.total;
                         this.finalOrder = lastOrder.finalOrder;
                         this.overallTotal = lastOrder.overallTotal;
