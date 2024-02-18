@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Resturant Site</title>
+    <title>Resturant Site Working</title>
     <!-- The VUE CDN ! Next version 3 -->
     <!--<script src="https://unpkg.com/vue@next"></script>-->
     <script src="https://unpkg.com/vue@3"></script>
@@ -55,106 +55,111 @@
             background: lightgrey;
             border-radius: 4px;
         }
+
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: lightgrey;
+        }
+
+        /* Style the buttons that are used to open the tab content */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            color: blue;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+        
     </style>
 
 </head>
 
 <body>
-    <h1>Resturant Site</h1>
-    <h2>Five Guys in Vue</h2>
+    <h1>Resturant Site Capstone Front</h1>
+
     <div id="vueRadio" class="parent">
-
-        <!-- Loops though the list of tables and creates the buttons -->
-        <div style="text-align: left;">
-            <div>
-                <button v-for="table in tables" key="table.id" @click="switchTable(table.id)">Table {{ table.id }}</button>
-            </div>
+        <div class="tab" style="text-align: middle;">
+            <button class="tablinks" v-for="tb in tables" v-on:click="switchTable(tb.id)">Table {{tb.id}}</button>
         </div>
-
         <div id="checkoutSide" class="child">
-            <textarea :id="txaFinalOrder" v-model="textareaValue" :value="finalOrder" 
+            <textarea :id="txaFinalOrder" v-model="textareaValue" :value="finalOrder"
                 style="height:250px; width:350px; background-color: white;" disabled="disabled"></textarea>
+            <div class="child tabContent" style="display: none;">
+                <textarea :id="txaFinalOrder" :value="finalOrder"
+                    style="height:250px; width:350px; background-color: white;" disabled="disabled"></textarea>
+            </div>
             <br />
             <input type="button" :id="btnAddOrder" v-on:click="addToFinal" value="Add To Order Final Order"
                 style="background-color: lightgrey;">
+
             <input type="button" id="btnClearOrder" v-on:click="clearOrder" value="Clear the whole order"
                 style="background-color: lightgrey;">
-                <input type="button" id="btnPrint" v-on:click="printOrder" value="Print the whole order"
+            <input type="button" id="btnPrint" v-on:click="printOrder" value="Print the whole order"
                 style="background-color: lightgrey;">
             <div class="child">
-                <span>Entre menu_item_desc: {{entreChoice.menu_item_desc}}</span>
+                <span>Entre Description: {{entreChoice.menu_item_desc}}</span>
                 <br>
                 <br>
                 <span style="font-size:xx-large;">Total: ${{overallTotal}}</span>
             </div>
-
-            
-        </div>
+        </div><!--end table 1 checkout-->
         <div id="menu_side" class="child">
-            <div id="divEntre" class="child">
+            <div id="divEntre" class="child" >
                 <h1>Entres</h1>
+                <div style="column-count: 2;">
                 <span v-for="(ent, index) in entres" v-on:change="calc">
                     <input type="radio" :id="ent.menu_item_name" name="radEntre" :value="ent" v-model="entreChoice" />
                     <label :for="ent.menu_item_name">{{ent.menu_item_name}}</label>
-                </span>
+                </span></div>
             </div><!--ends entre-->
-
-
             <div id="divToppings" class="child">
                 <h1>Toppings</h1>
                 <span v-for="(top, index) in toppings" v-on:change="calc">
-                    <input type="checkbox" :id="top.topping_name" :value="top" v-model="toppingChoice" />
-                    <label :for="top.topping_name">{{top.topping_name}}</label>
+                    <input type="checkbox" :id="top.topping_name" :value="top" v-model="toppingChoice"  />
+                    <label :for="top.topping_name" >{{top.topping_name}}</label>
                 </span>
             </div><!--ends toppings-->
-            <div id="divSides" class="child">
+            <!-- <div id="divSides" class="child tabContent">
                 <h1>Sides</h1>
                 <span v-for="(side, index) in sides" v-on:change="calc">
-                    <input type="checkbox" :id="side.menu_item_name" name="radSid" :value="side" v-model="sideChoice" />
-                    <label :for="side.menu_item_name">{{side.menu_item_name}}</label>
+                    <input type="checkbox" :id="side.side_name" name="radSid" :value="side" v-model="sideChoice" />
+                    <label :for="side.side_name" >{{side.side_name}}</label>
                 </span>
-            </div><!--ends sides-->
+            </div> --><!--ends sides-->
 
             <div id="divDrinks" class="child">
-                <h1>Drinks</h1>
+                <h1>Beverages</h1>
                 <span v-for="(drink, index) in drinks" v-on:change="calc">
-                    <input type="checkbox" :id="drink.menu_item_name" name="radDri" :value="drink" v-model="drinkChoice" />
-                    <label :for="drink.menu_item_name">{{drink.menu_item_name}}</label>
+                    <input type="checkbox" :id="drink.drink_name" name="radDri" :value="drink" v-model="drinkChoice" />
+                    <label :for="drink.drink_name">{{drink.drink_name}}</label>
                 </span>
             </div><!--ends sides-->
         </div> <!--ends child-->
         <br />
         <br />
-
-        <div id="divOrderDetails">
-            <span id="spnOrderDeets">
-                <span>Entre: {{entreChoice.entreName}} --- {{entreChoice.menu_item_price}}</span>
-                <br />
-                Toppings: <span v-for="(top,i) in toppingChoice">{{toppingChoice[i].topping_name}} | </span>
-                <br />
-                Sides: <span v-for="(side,i) in sideChoice"> {{sideChoice[i].menu_item_name}}
-                    --{{sideChoice[i].menu_item_price}}
-                    | </span>
-                <br />
-                <span>Total: {{indTotal}}</span>
-                <br>
-                <span>Total Order: {{entreChoice.menu_item_name}} |<span v-for="(side,i) in sideChoice">
-                        {{sideChoice[i].menu_item_name}}|</span> <span
-                        v-for="(top,i) in toppingChoice">{{toppingChoice[i].topping_name}} | </span>
-                </span></span>
-
-            </span>
-
-        </div><!--ends OrderDetails-->
     </div><!--end of the vue div-->
 
     <script>
         const Order = {
-
             data() {
                 return {
-                    // List of tables that are used to hold the orders
-                    // Works like a JSON, id for the id, orders holds all of the data to keep on the table and total is the menu_item_price
                     tables: [
                         { id: 1, orders: [], total: 0 },
                         { id: 2, orders: [], total: 0 },
@@ -165,16 +170,16 @@
                     currentTableId: 1,
                     entres: [],
                     toppings: [],
-                    sides: [],
+                    //sides: [],
                     drinks: [],
                     entreChoice: [],
                     toppingChoice: [],
-                    sideChoice: [],
+                    //sideChoice: [],
                     drinkChoice: [],
                     indTotal: 0,
-                    overallTotal:0,
+                    overallTotal: 0,
                     totalOrder: [],
-                    finalOrder: ""
+                    finalOrder: "",
 
                 }//end return
             }, //end data property
@@ -184,13 +189,13 @@
             },
 
             created() {
-                fetch('menu.json')
+                fetch('new_men.json')
                     .then(response => response.json())
                     .then(data => {
-                        this.entres = data.menu_items.filter(item =>item.menu_item_parent != 0);
+                        this.entres = data.entres;
                         this.toppings = data.toppings;
-                        this.sides = data.menu_items.filter(item =>item.menu_main === 6);
-                        this.drinks = data.menu_items.filter(item =>item.menu_main === 3);
+                        //this.sides = data.sides;
+                        this.drinks = data.drinks;
                     })
                     .catch(function (error) {
                         console.log(error);
@@ -204,36 +209,35 @@
                     this.indTotal = 0;
                     if (this.entreChoice) {
                         this.indTotal = this.entreChoice.menu_item_price;
-
                     }
                     for (i = 0; i < this.sideChoice.length; i++) {
-                        this.indTotal += parseFloat(this.sideChoice[i].menu_item_price);
-
+                        this.indTotal += parseFloat(this.sideChoice[i].side_price);
                     }
                     for (i = 0; i < this.drinkChoice.length; i++) {
-                        this.indTotal += parseFloat(this.drinkChoice[i].menu_item_price);
-
+                        this.indTotal += parseFloat(this.drinkChoice[i].drink_price);
                     }
                     this.indTotal = parseFloat(this.indTotal).toFixed(2);
-                   
-                   
+
+
 
                 },//end Calc 
+                /* Need to figure out how to make it work for different tables and save to different variables */
                 addToFinal() {
                     this.finalOrder += this.entreChoice.menu_item_name + " "
                     for (i = 0; i < this.toppingChoice.length; i++) {
                         this.finalOrder += this.toppingChoice[i].topping_name + " ";
                     }
                     for (i = 0; i < this.sideChoice.length; i++) {
-                        this.finalOrder += this.sideChoice[i].menu_item_name + " ";
+                        this.finalOrder += this.sideChoice[i].side_name + " ";
                     }
                     for (i = 0; i < this.drinkChoice.length; i++) {
-                        this.finalOrder += this.drinkChoice[i].menu_item_name + " ";
+                        this.finalOrder += this.drinkChoice[i].drink_name + " ";
                     }
-                    this.overallTotal = (parseFloat(this.overallTotal) + parseFloat(this.indTotal)).toFixed(2)
+                    this.overallTotal = parseFloat(this.overallTotal) + parseFloat(this.indTotal)
                     this.finalOrder += this.indTotal
                     this.finalOrder += "\n"
-                    
+                    this.overallTotal = this.overallTotal.toFixed(2)
+
                 },
 
                 clearOrder() {
@@ -242,11 +246,10 @@
                     this.overallTotal = 0;
                 },
                 /* our version of "printing" the recipt for the customer */
-                printOrder(){
+                printOrder() {
                     alert(this.finalOrder)
                 },
-
-            /*** New table switch stuff ***/
+                /*** New table switch stuff ***/
                 // Used to switch to the other tables
                 // Takes the table ID to know which table number it is on
                 switchTable(tableId) {
@@ -257,7 +260,7 @@
                     currentTable.orders.push({
                         entre: this.entreChoice,
                         toppings: this.toppingChoice,
-                        sides: this.sideChoice,
+                       // sides: this.sideChoice,
                         drinks: this.drinkChoice,
                         total: this.indTotal,
                         finalOrder: this.finalOrder,
@@ -271,14 +274,14 @@
                     this.currentTableId = tableId;
                     const newTable = this.tables.find(table => table.id === tableId);
                     this.textareaValue = ""
-                    
+
 
                     // Creates a new table if there is nothing in the table 
                     if (newTable.orders.length > 0) {
                         const lastOrder = newTable.orders[newTable.orders.length - 1];
                         this.entreChoice = lastOrder.entre;
                         this.toppingChoice = lastOrder.toppings;
-                        this.sideChoice = lastOrder.sides;
+                        //this.sideChoice = lastOrder.sides;
                         this.drinkChoice = lastOrder.drinks;
                         this.indTotal = lastOrder.total;
                         this.finalOrder = lastOrder.finalOrder;
@@ -289,11 +292,42 @@
                     }
                 },
 
+
             }//end Methods
 
         } //end Order
 
         Vue.createApp(Order).mount('#vueRadio')
+
+
+        function openTable(evt, tableNum) {
+            // Declare all variables
+            var i, tabcontent, tablinks;
+
+            // Get all elements with class="tabcontent" and hide them
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            // Get all elements with class="tablinks" and remove the class "active"
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            // Show the current tab, and add an "active" class to the button that opened the tab
+            document.getElementById(tableNum).style.display = "inline-block";
+            evt.currentTarget.className += " active";
+            //hides the other table's check while you are doing another
+            var tables = ["table1", "table2", "table3"];
+
+            for (var i = 0; i < tables.length; i++) {
+                if (tables[i] !== tableNum) {
+                    document.getElementById(tables[i]).style.display = "none";
+                }
+            }
+        }
 
     </script>
 
