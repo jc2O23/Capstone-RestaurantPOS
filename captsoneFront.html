@@ -210,9 +210,9 @@
                     if (this.entreChoice) {
                         this.indTotal = this.entreChoice.menu_item_price;
                     }
-                    for (i = 0; i < this.sideChoice.length; i++) {
+                    /* for (i = 0; i < this.sideChoice.length; i++) {
                         this.indTotal += parseFloat(this.sideChoice[i].side_price);
-                    }
+                    } */
                     for (i = 0; i < this.drinkChoice.length; i++) {
                         this.indTotal += parseFloat(this.drinkChoice[i].drink_price);
                     }
@@ -227,9 +227,9 @@
                     for (i = 0; i < this.toppingChoice.length; i++) {
                         this.finalOrder += this.toppingChoice[i].topping_name + " ";
                     }
-                    for (i = 0; i < this.sideChoice.length; i++) {
+                    /* for (i = 0; i < this.sideChoice.length; i++) {
                         this.finalOrder += this.sideChoice[i].side_name + " ";
-                    }
+                    } */
                     for (i = 0; i < this.drinkChoice.length; i++) {
                         this.finalOrder += this.drinkChoice[i].drink_name + " ";
                     }
