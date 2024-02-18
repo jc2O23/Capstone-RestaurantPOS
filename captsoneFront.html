@@ -63,8 +63,16 @@
     <h1>Resturant Site</h1>
     <h2>Five Guys in Vue</h2>
     <div id="vueRadio" class="parent">
+
+        <!-- Loops though the list of tables and creates the buttons -->
+        <div style="text-align: left;">
+            <div>
+                <button v-for="table in tables" key="table.id" @click="switchTable(table.id)">Table {{ table.id }}</button>
+            </div>
+        </div>
+
         <div id="checkoutSide" class="child">
-            <textarea :id="txaFinalOrder" :value="finalOrder"
+            <textarea :id="txaFinalOrder" v-model="textareaValue" :value="finalOrder" 
                 style="height:250px; width:350px; background-color: white;" disabled="disabled"></textarea>
             <br />
             <input type="button" :id="btnAddOrder" v-on:click="addToFinal" value="Add To Order Final Order"
@@ -74,7 +82,7 @@
                 <input type="button" id="btnPrint" v-on:click="printOrder" value="Print the whole order"
                 style="background-color: lightgrey;">
             <div class="child">
-                <span>Entre Description: {{entreChoice.description}}</span>
+                <span>Entre menu_item_desc: {{entreChoice.menu_item_desc}}</span>
                 <br>
                 <br>
                 <span style="font-size:xx-large;">Total: ${{overallTotal}}</span>
@@ -86,8 +94,8 @@
             <div id="divEntre" class="child">
                 <h1>Entres</h1>
                 <span v-for="(ent, index) in entres" v-on:change="calc">
-                    <input type="radio" :id="ent.entre_name" name="radEntre" :value="ent" v-model="entreChoice" />
-                    <label :for="ent.entre_name">{{ent.entre_name}}</label>
+                    <input type="radio" :id="ent.menu_item_name" name="radEntre" :value="ent" v-model="entreChoice" />
+                    <label :for="ent.menu_item_name">{{ent.menu_item_name}}</label>
                 </span>
             </div><!--ends entre-->
 
@@ -102,16 +110,16 @@
             <div id="divSides" class="child">
                 <h1>Sides</h1>
                 <span v-for="(side, index) in sides" v-on:change="calc">
-                    <input type="checkbox" :id="side.side_name" name="radSid" :value="side" v-model="sideChoice" />
-                    <label :for="side.side_name">{{side.side_name}}</label>
+                    <input type="checkbox" :id="side.menu_item_name" name="radSid" :value="side" v-model="sideChoice" />
+                    <label :for="side.menu_item_name">{{side.menu_item_name}}</label>
                 </span>
             </div><!--ends sides-->
 
             <div id="divDrinks" class="child">
                 <h1>Drinks</h1>
                 <span v-for="(drink, index) in drinks" v-on:change="calc">
-                    <input type="checkbox" :id="drink.drink_name" name="radDri" :value="drink" v-model="drinkChoice" />
-                    <label :for="drink.drink_name">{{drink.drink_name}}</label>
+                    <input type="checkbox" :id="drink.menu_item_name" name="radDri" :value="drink" v-model="drinkChoice" />
+                    <label :for="drink.menu_item_name">{{drink.menu_item_name}}</label>
                 </span>
             </div><!--ends sides-->
         </div> <!--ends child-->
@@ -120,18 +128,18 @@
 
         <div id="divOrderDetails">
             <span id="spnOrderDeets">
-                <span>Entre: {{entreChoice.entreName}} --- {{entreChoice.Price}}</span>
+                <span>Entre: {{entreChoice.entreName}} --- {{entreChoice.menu_item_price}}</span>
                 <br />
                 Toppings: <span v-for="(top,i) in toppingChoice">{{toppingChoice[i].topping_name}} | </span>
                 <br />
-                Sides: <span v-for="(side,i) in sideChoice"> {{sideChoice[i].side_name}}
-                    --{{sideChoice[i].side_price}}
+                Sides: <span v-for="(side,i) in sideChoice"> {{sideChoice[i].menu_item_name}}
+                    --{{sideChoice[i].menu_item_price}}
                     | </span>
                 <br />
                 <span>Total: {{indTotal}}</span>
                 <br>
-                <span>Total Order: {{entreChoice.entre_name}} |<span v-for="(side,i) in sideChoice">
-                        {{sideChoice[i].side_name}}|</span> <span
+                <span>Total Order: {{entreChoice.menu_item_name}} |<span v-for="(side,i) in sideChoice">
+                        {{sideChoice[i].menu_item_name}}|</span> <span
                         v-for="(top,i) in toppingChoice">{{toppingChoice[i].topping_name}} | </span>
                 </span></span>
 
@@ -145,6 +153,16 @@
 
             data() {
                 return {
+                    // List of tables that are used to hold the orders
+                    // Works like a JSON, id for the id, orders holds all of the data to keep on the table and total is the menu_item_price
+                    tables: [
+                        { id: 1, orders: [], total: 0 },
+                        { id: 2, orders: [], total: 0 },
+                        { id: 3, orders: [], total: 0 },
+                        { id: 4, orders: [], total: 0 },
+                        { id: 5, orders: [], total: 0 }
+                    ],
+                    currentTableId: 1,
                     entres: [],
                     toppings: [],
                     sides: [],
@@ -169,10 +187,10 @@
                 fetch('menu.json')
                     .then(response => response.json())
                     .then(data => {
-                        this.entres = data.entres;
+                        this.entres = data.menu_items.filter(item =>item.menu_item_parent != 0);
                         this.toppings = data.toppings;
-                        this.sides = data.sides;
-                        this.drinks = data.drinks;
+                        this.sides = data.menu_items.filter(item =>item.menu_main === 6);
+                        this.drinks = data.menu_items.filter(item =>item.menu_main === 3);
                     })
                     .catch(function (error) {
                         console.log(error);
@@ -185,15 +203,15 @@
                     //alert("HI");
                     this.indTotal = 0;
                     if (this.entreChoice) {
-                        this.indTotal = this.entreChoice.price;
+                        this.indTotal = this.entreChoice.menu_item_price;
 
                     }
                     for (i = 0; i < this.sideChoice.length; i++) {
-                        this.indTotal += parseFloat(this.sideChoice[i].side_price);
+                        this.indTotal += parseFloat(this.sideChoice[i].menu_item_price);
 
                     }
                     for (i = 0; i < this.drinkChoice.length; i++) {
-                        this.indTotal += parseFloat(this.drinkChoice[i].drink_price);
+                        this.indTotal += parseFloat(this.drinkChoice[i].menu_item_price);
 
                     }
                     this.indTotal = parseFloat(this.indTotal).toFixed(2);
@@ -202,17 +220,17 @@
 
                 },//end Calc 
                 addToFinal() {
-                    this.finalOrder += this.entreChoice.entre_name + " "
+                    this.finalOrder += this.entreChoice.menu_item_name + " "
                     for (i = 0; i < this.toppingChoice.length; i++) {
                         this.finalOrder += this.toppingChoice[i].topping_name + " ";
                     }
                     for (i = 0; i < this.sideChoice.length; i++) {
-                        this.finalOrder += this.sideChoice[i].side_name + " ";
+                        this.finalOrder += this.sideChoice[i].menu_item_name + " ";
                     }
                     for (i = 0; i < this.drinkChoice.length; i++) {
-                        this.finalOrder += this.drinkChoice[i].drink_name + " ";
+                        this.finalOrder += this.drinkChoice[i].menu_item_name + " ";
                     }
-                    this.overallTotal += this.indTotal
+                    this.overallTotal = (parseFloat(this.overallTotal) + parseFloat(this.indTotal)).toFixed(2)
                     this.finalOrder += this.indTotal
                     this.finalOrder += "\n"
                     
@@ -226,7 +244,50 @@
                 /* our version of "printing" the recipt for the customer */
                 printOrder(){
                     alert(this.finalOrder)
-                }
+                },
+
+            /*** New table switch stuff ***/
+                // Used to switch to the other tables
+                // Takes the table ID to know which table number it is on
+                switchTable(tableId) {
+                    // Save the current order to the current table
+                    const currentTable = this.tables.find(table => table.id == this.currentTableId);
+
+                    // Pushed the current table order onto the array and updates what is shown
+                    currentTable.orders.push({
+                        entre: this.entreChoice,
+                        toppings: this.toppingChoice,
+                        sides: this.sideChoice,
+                        drinks: this.drinkChoice,
+                        total: this.indTotal,
+                        finalOrder: this.finalOrder,
+                        overallTotal: this.overallTotal
+                    });
+
+                    // Gets the current table total menu_item_price
+                    currentTable.total += parseFloat(this.indTotal);
+
+                    // Switch to the new table and clear out some data
+                    this.currentTableId = tableId;
+                    const newTable = this.tables.find(table => table.id === tableId);
+                    this.textareaValue = ""
+                    
+
+                    // Creates a new table if there is nothing in the table 
+                    if (newTable.orders.length > 0) {
+                        const lastOrder = newTable.orders[newTable.orders.length - 1];
+                        this.entreChoice = lastOrder.entre;
+                        this.toppingChoice = lastOrder.toppings;
+                        this.sideChoice = lastOrder.sides;
+                        this.drinkChoice = lastOrder.drinks;
+                        this.indTotal = lastOrder.total;
+                        this.finalOrder = lastOrder.finalOrder;
+                        this.overallTotal = lastOrder.overallTotal;
+                    } else {
+                        // Just clears the order if there is no data stored in the table
+                        this.clearOrder();
+                    }
+                },
 
             }//end Methods
 
