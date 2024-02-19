@@ -396,11 +396,15 @@ class mainWindow:
             """
 
             execute_query(self.connection, self.delete_item_query, (self.checkUpd,))
-            close_out(self.connection)
 
             self.tree.delete(*self.tree.get_children())
             self.build_tree()
             self.clear_selection()
+            self.db = "mysqlMenus"
+            self.connection = create_db_connection(self.db)
+            self.query = "SELECT * FROM menu_items"
+            sql_to_json(self.query, self.connection, "menu_items")
+            
 
     def sign_out(self):
         close_out(self.connection)
