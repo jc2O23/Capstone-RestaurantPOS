@@ -130,12 +130,14 @@
                     </span>
                 </div>
             </div><!--ends entre-->
-            <div id="divToppings" class="child">
+            <div id="divToppings" class="child" style="height: fit-content;">
                 <h1>Toppings</h1>
-                <span v-for="(top, index) in toppings" v-on:change="calc">
-                    <input type="checkbox" :id="top.topping_name" :value="top" v-model="toppingChoice" />
-                    <label :for="top.topping_name">{{top.topping_name}}</label>
-                </span>
+                
+                    <span v-for="(top, index) in toppings" v-on:change="calc">
+                        <input type="checkbox" :id="top.topping_name" :value="top" v-model="toppingChoice" />
+                        <label :for="top.topping_name">{{top.topping_name}}</label>
+                    </span>
+                
             </div><!--ends toppings-->
             <!--<div id="divSides" class="child tabContent">
                 <h1>Sides</h1>
@@ -181,7 +183,7 @@
                     overallTotal: 0,
                     totalOrder: [],
                     finalOrder: "",
-                    
+
 
                 }//end return
             }, //end data property
@@ -191,11 +193,13 @@
             },
 
             created() {
+                /* get the entres from the file written from the database */
                 fetch('new_men.json')
                     .then(response => response.json())
                     .then(data => {
-                        this.entres = data.menu_items; 
+                        this.entres = data.menu_items;
                     })
+                    /* read the toppings from a new .json file */
                 fetch('toppings.json')
                     .then(response => response.json())
                     .then(data => {
@@ -209,7 +213,7 @@
 
             },
             methods: {
-
+                /* calculate the cost of each individual item so it is easier to add to the overall bill */
                 calc() {
                     //alert("HI");
                     this.indTotal = 0;
@@ -227,7 +231,8 @@
 
 
                 },//end Calc 
-                /* Need to figure out how to make it work for different tables and save to different variables */
+               /* adds the input to the final order display. this function is like sending something to the 
+               check. */
                 addToFinal() {
                     this.finalOrder += this.entreChoice.menu_item_name + " "
                     for (i = 0; i < this.toppingChoice.length; i++) {
@@ -239,15 +244,15 @@
                     for (i = 0; i < this.drinkChoice.length; i++) {
                         this.finalOrder += this.drinkChoice[i].drink_name + " ";
                     }*/
-                    this.toppingChoice =[];
-                    this.entreChoice=[]
+                    this.toppingChoice = [];
+                    this.entreChoice = []
                     this.overallTotal = parseFloat(this.overallTotal) + parseFloat(this.indTotal)
                     this.finalOrder += this.indTotal
                     this.finalOrder += "\n"
                     this.overallTotal = this.overallTotal.toFixed(2)
 
                 },
-
+                //clears everything for that table
                 clearOrder() {
                     this.finalOrder = "";
                     this.indTotal = 0;
@@ -307,7 +312,7 @@
 
         Vue.createApp(Order).mount('#vueRadio')
 
-
+/* funciton to open/close the table tabs. to make the design cleaner than just buttons */
         function openTable(evt, tableNum) {
             // Declare all variables
             var i, tabcontent, tablinks;
