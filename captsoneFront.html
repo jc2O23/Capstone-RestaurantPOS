@@ -194,7 +194,7 @@
 
             created() {
                 /* get the entres from the file written from the database */
-                fetch('new_men.json')
+                fetch('menu.json')
                     .then(response => response.json())
                     .then(data => {
                         this.entres = data.menu_items;
