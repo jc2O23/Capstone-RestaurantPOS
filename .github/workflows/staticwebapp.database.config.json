@@ -29,8 +29,8 @@
     }
   },
   "entities": {
-    "Employee": {
-      "source": "employees",
+    "Menu": {
+      "source": "menu_items",
       "permissions": [
         {
           "actions": ["*"],
