@@ -30,7 +30,7 @@
   },
   "entities": {
     "Person": {
-      "source": "Menus",
+      "source": "menu",
       "permissions": [
         {
           "actions": ["*"],
