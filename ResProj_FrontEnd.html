@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Resturant Site Switch</title>
+    <!-- The VUE CDN ! Next version 3 -->
+    <!--<script src="https://unpkg.com/vue@next"></script>-->
+    <script src="https://unpkg.com/vue@3"></script>
+    <style>
+        body {
+            background-color: cornflowerblue;
+            color: white;
+
+        }
+
+        /* sets the heirarchy for what elements go below it */
+        .parent {
+            display: inline-block;
+            padding: 12px 20px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        /*gets the divs to display next to eachother  */
+        .child {
+            display: inline-block;
+            border: 1px solid white;
+            padding: 10px;
+            vertical-align: top;
+
+        }
+
+        /* changes the backgroun and the boxes */
+        .child label,
+        .child input {
+            display: grid;
+            background-color: lightcyan;
+            color: black;
+            padding: 10px 10px 10px 10px;
+            
+
+        }
+
+        /* edits the actual dot for the radio button */
+        .child input[type="radio"],
+        .child input[type="checkbox"] {
+            opacity: 0.011;
+            z-index: 100;
+            width: 150px;
+            
+            
+        }
+        #menu.child, #menu_section.child, #menu_items.child {
+            width: 200px;
+        }
+        
+
+        /*changes the color of the selected item*/
+        input[type="radio"]:checked+label {
+            background: lightgrey;
+            border-radius: 4px;
+        }
+
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: lightgrey;
+        }
+
+        /* Style the buttons that are used to open the tab content */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            color: blue;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+        
+    </style>
+
+</head>
+
+<body>
+    <h1>Resturant Site Capstone Front</h1>
+
+    <div id="vueRadio" class="parent">
+        <div class="tab" style="text-align: middle;">
+            <button class="tablinks" v-for="tb in tables" v-on:click="switchTable(tb.id)">Table {{tb.id}}</button>
+        </div>
+        <div id="checkoutSide" class="child">
+            <textarea :id="txaFinalOrder" v-model="textareaValue" :value="finalOrder"
+                style="height:250px; width:350px; background-color: white;" disabled="readonly"></textarea>
+            <div class="child tabContent" style="display: none;">
+                <textarea :id="txaFinalOrder" :value="finalOrder"
+                    style="height:250px; width:350px; background-color: white;" disabled="readonly"></textarea>
+            </div>
+            <br />
+            <input type="button" :id="btnAddOrder" v-on:click="addToFinal" value="Add To Order Final Order"
+                style="background-color: lightgrey;">
+
+            <input type="button" id="btnClearOrder" v-on:click="clearOrder" value="Clear the whole order"
+                style="background-color: lightgrey;">
+            <input type="button" id="btnPrint" v-on:click="printOrder" value="Print the whole order"
+                style="background-color: lightgrey;">
+            <div class="child" style="width: 300px;">
+                <span style="font-size: large;">Entre Description:<p>{{entreChoice.menu_item_desc}}</p></span>
+                <br>
+                <br>
+                <span style="font-size:xx-large;">Total: ${{overallTotal}}</span>
+            </div>
+        </div><!--end table 1 checkout-->
+        <div id="menu_table" class="child">
+            <div id="menu" class="child">
+                <h1>Menu</h1>
+                <div>
+                    <span v-for="(men, index) in menus">
+                        <input type="radio" :id="men.menu_name" name="menu_RAD" v-model="sel_menu" :value="men" />
+                        <label :for="men.menu_name">{{men.menu_name}}</label>
+                    </span>
+                </div>
+            
+            </div><!--ends entre-->
+            <div id="menu_section" class="child" >
+                <h1>Sections</h1>
+                <span v-if="sel_menu" v-for="sec in menu_sections" v-show="sel_menu.menu_id == sec.menu_sec_parent">
+                    <input type="radio" :id="sec.menu_section_name" name="menSec_RAD" v-model="sel_section" :value="sec" />
+                    <label :for="sec.menu_section_name">{{ sec.menu_section_name }}</label>
+                </span>
+                
+            </div>
+            <div id ="menu_items" class="child" >
+                <h1>Items</h1>
+                <span v-if="sel_menu" v-for="item in menu_items" v-show="sel_section.menu_section_id == item.menu_item_parent && item.menu_main == sel_menu.menu_id" v-on:change="calc">
+                    <input type="radio" :id="item.menu_item_name" name='menItem_RAD' v-model="entreChoice" :value="item" />
+                    <label :for="item.menu_item_name">{{item.menu_item_name}}</label>
+                </span>
+                <span v-for="item in menu_items" v-show="sel_menu.menu_id == item.menu_main && item.menu_item_parent == 0" v-on:change="calc">
+                    <input type="radio" :id="item.menu_item_name" name='menItem_RAD2' v-model="entreChoice" :value="item" />
+                    <label :for="item.menu_item_name">{{item.menu_item_name}}</label>
+                </span>
+            </div>
+            <!--ends toppings-->
+            <!--<div id="divSides" class="child tabContent">
+                <h1>Sides</h1>
+                <span v-for="(side, index) in sides" v-on:change="calc">
+                    <input type="checkbox" :id="side.side_name" name="radSid" :value="side" v-model="sideChoice" />
+                    <label :for="side.side_name">{{side.side_name}}</label>
+                </span>
+            </div> ends sides-->
+
+            <!--<div id="divDrinks" class="child">
+                <h1>Beverages</h1>
+                <span v-for="(drink, index) in drinks" v-on:change="calc">
+                    <input type="checkbox" :id="drink.drink_name" name="radDri" :value="drink" v-model="drinkChoice" />
+                    <label :for="drink.drink_name">{{drink.drink_name}}</label>
+                </span>
+            </div><!--ends sides-->
+        </div> <!--ends child-->
+        <br />
+        <br />
+    </div><!--end of the vue div-->
+
+    <script>
+        
+        const Order = {
+            data() {
+                return {
+                    tables: [
+                        { id: 1, orders: [], total: 0 },
+                        { id: 2, orders: [], total: 0 },
+                        { id: 3, orders: [], total: 0 },
+                        { id: 4, orders: [], total: 0 },
+                        { id: 5, orders: [], total: 0 }
+                    ],
+                    currentTableId: 1,
+                    menu_items: [],
+                    menus: [],
+                    menu_sections: [],
+                    toppings: [],
+                    //sides: [],
+                    drinks: [],
+                    entreChoice: [],
+                    toppingChoice: [],
+                    //sideChoice: [],
+                    drinkChoice: [],
+                    indTotal: 0,
+                    overallTotal: 0,
+                    totalOrder: [],
+                    finalOrder: "",
+                    sel_menu: 0,
+                    sel_section: 0
+
+
+                }//end return
+            }, //end data property
+
+            mounted() {
+                console.log("mounted")
+            },
+
+            created() {
+                /* get the entres from the file written from the database */
+                fetch('./data/menu_items.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        this.menu_items = data.menu_items;
+                        
+                    })
+                fetch('./data/menu.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data)
+                        this.menus = data.menu;
+                    })
+                fetch('./data/menu_sections.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        this.menu_sections = data.menu_sections;
+                    })
+                    /* read the toppings from a new .json file */
+                fetch('./data/toppings.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        this.toppings = data.toppings;
+                        //this.sides = data.sides;
+                        //this.drinks = data.drinks;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+
+            },
+
+            methods: {
+                /* calculate the cost of each individual item so it is easier to add to the overall bill */
+                calc() {
+                    //alert("HI");
+                    this.indTotal = 0;
+                    if (this.entreChoice) {
+                        this.indTotal = this.entreChoice.menu_item_price;
+                    }
+                    /* for (i = 0; i < this.sideChoice.length; i++) {
+                        this.indTotal += parseFloat(this.sideChoice[i].side_price);
+                    } 
+                    for (i = 0; i < this.drinkChoice.length; i++) {
+                        this.indTotal += parseFloat(this.drinkChoice[i].drink_price);
+                    }*/
+                    this.indTotal = parseFloat(this.indTotal).toFixed(2);
+
+
+
+                },//end Calc 
+               /* adds the input to the final order display. this function is like sending something to the 
+               check. */
+                addToFinal() {
+                    this.finalOrder += this.entreChoice.menu_item_name + " "
+                    // for (i = 0; i < this.toppingChoice.length; i++) {
+                    //     this.finalOrder += this.toppingChoice[i].topping_name + " ";
+                    // }
+                    /* for (i = 0; i < this.sideChoice.length; i++) {
+                        this.finalOrder += this.sideChoice[i].side_name + " ";
+                    } 
+                    for (i = 0; i < this.drinkChoice.length; i++) {
+                        this.finalOrder += this.drinkChoice[i].drink_name + " ";
+                    }*/
+                    // this.toppingChoice = [];
+                    this.entreChoice = []
+                    this.overallTotal = parseFloat(this.overallTotal) + parseFloat(this.indTotal)
+                    this.finalOrder += this.indTotal
+                    this.finalOrder += "\n"
+                    this.overallTotal = this.overallTotal.toFixed(2)
+
+                },
+                //clears everything for that table
+                clearOrder() {
+                    this.finalOrder = "";
+                    this.indTotal = 0;
+                    this.overallTotal = 0;
+                },
+                /* our version of "printing" the recipt for the customer */
+                printOrder() {
+                    alert(this.finalOrder)
+                },
+                /*** New table switch stuff ***/
+                // Used to switch to the other tables
+                // Takes the table ID to know which table number it is on
+                switchTable(tableId) {
+                    // Save the current order to the current table
+                    const currentTable = this.tables.find(table => table.id == this.currentTableId);
+
+                    // Pushed the current table order onto the array and updates what is shown
+                    currentTable.orders.push({
+                        entre: this.entreChoice,
+                        toppings: this.toppingChoice,
+                        // sides: this.sideChoice,
+                        //drinks: this.drinkChoice,
+                        total: this.indTotal,
+                        finalOrder: this.finalOrder,
+                        overallTotal: this.overallTotal
+                    });
+
+                    // Gets the current table total menu_item_price
+                    currentTable.total += parseFloat(this.indTotal);
+
+                    // Switch to the new table and clear out some data
+                    this.currentTableId = tableId;
+                    const newTable = this.tables.find(table => table.id === tableId);
+                    this.textareaValue = ""
+
+
+                    // Creates a new table if there is nothing in the table 
+                    if (newTable.orders.length > 0) {
+                        const lastOrder = newTable.orders[newTable.orders.length - 1];
+                        this.entreChoice = lastOrder.entre;
+                        this.toppingChoice = lastOrder.toppings;
+                        //this.sideChoice = lastOrder.sides;
+                        //this.drinkChoice = lastOrder.drinks;
+                        this.indTotal = lastOrder.total;
+                        this.finalOrder = lastOrder.finalOrder;
+                        this.overallTotal = lastOrder.overallTotal;
+                    } else {
+                        // Just clears the order if there is no data stored in the table
+                        this.clearOrder();
+                    }
+                },
+
+
+            }//end Methods
+
+        } //end Order
+
+        Vue.createApp(Order).mount('#vueRadio')
+
+/* funciton to open/close the table tabs. to make the design cleaner than just buttons */
+        function openTable(evt, tableNum) {
+            // Declare all variables
+            var i, tabcontent, tablinks;
+
+            // Get all elements with class="tabcontent" and hide them
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            // Get all elements with class="tablinks" and remove the class "active"
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            // Show the current tab, and add an "active" class to the button that opened the tab
+            document.getElementById(tableNum).style.display = "inline-block";
+            evt.currentTarget.className += " active";
+            //hides the other table's check while you are doing another
+            var tables = ["table1", "table2", "table3"];
+
+            for (var i = 0; i < tables.length; i++) {
+                if (tables[i] !== tableNum) {
+                    document.getElementById(tables[i]).style.display = "none";
+                }
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Menu</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function fetchData() {
+                $.ajax({
+                    url: 'http://localhost:3000/CSC_481/ResProj/venv/fetch_data.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        
+                        var html = '';
+                        for (var i = 0; i < data.length; i++) {
+                            html += '<p>menu_id: ' + data[i].menu_id + ' - menu_name: ' + data[i].menu_name + '</p>';
+                        }
+                        
+                        $('#menu-list').html(html);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX Error:", status, error);
+                    }
+                    
+                });
+            }
+
+            // Fetch data initially
+            fetchData();
+
+            // Set interval to fetch data every 5 seconds
+            setInterval(fetchData, 5000);
+        });
+        console.log("here")
+    </script>
+</head>
+<body>
+    <h1>Menu List</h1>
+    <div id="menu-list"></div>
+</body>
+</html>
