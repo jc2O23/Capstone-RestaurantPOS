@@ -1,0 +1,39 @@
+{
+  "menu_sections": [
+    {
+      "menu_section_id": 1,
+      "menu_section_name": "Burgers",
+      "menu_sec_parent": 1
+    },
+    {
+      "menu_section_id": 2,
+      "menu_section_name": "Salads",
+      "menu_sec_parent": 1
+    },
+    {
+      "menu_section_id": 3,
+      "menu_section_name": "Appetizers",
+      "menu_sec_parent": 1
+    },
+    {
+      "menu_section_id": 4,
+      "menu_section_name": "Wraps",
+      "menu_sec_parent": 1
+    },
+    {
+      "menu_section_id": 5,
+      "menu_section_name": "Entrees",
+      "menu_sec_parent": 1
+    },
+    {
+      "menu_section_id": 6,
+      "menu_section_name": "Desserts",
+      "menu_sec_parent": 1
+    },
+    {
+      "menu_section_id": 8,
+      "menu_section_name": "Omelettes",
+      "menu_sec_parent": 2
+    }
+  ]
+}
