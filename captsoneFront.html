@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Resturant Site Switch</title>
+    <title>Switch</title>
     <!-- The VUE CDN ! Next version 3 -->
     <!--<script src="https://unpkg.com/vue@next"></script>-->
     <script src="https://unpkg.com/vue@3"></script>
@@ -94,6 +94,8 @@
     <h1>Resturant Site Capstone Front</h1>
 
     <div id="vueRadio" class="parent">
+        <button v-on:click="getTimestamp">save time</button>
+        <button v-on:click="toDatabase">Send to .JSON</button>
         <div class="tab" style="text-align: middle;">
             <button class="tablinks" v-for="tb in tables" v-on:click="switchTable(tb.id)">Table {{tb.id}}</button>
         </div>
@@ -132,34 +134,21 @@
             </div><!--ends entre-->
             <div id="divToppings" class="child" style="height: fit-content;">
                 <h1>Toppings</h1>
-                
-                    <span v-for="(top, index) in toppings" v-on:change="calc">
-                        <input type="checkbox" :id="top.topping_name" :value="top" v-model="toppingChoice" />
-                        <label :for="top.topping_name">{{top.topping_name}}</label>
-                    </span>
-                
-            </div><!--ends toppings-->
-            <!--<div id="divSides" class="child tabContent">
-                <h1>Sides</h1>
-                <span v-for="(side, index) in sides" v-on:change="calc">
-                    <input type="checkbox" :id="side.side_name" name="radSid" :value="side" v-model="sideChoice" />
-                    <label :for="side.side_name">{{side.side_name}}</label>
-                </span>
-            </div> ends sides-->
 
-            <!--<div id="divDrinks" class="child">
-                <h1>Beverages</h1>
-                <span v-for="(drink, index) in drinks" v-on:change="calc">
-                    <input type="checkbox" :id="drink.drink_name" name="radDri" :value="drink" v-model="drinkChoice" />
-                    <label :for="drink.drink_name">{{drink.drink_name}}</label>
+                <span v-for="(top, index) in toppings" v-on:change="calc">
+                    <input type="checkbox" :id="top.topping_name" :value="top" v-model="toppingChoice" />
+                    <label :for="top.topping_name">{{top.topping_name}}</label>
                 </span>
-            </div><!--ends sides-->
+
+            </div><!--ends toppings-->
+
         </div> <!--ends child-->
         <br />
         <br />
     </div><!--end of the vue div-->
 
     <script>
+
         const Order = {
             data() {
                 return {
@@ -183,7 +172,7 @@
                     overallTotal: 0,
                     totalOrder: [],
                     finalOrder: "",
-
+                    time: 0
 
                 }//end return
             }, //end data property
@@ -194,12 +183,12 @@
 
             created() {
                 /* get the entres from the file written from the database */
-                fetch('menu.json')
+                fetch('new_men.json')
                     .then(response => response.json())
                     .then(data => {
                         this.entres = data.menu_items;
                     })
-                    /* read the toppings from a new .json file */
+                /* read the toppings from a new .json file */
                 fetch('toppings.json')
                     .then(response => response.json())
                     .then(data => {
@@ -211,10 +200,12 @@
                         console.log(error);
                     })
 
+
             },
             methods: {
                 /* calculate the cost of each individual item so it is easier to add to the overall bill */
                 calc() {
+
                     //alert("HI");
                     this.indTotal = 0;
                     if (this.entreChoice) {
@@ -231,9 +222,9 @@
 
 
                 },//end Calc 
-               /* adds the input to the final order display. this function is like sending something to the 
-               check. */
-                addToFinal() {
+                /* adds the input to the final order display. this function is like sending something to the 
+                check. */
+                addToFinal(tableId) {
                     this.finalOrder += this.entreChoice.menu_item_name + " "
                     for (i = 0; i < this.toppingChoice.length; i++) {
                         this.finalOrder += this.toppingChoice[i].topping_name + " ";
@@ -250,7 +241,7 @@
                     this.finalOrder += this.indTotal
                     this.finalOrder += "\n"
                     this.overallTotal = this.overallTotal.toFixed(2)
-
+                    this.switchTable(this.currentTableId)
                 },
                 //clears everything for that table
                 clearOrder() {
@@ -268,7 +259,17 @@
                 switchTable(tableId) {
                     // Save the current order to the current table
                     const currentTable = this.tables.find(table => table.id == this.currentTableId);
-
+                    //removes the current order before placing the new one
+                    //helps printing to the database
+                    currentTable.orders.shift({
+                        entre: this.entreChoice,
+                        toppings: this.toppingChoice,
+                        // sides: this.sideChoice,
+                        //drinks: this.drinkChoice,
+                        total: this.indTotal,
+                        finalOrder: this.finalOrder,
+                        overallTotal: this.overallTotal
+                    })
                     // Pushed the current table order onto the array and updates what is shown
                     currentTable.orders.push({
                         entre: this.entreChoice,
@@ -304,6 +305,51 @@
                         this.clearOrder();
                     }
                 },
+                toDatabase() {
+                    // Create a JSON object representing the orders data
+                    const ordersData = {
+                        tables: this.tables.map(table => ({
+                            id: table.id,
+                            orders: table.orders.map(order => ({
+                                finalOrder: order.finalOrder,
+                                overallTotal: order.overallTotal
+                            }))
+                        })),
+                        //gives the time stamp for when the order is sent to the .json file
+                        time: this.getTimestamp()
+                    };
+                    // Convert the JSON object to a JSON string
+                    const jsonData = JSON.stringify(ordersData, null, 2);
+                    // Log jsonData to check if it's formatted correctly
+                    console.log("jsonData:", jsonData);
+
+                    // Save the JSON string to a file
+                    const filename = 'orders.json';
+                    const blob = new Blob([jsonData], { type: 'application/json' });
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();
+                    //console.log(this.getTimestamp())
+                },
+                getTimestamp() {
+                    const date = new Date();
+                    const month = String(date.getMonth() + 1).padStart(2, '0'); // Adding 1 because getMonth() returns zero-based month
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const year = date.getFullYear();
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    const seconds = String(date.getSeconds()).padStart(2, '0');
+                    /* proves that it works with the console to verify the answer
+                    console.log(`${month}/${day}/${year} ${hours}:${minutes}:${seconds}` )*/
+                    return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
+                }
+/* 
+// Example usage
+console.log(getFormattedTimestamp()); // Output: e.g., 03/18/2024 15:27:45
+
+ */
+
 
 
             }//end Methods
@@ -312,7 +358,8 @@
 
         Vue.createApp(Order).mount('#vueRadio')
 
-/* funciton to open/close the table tabs. to make the design cleaner than just buttons */
+
+        /* funciton to open/close the table tabs. to make the design cleaner than just buttons */
         function openTable(evt, tableNum) {
             // Declare all variables
             var i, tabcontent, tablinks;
@@ -341,6 +388,7 @@
                 }
             }
         }
+
 
     </script>
 
