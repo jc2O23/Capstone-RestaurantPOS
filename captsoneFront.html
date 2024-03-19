@@ -39,7 +39,6 @@
             background-color: lightcyan;
             color: black;
             padding: 10px 10px 10px 10px;
-            
 
         }
 
@@ -48,7 +47,7 @@
         .child input[type="checkbox"] {
             opacity: 0.011;
             z-index: 100;
-            width: 150px;
+        width: 150px;
             
             
         }
@@ -93,6 +92,46 @@
             border: 1px solid #ccc;
             border-top: none;
         }
+
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        /* Modal Content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        /* The Close Button */
+        .close {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        
         
     </style>
 
@@ -102,8 +141,21 @@
     <h1>Resturant Site Capstone Front</h1>
 
     <div id="vueRadio" class="parent">
+        <button v-on:click="getTimestamp">save time</button>
+        <button v-on:click="toDatabase">Send to .JSON</button>
+        <div id="myModal" class="modal">
+
+            <!-- Modal content -->
+            <div class="modal-content">
+              <span class="close" v-on:click="closeEmp">&times;</span>
+             <button id="btnNums" v-for="btnum in butNums">{{btnum}}</button>
+            </div>
+          
+        </div>
         <div class="tab" style="text-align: middle;">
             <button class="tablinks" v-for="tb in tables" v-on:click="switchTable(tb.id)">Table {{tb.id}}</button>
+            <button id="empLogIn" v-on:click="empLogIn">Employee LogIn</button>
+            
         </div>
         <div id="checkoutSide" class="child">
             <textarea :id="txaFinalOrder" v-model="textareaValue" :value="finalOrder"
@@ -136,15 +188,14 @@
                         <label :for="men.menu_name">{{men.menu_name}}</label>
                     </span>
                 </div>
-            
             </div><!--ends entre-->
             <div id="menu_section" class="child" >
                 <h1>Sections</h1>
-                <span v-if="sel_menu" v-for="sec in menu_sections" v-show="sel_menu.menu_id == sec.menu_sec_parent">
+<span v-if="sel_menu" v-for="sec in menu_sections" v-show="sel_menu.menu_id == sec.menu_sec_parent">
                     <input type="radio" :id="sec.menu_section_name" name="menSec_RAD" v-model="sel_section" :value="sec" />
                     <label :for="sec.menu_section_name">{{ sec.menu_section_name }}</label>
                 </span>
-                
+
             </div>
             <div id ="menu_items" class="child" >
                 <h1>Items</h1>
@@ -179,7 +230,7 @@
     </div><!--end of the vue div-->
 
     <script>
-        
+
         const Order = {
             data() {
                 return {
@@ -190,6 +241,7 @@
                         { id: 4, orders: [], total: 0 },
                         { id: 5, orders: [], total: 0 }
                     ],
+butNums: [1,2,3,4,5,6,7,8,9,0,'CLR','DEL'],
                     currentTableId: 1,
                     menu_items: [],
                     menus: [],
@@ -205,9 +257,9 @@
                     overallTotal: 0,
                     totalOrder: [],
                     finalOrder: "",
+                    time: 0,
                     sel_menu: 0,
                     sel_section: 0
-
 
                 }//end return
             }, //end data property
@@ -222,7 +274,7 @@
                     .then(response => response.json())
                     .then(data => {
                         this.menu_items = data.menu_items;
-                        
+
                     })
                 fetch('./data/menu.json')
                     .then(response => response.json())
@@ -235,7 +287,7 @@
                     .then(data => {
                         this.menu_sections = data.menu_sections;
                     })
-                    /* read the toppings from a new .json file */
+                /* read the toppings from a new .json file */
                 fetch('./data/toppings.json')
                     .then(response => response.json())
                     .then(data => {
@@ -247,11 +299,12 @@
                         console.log(error);
                     })
 
-            },
 
+            },
             methods: {
                 /* calculate the cost of each individual item so it is easier to add to the overall bill */
                 calc() {
+
                     //alert("HI");
                     this.indTotal = 0;
                     if (this.entreChoice) {
@@ -268,12 +321,12 @@
 
 
                 },//end Calc 
-               /* adds the input to the final order display. this function is like sending something to the 
-               check. */
-                addToFinal() {
+                /* adds the input to the final order display. this function is like sending something to the 
+                check. */
+                addToFinal(tableId) {
                     this.finalOrder += this.entreChoice.menu_item_name + " "
                     // for (i = 0; i < this.toppingChoice.length; i++) {
-                    //     this.finalOrder += this.toppingChoice[i].topping_name + " ";
+                        //     this.finalOrder += this.toppingChoice[i].topping_name + " ";
                     // }
                     /* for (i = 0; i < this.sideChoice.length; i++) {
                         this.finalOrder += this.sideChoice[i].side_name + " ";
@@ -287,7 +340,7 @@
                     this.finalOrder += this.indTotal
                     this.finalOrder += "\n"
                     this.overallTotal = this.overallTotal.toFixed(2)
-
+                    this.switchTable(this.currentTableId)
                 },
                 //clears everything for that table
                 clearOrder() {
@@ -305,7 +358,17 @@
                 switchTable(tableId) {
                     // Save the current order to the current table
                     const currentTable = this.tables.find(table => table.id == this.currentTableId);
-
+                    //removes the current order before placing the new one
+                    //helps printing to the database
+                    currentTable.orders.shift({
+                        entre: this.entreChoice,
+                        toppings: this.toppingChoice,
+                        // sides: this.sideChoice,
+                        //drinks: this.drinkChoice,
+                        total: this.indTotal,
+                        finalOrder: this.finalOrder,
+                        overallTotal: this.overallTotal
+                    })
                     // Pushed the current table order onto the array and updates what is shown
                     currentTable.orders.push({
                         entre: this.entreChoice,
@@ -341,6 +404,78 @@
                         this.clearOrder();
                     }
                 },
+                empLogIn() {
+                    console.log("EYS")
+                    document.getElementById("myModal").style.display = "block"
+                    modal.style.display = "block";
+
+                    // Get the modal
+                    
+
+                    // Get the button that opens the modal
+
+                    // Get the <span> element that closes the modal
+                    var span = document.getElementsByClassName("close")[0];
+
+                    
+
+                    // When the user clicks on the button, open the modal
+                        
+
+                    // When the user clicks on <span> (x), close the modal
+                        modal.style.display = "none";
+                    
+
+                    // When the user clicks anywhere outside of the modal, close it
+                },
+                closeEmp() {
+                        document.getElementById("myModal").style.display = "none"
+                    },
+                toDatabase() {
+                    // Create a JSON object representing the orders data
+                    const ordersData = {
+                        tables: this.tables.map(table => ({
+                            id: table.id,
+                            orders: table.orders.map(order => ({
+                                finalOrder: order.finalOrder,
+                                overallTotal: order.overallTotal
+                            }))
+                        })),
+                        //gives the time stamp for when the order is sent to the .json file
+                        time: this.getTimestamp()
+                    };
+                    // Convert the JSON object to a JSON string
+                    const jsonData = JSON.stringify(ordersData, null, 2);
+                    // Log jsonData to check if it's formatted correctly
+                    console.log("jsonData:", jsonData);
+
+                    // Save the JSON string to a file
+                    const filename = 'orders.json';
+                    const blob = new Blob([jsonData], { type: 'application/json' });
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();
+                    //console.log(this.getTimestamp())
+                },
+                getTimestamp() {
+                    const date = new Date();
+                    const month = String(date.getMonth() + 1).padStart(2, '0'); // Adding 1 because getMonth() returns zero-based month
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const year = date.getFullYear();
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    const seconds = String(date.getSeconds()).padStart(2, '0');
+                    /* proves that it works with the console to verify the answer */
+                    console.log(`${month}/${day}/${year} ${hours}:${minutes}:${seconds}` )
+                    return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
+                }
+/* 
+// Example usage
+console.log(getFormattedTimestamp()); // Output: e.g., 03/18/2024 15:27:45
+
+ */
+
 
 
             }//end Methods
@@ -349,7 +484,8 @@
 
         Vue.createApp(Order).mount('#vueRadio')
 
-/* funciton to open/close the table tabs. to make the design cleaner than just buttons */
+
+        /* funciton to open/close the table tabs. to make the design cleaner than just buttons */
         function openTable(evt, tableNum) {
             // Declare all variables
             var i, tabcontent, tablinks;
@@ -378,6 +514,7 @@
                 }
             }
         }
+
 
     </script>
 
