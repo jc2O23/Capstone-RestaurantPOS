@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Resturant Site</title>
+    <!-- The VUE CDN ! Next version 3 -->
+    <!--<script src="https://unpkg.com/vue@next"></script>-->
+    <script src="https://unpkg.com/vue@3"></script>
+    <style>
+        body {
+            background-color: cornflowerblue;
+            color: white;
+
+        }
+
+        /* sets the heirarchy for what elements go below it */
+        .parent {
+            display: inline-block;
+            padding: 12px 20px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        /*gets the divs to display next to eachother  */
+        .child {
+            display: inline-block;
+            border: 1px solid white;
+            padding: 10px;
+            vertical-align: top;
+
+        }
+
+        /* changes the backgroun and the boxes */
+        .child label,
+        .child input {
+            display: grid;
+            background-color: lightcyan;
+            color: black;
+            padding: 10px 10px 10px 10px;
+
+        }
+
+        /* edits the actual dot for the radio button */
+        .child input[type="radio"],
+        .child input[type="checkbox"] {
+            opacity: 0.011;
+            z-index: 100;
+        }
+
+        /*changes the color of the selected item*/
+        .child input[type="radio"]:checked+label,
+        .child input[type="checkbox"]:checked+label {
+            background: lightgrey;
+            border-radius: 4px;
+        }
+
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: lightgrey;
+        }
+
+        /* Style the buttons that are used to open the tab content */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            color: blue;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+    </style>
+
+</head>
+
+<body>
+    <h1>Resturant Site Capstone Front</h1>
+
+    <div id="vueRadio" class="parent">
+        <button v-on:click="getTimestamp">save time</button>
+        <button v-on:click="toDatabase">Send to .JSON</button>
+        <div class="tab" style="text-align: middle;">
+            <button class="tablinks" v-for="tb in tables" v-on:click="switchTable(tb.id)">Table {{tb.id}}</button>
+        </div>
+        <div id="checkoutSide" class="child">
+            <textarea :id="txaFinalOrder" v-model="textareaValue" :value="finalOrder"
+                style="height:250px; width:350px; background-color: white;" disabled="disabled"></textarea>
+            <div class="child tabContent" style="display: none;">
+                <textarea :id="txaFinalOrder" :value="finalOrder"
+                    style="height:250px; width:350px; background-color: white;" disabled="disabled"></textarea>
+            </div>
+            <br />
+            <input type="button" :id="btnAddOrder" v-on:click="addToFinal" value="Add To Order Final Order"
+                style="background-color: lightgrey;">
+
+            <input type="button" id="btnClearOrder" v-on:click="clearOrder" value="Clear the whole order"
+                style="background-color: lightgrey;">
+            <input type="button" id="btnPrint" v-on:click="printOrder" value="Print the whole order"
+                style="background-color: lightgrey;">
+            <div class="child">
+                <span>Entre Description: {{entreChoice.menu_item_desc}}</span>
+                <br>
+                <br>
+                <span style="font-size:xx-large;">Total: ${{overallTotal}}</span>
+            </div>
+        </div><!--end table 1 checkout-->
+        <div id="menu_side" class="child">
+            <div id="divEntre" class="child">
+                <h1>Food/Drinks</h1>
+                <div style="column-count: 3;">
+                    <span v-for="(ent, index) in entres" v-on:change="calc">
+                        <input type="radio" :id="ent.menu_item_name" name="radEntre" :value="ent"
+                            v-model="entreChoice" />
+                        <label :for="ent.menu_item_name">{{ent.menu_item_name}}</label>
+                    </span>
+                </div>
+            </div><!--ends entre-->
+            <div id="divToppings" class="child" style="height: fit-content;">
+                <h1>Toppings</h1>
+
+                <span v-for="(top, index) in toppings" v-on:change="calc">
+                    <input type="checkbox" :id="top.topping_name" :value="top" v-model="toppingChoice" />
+                    <label :for="top.topping_name">{{top.topping_name}}</label>
+                </span>
+
+            </div><!--ends toppings-->
+
+        </div> <!--ends child-->
+        <br />
+        <br />
+    </div><!--end of the vue div-->
+
+    <script>
+
+        const Order = {
+            data() {
+                return {
+                    tables: [
+                        { id: 1, orders: [], total: 0 },
+                        { id: 2, orders: [], total: 0 },
+                        { id: 3, orders: [], total: 0 },
+                        { id: 4, orders: [], total: 0 },
+                        { id: 5, orders: [], total: 0 }
+                    ],
+                    currentTableId: 1,
+                    entres: [],
+                    toppings: [],
+                    //sides: [],
+                    drinks: [],
+                    entreChoice: [],
+                    toppingChoice: [],
+                    //sideChoice: [],
+                    drinkChoice: [],
+                    indTotal: 0,
+                    overallTotal: 0,
+                    totalOrder: [],
+                    finalOrder: "",
+                    time: 0
+
+                }//end return
+            }, //end data property
+
+            mounted() {
+                console.log("mounted")
+            },
+
+            created() {
+                /* get the entres from the file written from the database */
+                fetch('new_men.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        this.entres = data.menu_items;
+                    })
+                /* read the toppings from a new .json file */
+                fetch('toppings.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        this.toppings = data.toppings;
+                        //this.sides = data.sides;
+                        //this.drinks = data.drinks;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+
+
+            },
+            methods: {
+                /* calculate the cost of each individual item so it is easier to add to the overall bill */
+                calc() {
+
+                    //alert("HI");
+                    this.indTotal = 0;
+                    if (this.entreChoice) {
+                        this.indTotal = this.entreChoice.menu_item_price;
+                    }
+                    /* for (i = 0; i < this.sideChoice.length; i++) {
+                        this.indTotal += parseFloat(this.sideChoice[i].side_price);
+                    } 
+                    for (i = 0; i < this.drinkChoice.length; i++) {
+                        this.indTotal += parseFloat(this.drinkChoice[i].drink_price);
+                    }*/
+                    this.indTotal = parseFloat(this.indTotal).toFixed(2);
+
+
+
+                },//end Calc 
+                /* adds the input to the final order display. this function is like sending something to the 
+                check. */
+                addToFinal(tableId) {
+                    this.finalOrder += this.entreChoice.menu_item_name + " "
+                    for (i = 0; i < this.toppingChoice.length; i++) {
+                        this.finalOrder += this.toppingChoice[i].topping_name + " ";
+                    }
+                    /* for (i = 0; i < this.sideChoice.length; i++) {
+                        this.finalOrder += this.sideChoice[i].side_name + " ";
+                    } 
+                    for (i = 0; i < this.drinkChoice.length; i++) {
+                        this.finalOrder += this.drinkChoice[i].drink_name + " ";
+                    }*/
+                    this.toppingChoice = [];
+                    this.entreChoice = []
+                    this.overallTotal = parseFloat(this.overallTotal) + parseFloat(this.indTotal)
+                    this.finalOrder += this.indTotal
+                    this.finalOrder += "\n"
+                    this.overallTotal = this.overallTotal.toFixed(2)
+                    this.switchTable(this.currentTableId)
+                },
+                //clears everything for that table
+                clearOrder() {
+                    this.finalOrder = "";
+                    this.indTotal = 0;
+                    this.overallTotal = 0;
+                },
+                /* our version of "printing" the recipt for the customer */
+                printOrder() {
+                    alert(this.finalOrder)
+                },
+                /*** New table switch stuff ***/
+                // Used to switch to the other tables
+                // Takes the table ID to know which table number it is on
+                switchTable(tableId) {
+                    // Save the current order to the current table
+                    const currentTable = this.tables.find(table => table.id == this.currentTableId);
+                    //removes the current order before placing the new one
+                    //helps printing to the database
+                    currentTable.orders.shift({
+                        entre: this.entreChoice,
+                        toppings: this.toppingChoice,
+                        // sides: this.sideChoice,
+                        //drinks: this.drinkChoice,
+                        total: this.indTotal,
+                        finalOrder: this.finalOrder,
+                        overallTotal: this.overallTotal
+                    })
+                    // Pushed the current table order onto the array and updates what is shown
+                    currentTable.orders.push({
+                        entre: this.entreChoice,
+                        toppings: this.toppingChoice,
+                        // sides: this.sideChoice,
+                        //drinks: this.drinkChoice,
+                        total: this.indTotal,
+                        finalOrder: this.finalOrder,
+                        overallTotal: this.overallTotal
+                    });
+
+                    // Gets the current table total menu_item_price
+                    currentTable.total += parseFloat(this.indTotal);
+
+                    // Switch to the new table and clear out some data
+                    this.currentTableId = tableId;
+                    const newTable = this.tables.find(table => table.id === tableId);
+                    this.textareaValue = ""
+
+
+                    // Creates a new table if there is nothing in the table 
+                    if (newTable.orders.length > 0) {
+                        const lastOrder = newTable.orders[newTable.orders.length - 1];
+                        this.entreChoice = lastOrder.entre;
+                        this.toppingChoice = lastOrder.toppings;
+                        //this.sideChoice = lastOrder.sides;
+                        //this.drinkChoice = lastOrder.drinks;
+                        this.indTotal = lastOrder.total;
+                        this.finalOrder = lastOrder.finalOrder;
+                        this.overallTotal = lastOrder.overallTotal;
+                    } else {
+                        // Just clears the order if there is no data stored in the table
+                        this.clearOrder();
+                    }
+                },
+                toDatabase() {
+                    // Create a JSON object representing the orders data
+                    const ordersData = {
+                        tables: this.tables.map(table => ({
+                            id: table.id,
+                            orders: table.orders.map(order => ({
+                                finalOrder: order.finalOrder,
+                                overallTotal: order.overallTotal
+                            }))
+                        })),
+                        //gives the time stamp for when the order is sent to the .json file
+                        time: this.getTimestamp()
+                    };
+                    // Convert the JSON object to a JSON string
+                    const jsonData = JSON.stringify(ordersData, null, 2);
+                    // Log jsonData to check if it's formatted correctly
+                    console.log("jsonData:", jsonData);
+
+                    // Save the JSON string to a file
+                    const filename = 'orders.json';
+                    const blob = new Blob([jsonData], { type: 'application/json' });
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();
+                    //console.log(this.getTimestamp())
+                },
+                getTimestamp() {
+                    const date = new Date();
+                    const month = String(date.getMonth() + 1).padStart(2, '0'); // Adding 1 because getMonth() returns zero-based month
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const year = date.getFullYear();
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    const seconds = String(date.getSeconds()).padStart(2, '0');
+                    /* proves that it works with the console to verify the answer
+                    console.log(`${month}/${day}/${year} ${hours}:${minutes}:${seconds}` )*/
+                    return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
+                }
+/* 
+// Example usage
+console.log(getFormattedTimestamp()); // Output: e.g., 03/18/2024 15:27:45
+
+ */
+
+
+
+            }//end Methods
+
+        } //end Order
+
+        Vue.createApp(Order).mount('#vueRadio')
+
+
+        /* funciton to open/close the table tabs. to make the design cleaner than just buttons */
+        function openTable(evt, tableNum) {
+            // Declare all variables
+            var i, tabcontent, tablinks;
+
+            // Get all elements with class="tabcontent" and hide them
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            // Get all elements with class="tablinks" and remove the class "active"
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            // Show the current tab, and add an "active" class to the button that opened the tab
+            document.getElementById(tableNum).style.display = "inline-block";
+            evt.currentTarget.className += " active";
+            //hides the other table's check while you are doing another
+            var tables = ["table1", "table2", "table3"];
+
+            for (var i = 0; i < tables.length; i++) {
+                if (tables[i] !== tableNum) {
+                    document.getElementById(tables[i]).style.display = "none";
+                }
+            }
+        }
+
+
+    </script>
+
+</body>
+
+</html>
