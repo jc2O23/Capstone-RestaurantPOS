@@ -47,14 +47,17 @@
         .child input[type="checkbox"] {
             opacity: 0.011;
             z-index: 100;
-        width: 150px;
-            
-            
+            width: 150px;
+
+
         }
-        #menu.child, #menu_section.child, #menu_items.child {
+
+        #menu.child,
+        #menu_section.child,
+        #menu_items.child {
             width: 200px;
         }
-        
+
 
         /*changes the color of the selected item*/
         input[type="radio"]:checked+label {
@@ -94,17 +97,26 @@
         }
 
         .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1; /* Sit on top */
-            padding-top: 100px; /* Location of the box */
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1;
+            /* Sit on top */
+            padding-top: 100px;
+            /* Location of the box */
             left: 0;
             top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgb(0,0,0); /* Fallback color */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgb(0, 0, 0);
+            /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black w/ opacity */
         }
 
         /* Modal Content */
@@ -130,9 +142,6 @@
             text-decoration: none;
             cursor: pointer;
         }
-
-        
-        
     </style>
 
 </head>
@@ -147,15 +156,16 @@
 
             <!-- Modal content -->
             <div class="modal-content">
-              <span class="close" v-on:click="closeEmp">&times;</span>
-             <button id="btnNums" v-for="btnum in butNums">{{btnum}}</button>
+                <span class="close" v-on:click="closeEmp">&times;</span>
+                <div class = "numEnter"></div>
+                <button id="btnNums" v-for="btnum in butNums" v-on:click="handleBtn(btnum)">{{btnum}}</button>
             </div>
-          
+
         </div>
         <div class="tab" style="text-align: middle;">
             <button class="tablinks" v-for="tb in tables" v-on:click="switchTable(tb.id)">Table {{tb.id}}</button>
             <button id="empLogIn" v-on:click="empLogIn">Employee LogIn</button>
-            
+
         </div>
         <div id="checkoutSide" class="child">
             <textarea :id="txaFinalOrder" v-model="textareaValue" :value="finalOrder"
@@ -189,22 +199,28 @@
                     </span>
                 </div>
             </div><!--ends entre-->
-            <div id="menu_section" class="child" >
+            <div id="menu_section" class="child">
                 <h1>Sections</h1>
-<span v-if="sel_menu" v-for="sec in menu_sections" v-show="sel_menu.menu_id == sec.menu_sec_parent">
-                    <input type="radio" :id="sec.menu_section_name" name="menSec_RAD" v-model="sel_section" :value="sec" />
+                <span v-if="sel_menu" v-for="sec in menu_sections" v-show="sel_menu.menu_id == sec.menu_sec_parent">
+                    <input type="radio" :id="sec.menu_section_name" name="menSec_RAD" v-model="sel_section"
+                        :value="sec" />
                     <label :for="sec.menu_section_name">{{ sec.menu_section_name }}</label>
                 </span>
 
             </div>
-            <div id ="menu_items" class="child" >
+            <div id="menu_items" class="child">
                 <h1>Items</h1>
-                <span v-if="sel_menu" v-for="item in menu_items" v-show="sel_section.menu_section_id == item.menu_item_parent && item.menu_main == sel_menu.menu_id" v-on:change="calc">
-                    <input type="radio" :id="item.menu_item_name" name='menItem_RAD' v-model="entreChoice" :value="item" />
+                <span v-if="sel_menu" v-for="item in menu_items"
+                    v-show="sel_section.menu_section_id == item.menu_item_parent && item.menu_main == sel_menu.menu_id"
+                    v-on:change="calc">
+                    <input type="radio" :id="item.menu_item_name" name='menItem_RAD' v-model="entreChoice"
+                        :value="item" />
                     <label :for="item.menu_item_name">{{item.menu_item_name}}</label>
                 </span>
-                <span v-for="item in menu_items" v-show="sel_menu.menu_id == item.menu_main && item.menu_item_parent == 0" v-on:change="calc">
-                    <input type="radio" :id="item.menu_item_name" name='menItem_RAD2' v-model="entreChoice" :value="item" />
+                <span v-for="item in menu_items"
+                    v-show="sel_menu.menu_id == item.menu_main && item.menu_item_parent == 0" v-on:change="calc">
+                    <input type="radio" :id="item.menu_item_name" name='menItem_RAD2' v-model="entreChoice"
+                        :value="item" />
                     <label :for="item.menu_item_name">{{item.menu_item_name}}</label>
                 </span>
             </div>
@@ -241,7 +257,7 @@
                         { id: 4, orders: [], total: 0 },
                         { id: 5, orders: [], total: 0 }
                     ],
-butNums: [1,2,3,4,5,6,7,8,9,0,'CLR','DEL'],
+                    butNums: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'CLR', 'DEL'],
                     currentTableId: 1,
                     menu_items: [],
                     menus: [],
@@ -326,7 +342,7 @@ butNums: [1,2,3,4,5,6,7,8,9,0,'CLR','DEL'],
                 addToFinal(tableId) {
                     this.finalOrder += this.entreChoice.menu_item_name + " "
                     // for (i = 0; i < this.toppingChoice.length; i++) {
-                        //     this.finalOrder += this.toppingChoice[i].topping_name + " ";
+                    //     this.finalOrder += this.toppingChoice[i].topping_name + " ";
                     // }
                     /* for (i = 0; i < this.sideChoice.length; i++) {
                         this.finalOrder += this.sideChoice[i].side_name + " ";
@@ -407,30 +423,23 @@ butNums: [1,2,3,4,5,6,7,8,9,0,'CLR','DEL'],
                 empLogIn() {
                     console.log("EYS")
                     document.getElementById("myModal").style.display = "block"
-                    modal.style.display = "block";
-
-                    // Get the modal
                     
 
-                    // Get the button that opens the modal
 
                     // Get the <span> element that closes the modal
                     var span = document.getElementsByClassName("close")[0];
 
+
                     
-
-                    // When the user clicks on the button, open the modal
-                        
-
-                    // When the user clicks on <span> (x), close the modal
-                        modal.style.display = "none";
-                    
-
-                    // When the user clicks anywhere outside of the modal, close it
                 },
                 closeEmp() {
-                        document.getElementById("myModal").style.display = "none"
-                    },
+                    document.getElementById("myModal").style.display = "none"
+                },
+                handleBtn(btnum){
+                    console.log(btnum)
+                    
+
+                },
                 toDatabase() {
                     // Create a JSON object representing the orders data
                     const ordersData = {
@@ -467,14 +476,14 @@ butNums: [1,2,3,4,5,6,7,8,9,0,'CLR','DEL'],
                     const minutes = String(date.getMinutes()).padStart(2, '0');
                     const seconds = String(date.getSeconds()).padStart(2, '0');
                     /* proves that it works with the console to verify the answer */
-                    console.log(`${month}/${day}/${year} ${hours}:${minutes}:${seconds}` )
+                    console.log(`${month}/${day}/${year} ${hours}:${minutes}:${seconds}`)
                     return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
                 }
-/* 
-// Example usage
-console.log(getFormattedTimestamp()); // Output: e.g., 03/18/2024 15:27:45
-
- */
+                /* 
+                // Example usage
+                console.log(getFormattedTimestamp()); // Output: e.g., 03/18/2024 15:27:45
+                
+                 */
 
 
 
