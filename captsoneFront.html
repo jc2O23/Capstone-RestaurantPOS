@@ -133,10 +133,15 @@
 <body>
     <h1>Resturant Site Capstone working</h1>
 
+    <br>
+
     <div id="vueRadio" class="parent">
+
         <button v-on:click="restore">Restore from before load?</button>
         <button v-on:click="getTimestamp">save time</button>
         <button v-on:click="toDatabase">Send to .JSON</button>
+        <p id="pEmpWelcome" style="display: none;">Welcome {{employees[empIndex].name}}</p>
+
         <div id="myModal" class="modal">
             <!-- Modal content -->
 
@@ -160,6 +165,7 @@
         <div class="tab" style="text-align: middle;">
             <button class="tablinks" v-for="tb in tables" v-on:click="switchTable(tb.id)"
                 :class="{ 'selected': tb.id === currentTableId }">Table {{tb.id}}</button>
+            <button id="btnSignOut" v-on:click="signOut" style="display: none;">Sign out</button>
             <button id="empLogIn" v-on:click="empLogIn">Employee LogIn</button>
 
         </div>
@@ -168,21 +174,29 @@
                 style="height:250px; width:350px; background-color: white;" disabled="readonly"></textarea>
 
             <br />
-            <input type="button" :id="btnAddOrder" v-on:click="addToFinal" value="Add To Order Final Order"
-                style="background-color: lightgrey;">
+            <input type="button" id="btnAddOrder" v-on:click="addToFinal" value="Add To Order Final Order"
+                style="background-color: lightgrey;" disabled="true">
 
             <input type="button" id="btnClearOrder" v-on:click="clearOrder" value="Clear the whole order"
-                style="background-color: lightgrey;">
+                style="background-color: lightgrey;" disabled="true">
             <input type="button" id="btnPrint" v-on:click="printOrder" value="Print the whole order"
-                style="background-color: lightgrey;">
-            <input type="button" :id="btnRemoveItem" v-on:click="removeFromFinal" value="Remove this item"
-                style="background-color: lightgrey;">
+                style="background-color: lightgrey;" disabled="true">
+            <input type="button" id="btnRemoveItem" v-on:click="removeFromFinal" value="Remove this item"
+                style="background-color: lightgrey;" disabled="true">
+            <input type="button" id="btnTimeOpen" v-on:click="timeOpen" value="Seat this table"
+                style="background-color: lightgrey;" disabled="true">
+            <!-- Close table is called when you print the order to the alert box. No need to have this button
+                 <input type="button" :id="btnTimeClose" v-on:click="timeClose" value="this table finished"
+                style="background-color: lightgrey;"> -->
             <div class="child" style="width: 300px;">
                 <span style="font-size: large;">Entre Description:<p>{{entreChoice.menu_item_desc}}</p></span>
                 <br>
                 <br>
                 <span style="font-size:xx-large;">Total: ${{overallTotal}}</span>
                 <br>
+                <span>
+                    <p>Time Seated {{tables[currentTableId -1].timeIn}}</p>
+                </span>
                 <span style="font-size:large;"> <br>
                 </span>
             </div>
@@ -234,24 +248,24 @@
             data() {
                 return {
                     tables: [
-                        { id: 1, orders: [], total: 0 },
-                        { id: 2, orders: [], total: 0 },
-                        { id: 3, orders: [], total: 0 },
-                        { id: 4, orders: [], total: 0 },
-                        { id: 5, orders: [], total: 0 }
+                        { id: 1, orders: [], total: 0, timeIn: "", timeOut: 0 },
+                        { id: 2, orders: [], total: 0, timeIn: "", timeOut: 0 },
+                        { id: 3, orders: [], total: 0, timeIn: "", timeOut: 0 },
+                        { id: 4, orders: [], total: 0, timeIn: "", timeOut: 0 },
+                        { id: 5, orders: [], total: 0, timeIn: "", timeOut: 0 }
                     ],
                     employees: [
-                        { id: 12, name: "John C.", pin: 101, pass: 1101, level: 1, role: "Boss" },
-                        { id: 13, name: "Dave S.", pin: 123, pass: 1123, level: 3, role: "Server" },
-                        { id: 14, name: "Nick V.", pin: 345, pass: 1345, level: 2, role: "Cook" },
-                        { id: 15, name: "Jim F", pin: 678, pass: 1678, level: 2, role: "Cook" },
-                        { id: 16, name: "Liam M.", pin: 909, pass: 1909, level: 1, role: "Boss" },
-                        { id: 17, name: "Dan S.", pin: 221, pass: 1221, level: 1, role: "Boss" },
-                        { id: 18, name: "Mary L.", pin: 565, pass: 1565, level: 3, role: "Server" },
-                        { id: 19, name: "Cara G.", pin: 9, pass: 1009, level: 2, role: "Manager" },
-                        { id: 20, name: "Greg H.", pin: 160, pass: 1160, level: 2, role: "Boss" },
-                        { id: 21, name: "Megan S.", pin: 746, pass: 1746, level: 3, role: "Server" },
-                        { id: 22, name: "Dave S.", pin: 867, pass: 1867, level: 1, role: "Manager" },
+                        { id: 12, name: "John C.", pin: 101, pass: 1101, level: 1, role: "Boss", clockIn: "", clockOut: 0 },
+                        { id: 13, name: "Dave S.", pin: 123, pass: 1123, level: 3, role: "Server", clockIn: "", clockOut: 0 },
+                        { id: 14, name: "Nick V.", pin: 345, pass: 1345, level: 2, role: "Cook", clockIn: "", clockOut: 0 },
+                        { id: 15, name: "Jim F", pin: 678, pass: 1678, level: 2, role: "Cook", clockIn: "", clockOut: 0 },
+                        { id: 16, name: "Liam M.", pin: 909, pass: 1909, level: 1, role: "Boss", clockIn: "", clockOut: 0 },
+                        { id: 17, name: "Dan S.", pin: 221, pass: 1221, level: 1, role: "Boss", clockIn: "", clockOut: 0 },
+                        { id: 18, name: "Mary L.", pin: 565, pass: 1565, level: 3, role: "Server", clockIn: "", clockOut: 0 },
+                        { id: 19, name: "Cara G.", pin: 9, pass: 1009, level: 2, role: "Manager", clockIn: "", clockOut: 0 },
+                        { id: 20, name: "Greg H.", pin: 160, pass: 1160, level: 2, role: "Boss", clockIn: "", clockOut: 0 },
+                        { id: 21, name: "Megan S.", pin: 746, pass: 1746, level: 3, role: "Server", clockIn: "", clockOut: 0 },
+                        { id: 22, name: "Dave S.", pin: 867, pass: 1867, level: 1, role: "Manager", clockIn: "", clockOut: 0 },
 
                     ],
                     empPin: 0,
@@ -279,6 +293,8 @@
                     tip15: 0,
                     tip20: 0,
                     tip25: 0,
+                    currentEmpID: 0
+
 
                 }//end return
             }, //end data property
@@ -325,25 +341,40 @@
                 /*  //Makes sure the order is properly saved before the window refreshes
                    window.onbeforeunload = this.toDatabase */
 
-                
+
 
             },
             methods: {
+                timeOpen() {
+                    let newTimeIn = new Date(); // Store the current time
+                    this.tables[this.currentTableId - 1].timeIn = newTimeIn; // Adjusted index for table ID
+                    console.log(this.tables[this.currentTableId - 1])
+                    alert("Table " + this.currentTableId + " was seated at " + newTimeIn);
+                    /* return timeIn */
+                },
+                timeClose() {
+                    let timeOut = new Date(); // Store the current time
+                    if (this.tables[this.currentTableId - 1].timeIn > 0) {
+                        let seatedTime = timeOut - this.tables[this.currentTableId - 1].timeIn; // Calculate the difference in milliseconds
+                        seatedTime /= 1000; // Convert milliseconds to seconds
+                        seatedTime /= 60; // Convert seconds to minutes
+                        //alert("Time elapsed for Table " + (this.currentTableId) + ": " + seatedTime.toFixed(2) + " minutes");
+                        this.clearOrder()
+                        return Math.round(seatedTime)
+                    }
+                    else {
+                        alert("Table " + this.currentTableId + " has not yet been seated")
+                    }
+                },
+
 
                 /* calculate the cost of each individual item so it is easier to add to the overall bill */
                 calc() {
-
                     //alert("HI");
                     this.indTotal = 0;
                     if (this.entreChoice) {
                         this.indTotal = this.entreChoice.menu_item_price;
                     }
-                    /* for (i = 0; i < this.sideChoice.length; i++) {
-                        this.indTotal += parseFloat(this.sideChoice[i].side_price);
-                    } 
-                    for (i = 0; i < this.drinkChoice.length; i++) {
-                        this.indTotal += parseFloat(this.drinkChoice[i].drink_price);
-                    }*/
                     this.indTotal = parseFloat(this.indTotal).toFixed(2);
 
 
@@ -352,6 +383,9 @@
                 /* adds the input to the final order display. this function is like sending something to the 
                 check. */
                 addToFinal(tableId) {
+                    if (this.tables[this.currentTableId - 1].timeIn == 0) {
+                        this.timeOpen()
+                    }
                     this.finalOrder += this.entreChoice.menu_item_name + " "
                     this.entreChoice = []
                     console.log(this.entreChoice)
@@ -360,6 +394,7 @@
                     this.finalOrder += "\n"
                     this.overallTotal = this.overallTotal.toFixed(2)
                     this.switchTable(this.currentTableId)
+
                 },
                 removeFromFinal(tableId) {
                     if (this.finalOrder.includes(this.entreChoice.menu_item_name)) {
@@ -380,6 +415,7 @@
                     this.finalOrder = "";
                     this.indTotal = 0;
                     this.overallTotal = 0;
+                    this.tables[this.currentTableId - 1].timeIn = ""
                 },
                 tip() {
                     total = this.overallTotal
@@ -395,7 +431,7 @@
                 /* our version of "printing" the recipt for the customer */
                 printOrder() {
                     let printable = "Final Order" + this.finalOrder + "\n" + " Your Total Is: $" + this.overallTotal +
-                        "\n Suggested Tips" + "\n" + this.tip();
+                        "\n Suggested Tips" + "\n" + this.tip() + "\n" + "This Table was seated for " + this.timeClose() + " minutes";
                     alert(printable)
                 },
                 /*** New table switch stuff ***/
@@ -404,40 +440,26 @@
                 switchTable(tableId) {
                     // Save the current order to the current table
                     const currentTable = this.tables.find(table => table.id === this.currentTableId);
-                    // Remove the current order before placing the new one
-                    // Helps in printing to the database
                     currentTable.orders.shift();
-                    // Push the current table order onto the array and update what is shown
                     currentTable.orders.push({
-                        /*  entre: this.entreChoice,
-                         toppings: this.toppingChoice, */
-                        // sides: this.sideChoice,
-                        // drinks: this.drinkChoice,
                         total: this.indTotal,
                         finalOrder: this.finalOrder,
                         overallTotal: this.overallTotal
                     });
-
-                    // Gets the current table total menu_item_price
                     currentTable.total += parseFloat(this.indTotal);
-
+                    // Store time in for the current table
+                    currentTable.timeIn = this.tables[this.currentTableId - 1].timeIn;
+                    currentTable.timeOut = this.timeOut;
                     // Switch to the new table and clear out some data
                     this.currentTableId = tableId;
                     const newTable = this.tables.find(table => table.id === tableId);
                     this.textareaValue = "";
-
-                    // Creates a new table if there is nothing in the table 
                     if (newTable.orders.length > 0) {
                         const lastOrder = newTable.orders[newTable.orders.length - 1];
-                        /* this.entreChoice = lastOrder.entre;
-                        this.toppingChoice = lastOrder.toppings; */
-                        // this.sideChoice = lastOrder.sides;
-                        // this.drinkChoice = lastOrder.drinks;
                         this.indTotal = lastOrder.total;
                         this.finalOrder = lastOrder.finalOrder;
                         this.overallTotal = lastOrder.overallTotal;
                     } else {
-                        // Just clears the order if there is no data stored in the table
                         this.clearOrder();
                     }
                 },
@@ -470,46 +492,80 @@
                     let userCode = this.empCode
                     let validCode = this.employees[this.empIndex].pass
                     console.log(this.employees[this.empIndex].name)
-                    console.log(userCode)
+                    //console.log(userCode)
                     if (userCode == validCode) {
+                        document.getElementById("pEmpWelcome").style.display = "block"
+                        document.getElementById("btnSignOut").style.display = "block"
+                        document.getElementById("empLogIn").style.display = "none"
+                        // this.currentEmpID = this.employees[this.empIndex].name
                         alert("Welcome " + this.employees[this.empIndex].name + " It is currently " + this.getTimestamp())
                         console.log("Welcome " + this.employees[this.empIndex].name + " It is currently " + this.getTimestamp())
-                        //this.enableButtons()
+                        enableButtons()
                         this.closeEmp()
+                        this.clockInTime()
+
+
                     }
                     else {
-                        console.log(userCode)
-                        alert("Incorrect Password")
+                        //console.log(userCode)
+                        //alert("Incorrect Password")
                         document.getElementById("spanCode").style.display = "none"
                         document.getElementById("spanPin").style.display = "block"
-                        // this.disableButtons()
+                        disableButtons()
                     }
                 },
-                /* might be able to get later tomorrow to lock down the system until the employee signs in 
-                
-                disableButtons() {
-                    console.log("buttons don't work")
-                    document.getElementById("btnAddOrder").disabled = true
-                    document.getElementById("btnClearOrder").disabled = true
-                    document.getElementById("btnPrint").disabled = true
-                    document.getElementById("btnRemoveItem").disabled = true
-                },
-                enableButtons() {
-                    console.log("buttons should work")
-                    document.getElementById("btnAddOrder").disabled = false
-                    document.getElementById("btnClearOrder").disabled = false
-                    document.getElementById("btnPrint").disabled = false
-                    document.getElementById("btnRemoveItem").disabled = false
-                },*/
+
+
                 closeEmp() {
                     document.getElementById("myModal").style.display = "none"
 
+                }, signOut() {
+                    this.empCode = 0
+                    this.empPin = 0
+                    document.getElementById("pEmpWelcome").style.display = "none"
+                    document.getElementById("btnSignOut").style.display = "none"
+                    document.getElementById("empLogIn").style.display = "block"
+                    this.clockOutTime()
+                    this.checkPass()
                 },
-                /* handleBtn(btnum) {
-                    console.log(btnum)
+                clockInTime() {
+                    let newClockIn = new Date();
+                    this.employees[this.empIndex].clockIn = newClockIn;
+                    console.log(this.employees[this.empIndex])
+
+                    /* 
+                    const currentEmp = this.employees.find(employee => employee.id === this.currentEmpId);
+                    let newClockIn = new Date(); // Store the current time
+                    currentEmp.clockIn = newClockIn; // Adjusted index for table ID
+                    console.log(this.currentEmp.clockIn)
+                    alert(currentEmp.name + " signed in at " + newClockIn);
+                    /* return timeIn 
+ */
 
 
-                }, */
+                },
+                clockOutTime() {
+                    let newClockOut = new Date();
+                    if (this.employees[this.empIndex].clockIn > 0) {
+                        let shiftTime =  newClockOut - this.employees[this.empIndex].clockIn 
+                        shiftTime /= 1000
+                        //if this shift time is greater than 60 seconds - we want to put results in minutes
+                        if (shiftTime > 60) {
+                            shiftTime /= 60
+                            shiftTime = Math.round(shiftTime)
+                            this.employees[this.empIndex].clockOut = shiftTime
+                            alert(this.employees[this.empIndex].name + " worked " + shiftTime + " minutes")
+                            console.log(shiftTime + " minutes")
+                        }
+                        //if shift is seconds we want to display in seconds
+                        else {
+                            this.employees[this.empIndex].clockOut = shiftTime
+                            console.log(this.employees[this.empIndex].name + " is now signed out")
+                            console.log("worked " + this.employees[this.empIndex].clockOut + " seconds")
+                            alert(this.employees[this.empIndex].name + " worked " + shiftTime + " seconds")
+                        }
+                    }
+                },
 
                 toDatabase() {
                     // Create a JSON object representing the orders data
@@ -618,6 +674,24 @@
                     document.getElementById(tables[i]).style.display = "none";
                 }
             }
+        }
+
+        function disableButtons() {
+            document.getElementById("btnAddOrder").disabled = true
+            document.getElementById("btnClearOrder").disabled = true
+            document.getElementById("btnPrint").disabled = true
+            document.getElementById("btnRemoveItem").disabled = true
+            document.getElementById("btnTimeOpen").disabled = true
+            /* document.getElementById("btnRemoveItem") */
+            console.log("buttons don't work")
+        }
+        function enableButtons() {
+            document.getElementById("btnAddOrder").disabled = false
+            document.getElementById("btnClearOrder").disabled = false
+            document.getElementById("btnPrint").disabled = false
+            document.getElementById("btnRemoveItem").disabled = false
+            document.getElementById("btnTimeOpen").disabled = false
+            console.log("buttons should work")
         }
 
 
