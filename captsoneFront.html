@@ -148,8 +148,7 @@
             <div class="modal-content">
                 <span class="close" v-on:click="closeEmp">&times;</span>
                 <!-- <div class="numEnter"></div>
-                <button id="btnNums" v-for="btnum in butNums" v-on:click="handleBtn(btnum)">{{btnum}}</button> -->
-                <!--???????????????????????????????????????????????????????-->
+                
                 <span id="spanPin">
                     <input type="number" id="EmployeePin" v-model="empPin" style="display: block;">
                     <button v-on:click="checkUser">Check</button></span>
@@ -334,12 +333,8 @@
                         console.log(error);
                     })
 
-                //////////////////////////////////////////////////////////////
-                /////////////////////////////////////////////////////////////
-                /////////////////////////////////////////////////////////////
-                //uncomment below to enable this function
-                /*  //Makes sure the order is properly saved before the window refreshes
-                   window.onbeforeunload = this.toDatabase */
+               //Makes sure the order is properly saved before the window refreshes
+                   window.onbeforeunload = this.toDatabase
 
 
 
