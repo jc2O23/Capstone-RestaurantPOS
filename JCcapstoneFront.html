@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Resturant Site Switch</title>
+    <!-- The VUE CDN ! Next version 3 -->
+    <!--<script src="https://unpkg.com/vue@next"></script>-->
+    <script src="https://unpkg.com/vue@3"></script>
+    <style>
+        body {
+            background-color: cornflowerblue;
+            color: white;
+
+        }
+
+        /* sets the heirarchy for what elements go below it */
+        .parent {
+            display: inline-block;
+            padding: 12px 20px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        /*gets the divs to display next to eachother  */
+        .child {
+            display: inline-block;
+            border: 1px solid white;
+            padding: 10px;
+            vertical-align: top;
+
+        }
+
+        /* changes the backgroun and the boxes */
+        .child label,
+        .child input {
+            display: grid;
+            background-color: lightcyan;
+            color: black;
+            padding: 10px 10px 10px 10px;
+
+        }
+
+        /* edits the actual dot for the radio button */
+        .child input[type="radio"],
+        .child input[type="checkbox"] {
+            opacity: 0.011;
+            z-index: 100;
+            width: 150px;
+
+
+        }
+
+        #menu.child,
+        #menu_section.child,
+        #menu_items.child {
+            width: 200px;
+        }
+
+
+        /*changes the color of the selected item*/
+        input[type="radio"]:checked+label {
+            background: lightgrey;
+            border-radius: 4px;
+        }
+
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: lightgrey;
+        }
+
+        /* Style the buttons that are used to open the tab content */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            color: blue;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+
+        
+
+        
+
+        .modal {
+            display: none;
+            position: fixed;
+            left: 400px;
+            right: auto;
+            bottom: auto;
+            background-color: rgb(184, 199, 209);
+            color: black;
+            border-style: groove;
+            padding: 20px; 
+            align-items: center; 
+            width: 300px; 
+            z-index: 1;
+        }
+
+        .modal_title {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 20px; /* Added padding for spacing */
+        }
+
+        .modal-content {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* Create three columns */
+            grid-gap: 0; /* Space between rows and columns */
+            justify-items: center; /* Center the buttons in the grid */
+        }
+
+        #btnNums {
+            width: 60px; /* Set a fixed width for buttons */
+            height: 60px; /* Set a fixed height for buttons */
+            margin: 2.5px; /* Space around buttons */
+        }
+        
+        .modalAsk {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 300px;
+            height: 300px;
+        }
+
+        .btnAskModal {
+            display: flex;
+            justify-content: center;
+        }
+
+        #btnNumsAsk {
+            width: 75px; /* Set a fixed width for buttons */
+            height: 75px; /* Set a fixed height for buttons */
+            margin: 25px; /* Space around buttons */
+            padding: 10px;
+            text-align: center;
+        }
+
+        .modalSuccess {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .btnSuccess {
+            display: flex;
+            justify-content: center;
+            width: 100px; 
+            height: 75px; 
+        }
+
+        .myModalNotFound {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            align-items: center;
+            width: 300px;
+            height: 300px;
+        }
+
+        .myModalInVal {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            align-items: center;
+            width: 300px;
+            height: 300px;
+        }
+
+        #empLogIn {
+            padding: 6px 12px;
+            
+            
+            background-color: lightgrey;
+            cursor: pointer;
+            font-size: x-large;
+            
+
+        }
+
+        .empTab button:hover {
+            color: blue;
+        }
+        
+    </style>
+
+</head>
+
+<body>
+    <h1>Resturant Site Capstone Front</h1>
+
+    <div id="vueRadio" class="parent">
+        <button v-on:click="getTimestamp" v-if="adminLog">save time</button>
+        <button v-on:click="toDatabase" v-if="adminLog">Send to .JSON</button>
+
+        <div id="myModal" class="modal">
+            <div class = "modal_title">
+                <h1>Enter Employee Number</h1>
+                <input type="text" :value="empPin" style="height: 50px; font-size: x-large; width: 100px; text-align: center;" readonly></input>
+                </div>
+            <div class="modal-content">
+                <button id="btnNums" v-for="btnum in butNums" v-on:click="handleBtn(btnum)">[[btnum]]</button>
+            </div>
+        </div>
+
+        <div id="myModalAsk" class="modal">
+            <div class = "modalAsk">
+                <h1>LogIn as [[empName]]?</h1>
+                <div class="btnAskModal">
+                    <input id='btnNumsAsk' type="button" value="Yes" @click="askEmpBtn('Yes')"></input>
+                    <input id='btnNumsAsk' type="button" value="No" @click="askEmpBtn('No')"></input>
+                </div>
+                <div class="btnAskModal">
+                    <input id='btnNumsAsk' type="button" value="Cancel" @click="askEmpBtn('Cancel')"></input>
+                </div>
+            </div>
+        </div>
+
+        <div id="myModalNotFound" class="modal">
+            <div class = "modalNotFound">
+                <h1 style="text-align: center;">No Employee<br>Found for<br><br>[[empPin]]</h1>
+                <div class="btnAskModal">
+                    <input id='btnNumsAsk' type="button" value="Back" @click="NFEmpBtn('Back')"></input>
+                    <input id='btnNumsAsk' type="button" value="Cancel" @click="NFEmpBtn('Cancel')"></input>
+                </div>
+            </div>
+        </div>
+
+        <div id="passModal" class="modal">
+            <div class = "modal_title">
+                <h1>Enter Password</h1>
+                <input type="text" :value="empCode" style="height: 50px; font-size: x-large; width: 100px; text-align: center;" readonly></input>
+                </div>
+            <div class="modal-content">
+                <button id="btnNums" v-for="btnum in butNums" v-on:click="handlePassBtn(btnum)">[[btnum]]</button>
+            </div>
+        </div>
+
+        <div id="myModalSuccess" class="modal">
+            <div class = "modalSuccess">
+                <h1 id='headClock'style="text-align: center;">EMPL: [[empName]] ([[empPin]])<br>CLOCKED IN</h1>
+                <div class="btnSuccess">
+                    <input id='btnSuccess' type="button" value="Close" v-on:click="successClose" style="width: 100px;"></input>
+                </div>
+            </div>
+        </div>
+
+        <div id="myModalInVal" class="modal">
+            <div class = "modalInVal">
+                <h1 style="text-align: center;">Invalid Pin</h1>
+                <div class="btnAskModal">
+                    <input id='btnNumsAsk' type="button" value="Back" @click="InValBtn('Back')"></input>
+                    <input id='btnNumsAsk' type="button" value="Cancel" @click="InValBtn('Cancel')"></input>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab" style="text-align: middle;">
+            <button class="tablinks" v-for="tb in tables" v-on:click="switchTable(tb.id)">Table [[tb.id]]</button>
+        </div>
+        <div id="checkoutSide" class="child" v-if="empLevel">
+            <textarea id="txaFinalOrder" :value="finalOrder" v-on:click="selLine" readonly style="height:250px; width:350px; background-color: white; font-size: x-large;"></textarea>
+            <div class="child tabContent" style="display: none;">
+                <textarea :id="txaFinalOrder" :value="finalOrder"
+                    style="height:250px; width:350px; background-color: white;" disabled="readonly"></textarea>
+            </div>
+            <br />
+            <input type="button" id="btnAddOrder" v-on:click="addToFinal" value="Add To Order Final Order"
+                style="background-color: lightgrey;">
+
+            <input type="button" id="btnClearOrder" v-on:click="clearOrder" value="Clear the whole order"
+                style="background-color: lightgrey;">
+            <input type="button" id="btnPrint" v-on:click="printOrder" value="Print the whole order"
+                style="background-color: lightgrey;">
+                <button @click="sendData" style="background-color: lightgrey;" v-if="adminLog">Send Data to Flask</button><br></br>
+                <button @click="getmenus" style="background-color: lightgrey;" v-if="adminLog">Get menus from Flask</button><br></br>
+            <div style="width: 300px;">
+                <span style="font-size: large;">Item Description:<p>[[entreChoice.menu_item_desc]]</p></span>
+                <span style="font-size: large;">Item Price: $[[indTotal]]</span>
+                <span style="font-size:xx-large;"><p>Total: $[[overallTotal]]</p></span>
+            </div>
+        </div><!--end table 1 checkout-->
+        <div id="menu_table" class="child" v-if="empLevel">
+            <div id="menu" class="child">
+                <h1>Menu</h1>
+                <div>
+                    <span v-for="(men, index) in menus">
+                        <input type="radio" :id="men.menu_name" name="menu_RAD" v-model="sel_menu" :value="men" />
+                        <label :for="men.menu_name">[[men.menu_name]]</label>
+                    </span>
+                </div>
+            </div><!--ends entre-->
+            <div id="menu_section" class="child">
+                <h1>Sections</h1>
+                <span v-if="sel_menu" v-for="sec in menu_sections" v-show="sel_menu.menu_id == sec.menu_sec_parent">
+                    <input type="radio" :id="sec.menu_section_name" name="menSec_RAD" v-model="sel_section"
+                        :value="sec" />
+                    <label :for="sec.menu_section_name">[[ sec.menu_section_name ]]</label>
+                </span>
+
+            </div>
+            <div id="menu_items" class="child">
+                <h1>Items</h1>
+                <span v-if="sel_menu" v-for="item in menu_items"
+                    v-show="sel_section.menu_section_id == item.menu_item_parent && item.menu_main == sel_menu.menu_id"
+                    >
+                    <input type="radio" :id="item.menu_item_name" name='menItem_RAD' v-model="entreChoice"
+                        :value="item" v-on:change="calc"/>
+                    <label :for="item.menu_item_name">[[item.menu_item_name]]</label>
+                </span>
+                <span v-for="item in menu_items"
+                    v-show="sel_menu.menu_id == item.menu_main && item.menu_item_parent == 0" >
+                    <input type="radio" :id="item.menu_item_name" name='menItem_RAD2' v-model="entreChoice"
+                        :value="item" v-on:change="calc"/>
+                    <label :for="item.menu_item_name">[[item.menu_item_name]]</label>
+                </span>
+            </div>
+            
+        </div> <!--ends child-->
+        <br />
+        <br />
+        <div class="empTab">
+            <button id="empLogIn" v-on:click="empLogIn">Employee</button>
+        </div>
+    </div><!--end of the vue div-->
+
+    <script>
+
+        const Order = {
+            delimiters: ['[[', ']]'],
+            data() {
+                return {
+                    tables: [
+                        { id: 1, tableOrder: '', tableTotal: 0 },
+                        { id: 2, tableOrder: '', tableTotal: 0 },
+                        { id: 3, tableOrder: '', tableTotal: 0 },
+                        { id: 4, tableOrder: '', tableTotal: 0 },
+                        { id: 5, tableOrder: '', tableTotal: 0 }
+                    ],
+                    butNums: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'CLR', 'DEL', 'OK', "X"],
+                    currentTableId: 1,
+                    menu_items: [],
+                    menus: [],
+                    menu_sections: [],
+                    toppings: [],
+                    entreChoice: [],
+                    indTotal: 0,
+                    overallTotal: 0,
+                    finalOrder: [],
+                    finalOrderItems: [],
+                    time: 0,
+                    sel_menu: 0,
+                    sel_section: 0,
+                    txaFinalOrder: '',
+                    empPin: '',
+                    empName: '', 
+                    empCode: '',
+                    empLevel: 0,
+                    adminLog: 0,
+
+                }//end return
+            }, //end data property
+
+            mounted() {
+                console.log("mounted")
+                
+            },
+
+            created() {
+                /* get the entres from the file written from the database */
+                this.getmenus();
+                this.fetchData();
+                    this.polling = setInterval(() => {
+                        this.fetchData();
+                    }, 5000); // Check every 10 seconds
+                },
+                beforeDestroy() {
+                    clearInterval(this.polling); // Clear the interval when the component is destroyed
+                
+                },
+                
+                
+
+
+            methods: {
+                fetchData() {
+                    fetch('static/data/menu_items.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        this.menu_items = data.menu_items;
+
+                    })
+                    fetch('static/data/menu.json')
+                        .then(response => response.json())
+                        .then(data => {
+                            this.menus = data.menu;
+                            
+                    })
+                    fetch('static/data/menu_sections.json')
+                        .then(response => response.json())
+                        .then(data => {
+                            this.menu_sections = data.menu_sections;
+                    })
+                    /* read the toppings from a new .json file */
+                    fetch('static/data/toppings.json')
+                        .then(response => response.json())
+                        .then(data => {
+                            this.toppings = data.toppings;
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        })
+                    
+                },
+                sendData(){
+                    
+                    fetch('/add_data', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(this.tables)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Success:', data);
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+                },
+                getmenus() {
+                    fetch('/get_menus')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data)
+                        this.menus = data;  // Assuming 'menus' is an array in your Vue data
+                        // Update the HTML content here, or use Vue's data-binding to automatically update the view
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                },
+                /* calculate the cost of each individual item so it is easier to add to the overall bill */
+                calc() {
+
+                    //alert("HI");
+                    this.indTotal = 0;
+                    if (this.entreChoice) {
+                        this.indTotal = this.entreChoice.menu_item_price;
+                    }
+                    this.indTotal = parseFloat(this.indTotal).toFixed(2);
+
+
+
+                },//end Calc 
+                /* adds the input to the final order display. this function is like sending something to the 
+                check. */
+                addToFinal() {
+                    
+                    const currentTable = this.tables.find(table => table.id === this.currentTableId);
+                    console.log(currentTable.id)
+                    currentTable.tableOrder += this.entreChoice.menu_item_name + " " + this.indTotal + "\n";
+                    currentTable.tableTotal += parseFloat(this.indTotal)
+
+                    this.finalOrder = currentTable.tableOrder;
+                    this.overallTotal = currentTable.tableTotal.toFixed(2);
+                    
+                    
+                    this.entreChoice = []
+                    this.indTotal = ''
+                },
+
+                clearOrder() {
+                    const currentTable = this.tables.find(table => table.id === this.currentTableId);
+                    currentTable.tableOrder = ''
+                    currentTable.tableTotal = 0
+
+                    this.finalOrder = "";
+                    this.indTotal = 0;
+                    this.overallTotal = (0).toFixed(2);
+                },
+
+                /* our version of "printing" the recipt for the customer */
+                printOrder() {
+                    alert(this.finalOrder)
+                },
+
+                switchTable(tableId) {
+
+                    console.log(tableId)
+                    const tableSwitchFrom = this.tables.find(table => table.id === this.currentTableId);
+                    if (tableSwitchFrom.id == tableId) {
+                        console.log("same table switch")
+                        return
+                    }
+                    
+                    else {
+                        console.log(this.tables)
+                        const tableSwitchTo = this.tables.find(table => table.id === tableId);
+
+                        this.currentTableId = tableSwitchTo.id
+                        this.finalOrder = tableSwitchTo.tableOrder
+                        this.overallTotal = tableSwitchTo.tableTotal.toFixed(2)   
+                    }
+                    
+                },
+
+                selLine() {
+                    const textarea = document.getElementById('txaFinalOrder');
+                    const cursorPosition = textarea.selectionStart;
+                    const lines = textarea.value.split('\n');
+                    let start = 0;
+                    let end = 0;
+
+                    for (let i = 0; i < lines.length; i++) {
+                        end = start + lines[i].length;
+                        if (cursorPosition >= start && cursorPosition <= end) {
+                            // Check if the cursor is at the very end of the previous line
+                            if (cursorPosition === start && i > 0) {
+                                start--;
+                            }
+                            break;
+                        }
+                        start = end + 1; // Move to the start of the next line, including the newline character
+                    }
+
+                    // Select the entire line
+                    textarea.setSelectionRange(start, end);
+                },
+
+                empLogIn() {
+                    document.getElementById("myModal").style.display = "block"
+                },
+                handleBtn(btnum){
+
+                    if(btnum == "X") {
+                        this.empPin = ""
+                        document.getElementById("myModal").style.display = "none"
+                    }
+                    else if(btnum == "CLR") {
+                        this.empPin = ""
+                    }
+                    else if(btnum == "DEL") {
+                        let empStr = this.empPin
+                        empStr = empStr.slice(0, -1)
+                        this.empPin = empStr
+                    }
+                    else if(btnum == "OK") {
+                        fetch('static/data/employees.json')
+                        .then(response => response.json())
+                        .then(data => {
+                            const employee = data.Employee.find(emp => emp.pin_num === parseInt(this.empPin));
+                            if(employee) {
+                                console.log(employee.display_name)
+                                this.empName = employee.display_name
+                                document.getElementById("myModalAsk").style.display = "block"
+                                askEmp()
+                            }
+                            else {
+                                NoEmpFound()
+                            }
+                            
+                        })
+                    }
+                    else {
+                        if(this.empPin.length != 3) {
+                            this.empPin += btnum
+                        }
+                    }
+                    
+                    function askEmp() {
+                        document.getElementById("myModal").style.display = "none"
+                        document.getElementById("myModalAsk").style.display = "block"
+                    }
+                    function NoEmpFound() {
+                        document.getElementById("myModal").style.display = "none"
+                        document.getElementById("myModalNotFound").style.display = "block"
+                    }
+                },
+
+                NFEmpBtn(answer) {
+                    if (answer == "Cancel") {
+                        document.getElementById("myModalNotFound").style.display = "none"
+                        this.empPin = ""
+                    }
+                    else if (answer == 'Back') {
+                        this.empPin = ""
+                        document.getElementById("myModalNotFound").style.display = "none"
+                        document.getElementById("myModal").style.display = "block"
+                    }
+                    else {
+                        console.error()
+                    }
+                },
+
+                askEmpBtn(answer) {
+                    if(answer == "Yes"){
+                        document.getElementById("myModalAsk").style.display = "none"
+                        document.getElementById("passModal").style.display = "block"
+                    }
+                    else if (answer == "No") {
+                        this.empPin = ""
+                        this.empName = ""
+                        document.getElementById("myModalAsk").style.display = "none"
+                        document.getElementById("myModal").style.display = "block"
+                    }
+                    else if (answer == "Cancel") {
+                        this.empPin = ""
+                        this.empName = ""
+                        document.getElementById("myModalAsk").style.display = "none"
+                    }
+                    else {
+                        console.error()
+                    }
+                },
+
+                handlePassBtn(btnum) {
+                    if(btnum == "X") {
+                        this.empCode = ""
+                        this.empPin = ""
+                        this.display_name = ""
+                        document.getElementById("passModal").style.display = "none"
+                    }
+                    else if(btnum == "CLR") {
+                        this.empCode = ""
+                    }
+                    else if(btnum == "DEL") {
+                        let empStr = this.empCode
+                        empStr = empStr.slice(0, -1)
+                        this.empCode = empStr
+                    }
+                    else if(btnum == "OK") {
+                        fetch('static/data/employees.json')
+                        .then(response => response.json())
+                        .then(data => {
+                            const employee = data.Employee.find(emp => emp.pin_code === parseInt(this.empCode));
+                            if(employee) {
+                                document.getElementById("passModal").style.display = "none"
+                                successfulLogIn()
+                                if (employee.access_level <= 3) {
+                                    this.empLevel = 1
+                                    this.adminLog = 0
+                                    if (employee.access_level == 1) {
+                                        this.adminLog = 1
+                                    }
+                                }
+                                else {
+                                    this.empLevel = 0
+                                }
+                            }
+                            else {
+                                UnsuccessfulLogIn()
+                            }
+                            
+                        })
+                    }
+
+                    else {
+                        if (this.empCode.length != 4) {
+                            this.empCode += btnum
+                        }
+
+                        
+                    }
+
+                    function successfulLogIn() {
+                        document.getElementById("myModalSuccess").style.display = "block"
+                        
+                    }
+                    function UnsuccessfulLogIn() {
+                        document.getElementById("passModal").style.display = "none"
+                        document.getElementById("myModalInVal").style.display = "block"
+                    }
+                },
+
+                InValBtn(answer){
+                    if (answer == "Cancel") {
+                        document.getElementById("myModalInVal").style.display = "none"
+                        this.empCode = ""
+                        this.empPin = ""
+                        this.empName = ""
+                    }
+                    else if (answer == 'Back') {
+                        this.empCode = ""
+                        document.getElementById("myModalInVal").style.display = "none"
+                        document.getElementById("passModal").style.display = "block"
+                    }
+                    else {
+                        console.error()
+                    }
+
+                },
+
+                successClose() {
+                    document.getElementById("myModalSuccess").style.display = "none"
+                    this.empCode = ''
+                    this.empPin = ''
+                },
+
+                
+                toDatabase() {
+                    // Create a JSON object representing the orders data
+                    const ordersData = {
+                        tables: this.tables.map(table => ({
+                            id: table.id,
+                            orders: table.orders.map(order => ({
+                                finalOrder: order.finalOrder,
+                                overallTotal: order.overallTotal
+                            }))
+                        })),
+                        //gives the time stamp for when the order is sent to the .json file
+                        time: this.getTimestamp()
+                    };
+                    // Convert the JSON object to a JSON string
+                    const jsonData = JSON.stringify(ordersData, null, 2);
+                    // Log jsonData to check if it's formatted correctly
+                    console.log("jsonData:", jsonData);
+
+                    // Save the JSON string to a file
+                    const filename = 'orders.json';
+                    const blob = new Blob([jsonData], { type: 'application/json' });
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();
+                    //console.log(this.getTimestamp())
+                },
+                getTimestamp() {
+                    const date = new Date();
+                    const month = String(date.getMonth() + 1).padStart(2, '0'); // Adding 1 because getMonth() returns zero-based month
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const year = date.getFullYear();
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    const seconds = String(date.getSeconds()).padStart(2, '0');
+                    /* proves that it works with the console to verify the answer */
+                    console.log(`${month}/${day}/${year} ${hours}:${minutes}:${seconds}`)
+                    return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
+                }
+                /* 
+                // Example usage
+                console.log(getFormattedTimestamp()); // Output: e.g., 03/18/2024 15:27:45
+                
+                 */
+
+
+
+            }//end Methods
+
+        } //end Order
+
+        Vue.createApp(Order).mount('#vueRadio')
+
+
+    </script>
+
+</body>
+
+</html>
