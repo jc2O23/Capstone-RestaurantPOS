@@ -91,10 +91,6 @@
             border-top: none;
         }
 
-
-
-
-
         .modal {
             display: none;
             position: fixed;
@@ -246,11 +242,12 @@
                 </div>
             </div>
         </div>
-
         <div class="tab" style="text-align: middle;">
             <button class="tablinks" v-for="tb in tables" :class="tableCheck(tb)" v-on:click="switchTable(tb.id)"
                 style="font-size: larger;">Table [[tb.id]]</button>
+
         </div>
+
         <div id="checkoutSide" class="child">
             <textarea id="txaFinalOrder" :value="finalOrder" v-on:click="selLine" readonly
                 style="height:250px; width:350px; background-color: white; font-size: x-large;"></textarea>
@@ -278,7 +275,11 @@
                 </span>
             </div>
         </div><!--end table 1 checkout-->
-        <div id="menu_table" class="child" v-if="currentTableId > 0">
+        <!-- <div class="child">
+            <textarea name="noStock" id="btnNoStock" cols="30" rows="10"
+                style="display: grid;">These Items are out of Stock:</textarea>
+        </div> -->
+        <div id="menu_table" class="child" >
             <div id="menu" class="child">
                 <h1>Menu</h1>
                 <div>
@@ -312,16 +313,23 @@
                     <label :for="item.menu_item_name">[[item.menu_item_name]]</label>
                 </span>
             </div>
-
+            <div class="child">
+                <h1>Out of Stock</h1>
+                <textarea v-model="noStock" :id="taNoStock" cols="30" rows="20"
+                    style="display: grid; background-color: white;" disabled = true></textarea>
+            </div>
         </div> <!--ends child-->
+        
+
         <br />
         <br />
 
         <div class="empTab">
             <button id="logEmpl" v-on:click="logEmpl">Employee</button>
         </div>
-    </div><!--end of the vue div-->
 
+    </div><!--end of the vue div-->
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script>
 
         const Order = {
@@ -358,7 +366,8 @@
                     empName: '',
                     empHours: 0,
                     empValue: '',
-                    clockVal: -1
+                    clockVal: -1,
+                    noStock:[]
 
 
                 }//end return
@@ -380,9 +389,6 @@
                 clearInterval(this.polling); // Clear the interval when the component is destroyed
 
             },
-
-
-
 
             methods: {
                 fetchData() {
@@ -445,7 +451,6 @@
                 },
 
                 async clockEmpl() {
-
                     const postData = {
                         empCode: this.empPin,
                         timestamp: this.getTimestamp(),
@@ -469,7 +474,6 @@
                         console.error("Error: ", error)
                     }
                 },
-
                 async check_clock() {
                     const postData = {
                         empCode: this.empValue,
@@ -509,26 +513,34 @@
                 },//end Calc 
                 /* adds the input to the final order display. this function is like sending something to the 
                 check. */
-                addToFinal() {
-
-                    const currentTable = this.tables.find(table => table.id === this.currentTableId);
-                    console.log(currentTable.id)
-                    currentTable.tableOrder += this.entreChoice.menu_item_name + " " + this.indTotal + "\n";
-                    currentTable.tableTotal += parseFloat(this.indTotal)
-
-                    this.finalOrder = currentTable.tableOrder;
-                    this.overallTotal = currentTable.tableTotal.toFixed(2);
-
-
+                addToFinal(tableId) {
+                    this.finalOrder += this.entreChoice.menu_item_name + " "
                     this.entreChoice = []
-                    this.indTotal = ''
+                    console.log(this.entreChoice)
+                    this.overallTotal = parseFloat(this.overallTotal) + parseFloat(this.indTotal)
+                    this.finalOrder += this.indTotal
+                    this.finalOrder += "\n"
+                    this.overallTotal = this.overallTotal.toFixed(2)
+                    //this.switchTable(this.currentTableId)
+                    this.updateStock()
+                }, 
+                updateStock() {
+                    let newStock = []
+                    for (let i = 0; i < this.menu_items.length; i++) {
+                        if (this.finalOrder.includes(this.menu_items[i].menu_item_name)) {
+                            this.menu_items[i].menu_item_stock -= 1
+                            if (this.menu_items[i].menu_item_stock == 0) {
+                                this.noStock.push(this.menu_items[i].menu_item_name)
+                                alert("That was the last of " + this.menu_items[i].menu_item_name)
+                            }
+                        }
+                    }
                 },
 
                 clearOrder() {
                     const currentTable = this.tables.find(table => table.id === this.currentTableId);
                     currentTable.tableOrder = ''
                     currentTable.tableTotal = 0
-
                     this.finalOrder = "";
                     this.indTotal = 0;
                     this.overallTotal = (0).toFixed(2);
@@ -862,6 +874,8 @@
         } //end Order
 
         Vue.createApp(Order).mount('#vueRadio')
+       
+
 
 
     </script>
