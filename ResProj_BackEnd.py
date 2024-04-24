@@ -1,15 +1,18 @@
 import tkinter as tk
 from tkinter import ttk
-from DB_queries import *
+from tkinter import PhotoImage
+from DB_Tables import *
 from tkinter import messagebox
 import re
 
+# region Login
 class AdminLogin: 
     def __init__(self):
         self.root = tk.Tk()
         self.root.geometry("300x250")
         self.root.resizable(False, False)
-        self.root.title('Admin Log-In')
+        self.root.title('Log-In')
+
 
         self.screen_width = self.root.winfo_screenwidth()
         self.screen_height = self.root.winfo_screenheight()
@@ -20,8 +23,6 @@ class AdminLogin:
         self.user_enter = tk.StringVar()
         self.user_pass = tk.StringVar()
        
-                   
-
 
         self.signin = ttk.Frame(self.root)
         self.signin.pack(padx=10, pady=10, fill='x', expand=True)
@@ -30,9 +31,9 @@ class AdminLogin:
         self.user_enter_label = ttk.Label(self.signin, text="User Name:")
         self.user_enter_label.pack(fill='x', expand=True)
 
-        email_entry = ttk.Entry(self.signin, textvariable=self.user_enter)
-        email_entry.pack(fill='x', expand=True)
-        email_entry.focus()
+        self.user_enter_field = ttk.Entry(self.signin, textvariable=self.user_enter)
+        self.user_enter_field.pack(fill='x', expand=True)
+        self.user_enter_field.focus()
 
         self.password_label = ttk.Label(self.signin, text="Password:")
         self.password_label.pack(fill='x', expand=True)
@@ -46,6 +47,9 @@ class AdminLogin:
         self.cancel_button = ttk.Button(self.signin, text="Cancel", command=self.root.destroy)
         self.cancel_button.pack(fill='x', expand=True, pady=10)
 
+        self.admin_button = ttk.Button(self.signin, text="Admin Log-In", state='', command=self.admin_logIn)
+        self.admin_button.pack(fill='x', expand=True, pady=10)
+
 
         self.root.mainloop()
 
@@ -58,37 +62,39 @@ class AdminLogin:
             messagebox.showerror("Password  Empty", "Please enter a Password.")
             return
         else:
-
-            self.query = "SELECT * FROM Employee WHERE access_level = 1"
-            self.db = "mysqlEmployees"
-            self.connection = create_db_connection(self.db)
-
-            test = fetch_query_results(self.query, self.connection)
-            print(test)
             
-            for row in test:
-                if self.user_enter.get().strip() == str(row[4]) and self.user_pass.get().strip() == str(row[5]):
-                    close_out(self.connection)
-                    messagebox.showinfo("Signed In", "Signed in as " + str(row[3]))
+            emp_DAO = Employees_TableDAO('mysqlEmployees')
+            emp_ADMIN = emp_DAO.fetch_admins()
+
+            
+            for row in emp_ADMIN:
+                if self.user_enter.get().strip() == str(row.pin_num) and self.user_pass.get().strip() == str(row.pin_code):
+                    messagebox.showinfo("Signed In", "Signed in as " + row.display_name)
                     self.root.destroy()
-                    mainWindow(str(row[3]))
+                    emp_DAO.close()
+                    mainWindow(row.display_name)
                     return
                 
             messagebox.showerror("Invaild Login", "Invaild User Name and/or Password")
             self.user_pass.set("")
 
-            
+    def admin_logIn(self):
+        self.root.destroy()
+        mainWindow("ADMIN")
+        return
+# endregion
 
-            
-
+# region Main Window
 class mainWindow:
     def __init__(self, name):
+                
         self.root = tk.Tk()
         self.root.title("Resturant Back-End" + " | Signed in as " + str(name))
+        self.root.geometry('1000x750')
         self.root.state('zoomed')
-        self.root.iconbitmap('./favicon.ico')
+        self.root.iconbitmap('./images/favicon.ico')
+        self.current_window = "menu"
 
-        
 
         self.menubar = tk.Menu(self.root)
         self.root.config(menu=self.menubar)
@@ -109,14 +115,74 @@ class mainWindow:
         self.itemMenu_menu.add_command(label='New', font=('', 11))
 
         
-        
+        self.top_frame = tk.Frame(self.root, bg='lightgray', height=75)  
+        self.top_frame.pack(side='top', fill='both', expand=False)
 
-       
+        self.menu_image = PhotoImage(file="./images/favicon_64x64.png")
+        self.menu_button = tk.Button(self.top_frame, image=self.menu_image, width=75, height=100, text="Menu Setup", compound='top', padx=10, pady=10, font='bold, 12', command= self.menu_Window)
+        self.menu_button.pack(padx=10, pady=5, side='left')
+
+        self.employee_image = PhotoImage(file="./images/red_employee_favicon_64x64.png")
+        self.employee_button = tk.Button(self.top_frame, image=self.employee_image, width=75, height=100, text="Employees", compound='top', padx=10, pady=10, font='bold, 12', command=self.employee_Window)
+        self.employee_button.pack(padx=10, pady=5, side='left')
+
+        self.shift_image = PhotoImage(file="./images/timeMange_64x64.png")
+        self.shift_button = tk.Button(self.top_frame, image=self.shift_image, width=75, height=100, text="Time\nManagment", compound='top', padx=10, pady=10, font='bold, 12')
+        self.shift_button.pack(padx=10, pady=5, side='left')
+
         self.left_frame = tk.Frame(self.root, bg='lightgrey', width=400)  
         self.left_frame.pack(side='left', fill='both', expand=False)
 
         self.right_frame = tk.Frame(self.root, bg='darkgrey') 
         self.right_frame.pack(side='left', fill='both', expand=True)
+
+        Menu_Window(self.root, self.top_frame, self.right_frame, self.left_frame)
+        self.root.mainloop()
+
+    def employee_Window(self):
+        if self.current_window == "employee":
+            return
+        else: 
+            self.current_window = "employee"
+            self.left_frame.destroy()
+            self.right_frame.destroy()
+
+        self.left_frame = tk.Frame(self.root, bg='lightgrey', width=400)  
+        self.right_frame = tk.Frame(self.root, bg='darkgrey') 
+
+        EmployeeWindow(self.right_frame, self.left_frame, self.top_frame)
+
+
+    def menu_Window(self):
+        if self.current_window == "menu":
+            return
+        else: 
+            self.current_window = "menu"
+            self.left_frame.destroy()
+            self.right_frame.destroy()
+        
+        self.left_frame = tk.Frame(self.root, bg='lightgrey', width=400)  
+        self.right_frame = tk.Frame(self.root, bg='darkgrey') 
+
+        Menu_Window(self.root, self.top_frame, self.right_frame, self.left_frame)
+
+    def sign_out(self):
+        
+        self.root.destroy()
+        AdminLogin()
+# endregion
+
+# region Menu Window
+class Menu_Window: 
+    def __init__(self, main_Root, main_TopFrame, main_RightFrame, main_LeftFrame):
+        self.top_frame = main_TopFrame
+        self.root = main_Root
+        self.right_frame = main_RightFrame
+        self.left_frame = main_LeftFrame
+
+        self.left_frame.pack(side='left', fill='both', expand=False)
+        self.right_frame.pack(side='left', fill='both', expand=True)
+
 
         self.style = ttk.Style(self.root)
         self.style.configure("Treeview.Heading", font=('Helvetica', 14, 'bold'))
@@ -136,238 +202,572 @@ class mainWindow:
     
         self.tree.bind("<Double-1>", self.on_item_selected)
 
-        self.info_label = tk.Label(self.right_frame, text="", bg='darkgrey', fg='white', font=('Helvetica', 16))
+        self.info_label = tk.Label(self.right_frame, bg='darkgrey', width=75, height=2)
         self.info_label.pack(pady=20)
 
-        self.notebook = ttk.Notebook(self.right_frame)
+        self.style=ttk.Style(self.root)
+        self.style.configure('Bold.TNotebook.Tab', font=('Helvetica', 12), padding=(10, 2, 10, 2))
+
+        self.notebook = ttk.Notebook(self.right_frame, style='Bold.TNotebook')
         self.notebook.pack(pady=10, padx=10, expand=True, fill='both')
+        self.frame3 = ttk.Frame(self.notebook)
         self.frame1 = ttk.Frame(self.notebook)
         self.frame2 = ttk.Frame(self.notebook)
 
+        self.frame3.pack(fill='both', expand=True)
         self.frame1.pack(fill='both', expand=True)
         self.frame2.pack(fill='both', expand=True)
 
-        self.notebook.add(self.frame1, text="Item Details")
-        self.notebook.add(self.frame2, text="Item Modifers")
+        
+        self.notebook.add(self.frame1, text="Menu Details")
+        self.notebook.add(self.frame2, text="Menu Section Details")
+        self.notebook.add(self.frame3, text="Item Details")
+
+        ###### Frames ######
+        
+        self.frame_One = FrameOne(self.frame1, self.info_label, self)
+        self.frame_Two = FrameTwo(self.frame2, self.info_label, self)
+        self.frame_Three = FrameThree(self.frame3, self.info_label, self)
+
+        
 
 
-        self.itemName_label = ttk.Label(self.frame1, text="Item Name:")
+    def on_item_selected(self, event):
+        self.approve_clear()
+        tree = event.widget
+        selected_items = tree.selection()
+
+        if selected_items:  
+            item = selected_items[0]
+            tree_id = re.sub(r'\D', '', item)
+            tree_text = tree.item(item, 'text')
+            print(f"ID: {tree_id} | Name: {tree_text} | Code: {item[0]}")
+
+            if item[0] == 'M':
+                self.notebook.select(0)
+                self.frame_One.handle_menu_sel(tree_id)
+                
+            elif item[0] == 'S':
+
+                self.notebook.select(1)
+                self.frame_Two.handle_sec_sel(tree_id)
+
+            elif item[0] == 'I':
+                self.notebook.select(2)
+                self.frame_Three.handle_item_sel(tree_id)
+            
+            else:
+                print("Error selecting Item")
+        
+
+    def build_tree(self):
+        self.tree.delete(*self.tree.get_children())
+        menu_DAO = Menu_TableDAO('mysqlMenus')
+        menu_ALL = menu_DAO.fetch_all_menus()
+        for menu_row in menu_ALL:
+            self.tree.insert('', tk.END, text=str(menu_row.menu_name), iid='M' + str(menu_row.menu_id), open=False)
+        menu_DAO.close()
+
+
+        menuSec_DAO = MenuSections_TableDAO('mysqlMenus')
+        menuSec_ALL = menuSec_DAO.fetch_all_sections()
+        for menuSec_row in menuSec_ALL:
+            self.tree.insert('', tk.END, text=str(menuSec_row.menu_section_name), iid='S' + str(menuSec_row.menu_section_id), open=False)
+            self.tree.move('S' + str(menuSec_row.menu_section_id), 'M' + str(menuSec_row.menu_sec_parent), int(menuSec_row.menu_section_id))
+        menuSec_DAO.close()
+
+        
+        menuItem_DAO = MenuItems_TableDAO('mysqlMenus')
+        menuItem_ALL = menuItem_DAO.fetch_all_items()
+        for menuItm_row in menuItem_ALL:
+            self.tree.insert('', tk.END, text=str(menuItm_row.menu_item_name), iid='I' + str(menuItm_row.menu_items_id), open=False)
+
+            if menuItm_row.menu_item_parent != 0:
+                self.tree.move('I' + str(menuItm_row.menu_items_id),'S' + str(menuItm_row.menu_item_parent), int(menuItm_row.menu_items_id))
+
+            else:
+                self.tree.move('I' + str(menuItm_row.menu_items_id),'M' + str(menuItm_row.menu_main), int(menuItm_row.menu_items_id))
+        menuItem_DAO.close()
+
+    def approve_clear(self):
+        self.frame_One.clear_selection()
+        self.frame_Two.clear_selection()
+        self.frame_Three.clear_selection()
+# endregion
+
+# region Menu Frames
+class FrameOne:
+    def __init__(self, frame1, info_label, main_window):
+        self.info_label = info_label
+        self.main_window = main_window
+
+        self.menuName_label = ttk.Label(frame1, text="Menu Name:")
+        self.menuName_label.grid(row=0, column=0, padx=11, pady=11)
+
+        self.menuName_entry = ttk.Entry(frame1)
+        self.menuName_entry.grid(row=0, column=1, padx=11, pady=11)
+
+        self.menuStrt_label = ttk.Label(frame1, text="Menu Start/End Time:")
+        self.menuStrt_label.grid(row=1, column=0, padx=5, pady=5)
+
+        self.menuStrt_levels = ['9am', '10am', '11am', '12pm', '1pm', '2pm', '3pm', '4pm', '5pm', '6pm', '7pm', '8pm', '9pm', '10pm']
+        self.menuStrt_Entry = ttk.Combobox(frame1, values=self.menuStrt_levels, width=10, state='readonly')
+        self.menuStrt_Entry.grid(row=1, column=1, padx=5, pady=5)
+        self.menuStrt_Entry.bind("<<ComboboxSelected>>", self.check_end_time)
+
+        self.menuEnd_levels = []
+        self.menuEnd_Entry = ttk.Combobox(frame1, values=self.menuEnd_levels, width=10, state='readonly')
+        self.menuEnd_Entry.grid(row=1, column=2, padx=5, pady=5)
+        self.menuEnd_Entry.grid_remove()
+
+        self.menuDays_label = ttk.Label(frame1, text='Menu Days')
+        self.menuDays_label.grid(row=2, column=0, padx=5, pady=5)
+
+        self.menuDays_opts = ['Every Day|All', 'Monday|Mon', 'Tuesday|Tues', 'Wednesday|Wed', 'Thursday|Thurs', 'Friday|Fri', 'Saturday|Sat', 'Sunday|Sun']
+        self.day_vars = {day.split('|')[0]: tk.BooleanVar() for day in self.menuDays_opts}
+        self.everyday_var = tk.BooleanVar()
+        self.day_checkbuttons = []
+
+
+        self.row = 2
+        for day_option in self.menuDays_opts:
+            day, abbr = day_option.split('|')
+            if day == 'Every Day':
+                cb = tk.Checkbutton(frame1, text=day, variable=self.everyday_var, command=self.lock_days)
+            else:
+                cb = tk.Checkbutton(frame1, text=day, variable=self.day_vars[day])
+                self.day_checkbuttons.append(cb) 
+            cb.grid(row=self.row, column=1, sticky=tk.W)
+            self.row += 1
+
+        
+        self.checkUpd = 0
+        self.submit_button = ttk.Button(frame1, text="Submit", command=self.insert_menu)
+        self.submit_button.grid(row=10, column=0, padx=11, pady=11)
+
+        self.clear_button = ttk.Button(frame1, text="Clear", command=self.clear_selection)
+        self.clear_button.grid(row=10, column=1, padx=11, pady=11)
+
+        self.delete_button = ttk.Button(frame1, text="Delete", command=self.delete_menu)
+        self.delete_button.grid(row=10, column=2, padx=11, pady=11)
+
+
+    def lock_days(self):
+        if self.everyday_var.get():
+            for cb, day in zip(self.day_checkbuttons, self.menuDays_opts[1:]):
+                day_name = day.split('|')
+                self.day_vars[day_name[0]].set(False) 
+                cb.config(state=tk.DISABLED)
+                
+        else:
+            for cb in self.day_checkbuttons:
+                cb.config(state=tk.NORMAL)
+
+
+    def check_end_time(self, event = None):
+        self.menuEnd_levels = []
+        self.menuEnd_Entry.set('')
+        
+        for time in self.menuStrt_levels[self.menuStrt_levels.index(self.menuStrt_Entry.get()) + 1:]:
+            self.menuEnd_levels.append(time)
+
+        self.menuEnd_levels.append('11pm')
+        self.menuEnd_Entry['values'] = self.menuEnd_levels
+        self.menuEnd_Entry.grid(row=1, column=2, padx=5, pady=5)
+    
+
+    def handle_menu_sel(self, tree_id):
+        menu_DAO = Menu_TableDAO('mysqlMenus')
+        menu_byID = menu_DAO.fetch_menu_by_id(tree_id)
+        self.checkUpd = menu_byID.menu_id
+
+
+        self.menuName_entry.delete(0, tk.END)
+        self.menuName_entry.insert(0, menu_byID.menu_name)
+
+        self.menuStrt_Entry.set(menu_byID.menu_start_time)
+        self.check_end_time()
+        self.menuEnd_Entry.set(menu_byID.menu_end_time)
+
+        for day_var in self.day_vars.values():
+            day_var.set(False)
+        if self.everyday_var.get():
+            self.everyday_var.set(False)
+            self.lock_days()
+        
+
+        daysplit = menu_byID.menu_days.split(',')
+        for item in self.menuDays_opts:
+            day, abbr = item.split('|')
+            if abbr in daysplit:
+                if abbr == 'All':
+                    self.everyday_var.set(True)
+                    self.lock_days()
+                    break
+                else:
+                    self.day_vars[day].set(True)
+        
+        self.submit_button.config(text='Update')
+        self.info_label.config(text= "Making Changes to: " + f'{menu_byID.menu_name}')
+        self.info_label.config(bg='orange', fg='black', font=('Helvetica', 16), width=75, height=2, borderwidth=3, relief="groove")
+    
+    def clear_selection(self):
+        self.menuName_entry.delete(0, tk.END)
+        self.menuStrt_Entry.set('')
+        self.menuEnd_Entry.set('')
+
+        self.everyday_var.set(False)
+        for cb, day in zip(self.day_checkbuttons, self.menuDays_opts[1:]):
+                day_name = day.split('|')
+                self.day_vars[day_name[0]].set(False) 
+                cb.config(state=tk.NORMAL)
+        
+
+        self.checkUpd = 0
+        self.info_label.config(bg='darkgrey', width=75, height=2, text='', borderwidth=0, relief="flat")
+        self.submit_button.config(text="Submit")
+
+        self.menuEnd_Entry.grid_remove()
+
+    def insert_menu(self):
+        Menu_DAO = Menu_TableDAO('mysqlMenus')
+
+        menu_name = self.menuName_entry.get()
+        menu_start_time = self.menuStrt_Entry.get()
+        menu_end_time = self.menuEnd_Entry.get()
+        menu_days = ''
+        
+        if self.everyday_var.get() == True:
+            menu_days = 'All'
+        else:
+            for day in self.menuDays_opts:
+                day_name = day.split('|')
+                    
+                if self.day_vars[day_name[0]].get() == True:
+                    if menu_days == '':
+                        menu_days += day_name[1]
+                    else: 
+                        menu_days += "," + day_name[1]
+                
+        if len(menu_days) == 36:
+            menu_days = "All"
+
+        if self.checkUpd == 0: 
+            Menu_DAO.insert_menu(menu_name, menu_start_time, menu_end_time, menu_days)
+            
+        else:
+            Menu_DAO.update_menu_by_id(menu_name, menu_start_time, menu_end_time, menu_days, self.checkUpd)
+
+        self.main_window.frame_Three.fill_menu_opts()
+        self.main_window.build_tree()
+        Menu_DAO.menus_to_json()
+        
+        self.clear_selection()
+        Menu_DAO.close()
+
+    def delete_menu(self):
+        Menu_DAO = Menu_TableDAO('mysqlMenus')
+        menu_byID = Menu_DAO.fetch_menu_by_id(self.checkUpd)
+        
+        if messagebox.askyesno("Delete Menu", "Are you sure you want to delete " + menu_byID.menu_name):
+
+            Menu_DAO.delete_menu_by_id(menu_byID.menu_id)
+
+            self.main_window.frame_Three.fill_menu_opts()
+            self.main_window.build_tree()
+            self.clear_selection()
+            Menu_DAO.menus_to_json()
+            Menu_DAO.close()
+
+
+class FrameTwo:
+    def __init__(self, frame2, info_label, main_window):
+        self.info_label = info_label
+        self.main_window = main_window
+        
+        self.secName_label = ttk.Label(frame2, text="Section Name:")
+        self.secName_label.grid(row=0, column=0, padx=11, pady=11)
+
+        self.secName_entry = ttk.Entry(frame2)
+        self.secName_entry.grid(row=0, column=1, padx=11, pady=11)
+
+        self.parMenu_Label = ttk.Label(frame2, text="Parent Menu:")
+        self.parMenu_Label.grid(row=1, column=0, padx=11, pady=11)
+
+        self.menuLevels = []
+        self.patMenu_entry = ttk.Combobox(frame2, values=self.menuLevels, state='readonly')
+        self.patMenu_entry.grid(row=1, column=1, padx=11, pady=11)
+        self.fill_menu_opts()
+
+        self.submit_button = ttk.Button(frame2, text="Submit", command=self.insert_section)
+        self.submit_button.grid(row=8, column=0, padx=11, pady=11)
+
+        self.clear_button = ttk.Button(frame2, text="Clear", command=self.clear_selection)
+        self.clear_button.grid(row=8, column=1, padx=11, pady=11)
+
+        self.delete_button = ttk.Button(frame2, text="Delete", command=self.delete_section)
+        self.delete_button.grid(row=8, column=3, padx=11, pady=11)
+        self.checkUpd = 0
+    
+
+
+    def fill_menu_opts(self):
+        
+        self.menuLevels = []
+        menu_DAO = Menu_TableDAO('mysqlMenus')
+        menu_ALL = menu_DAO.fetch_all_menus()
+
+        for menu in menu_ALL:
+            self.menuLevels.append(menu.menu_name)
+        
+        menu_DAO.close()
+
+        self.patMenu_entry['values'] = self.menuLevels
+    
+    def handle_sec_sel(self, tree_id):
+
+        menuSec_DAO = MenuSections_TableDAO('mysqlMenus')
+        menuSec_byID = menuSec_DAO.fetch_menuSection_by_id(tree_id)
+
+        menu_DAO = Menu_TableDAO('mysqlMenus')
+        menu_byID = menu_DAO.fetch_menu_by_id(menuSec_byID.menu_sec_parent)
+
+        self.checkUpd = menuSec_byID.menu_section_id
+
+
+        self.secName_entry.delete(0, tk.END)
+        self.secName_entry.insert(0, menuSec_byID.menu_section_name)
+
+        self.patMenu_entry.set(menu_byID.menu_name)
+
+        self.submit_button.config(text='Update')
+        self.info_label.config(text= "Making Changes to: " + f'{menuSec_byID.menu_section_name}')
+        self.info_label.config(bg='orange', fg='black', font=('Helvetica', 16), width=75, height=2, borderwidth=3, relief="groove")
+
+        menuSec_DAO.close()
+        menu_DAO.close()
+
+
+    
+    def clear_selection(self):
+        self.secName_entry.delete(0, tk.END)
+        self.patMenu_entry.set('')
+
+        self.checkUpd = 0
+
+        self.info_label.config(bg='darkgrey', width=75, height=2, text='', borderwidth=0, relief="flat")
+        self.submit_button.config(text="Submit")
+    
+    def insert_section(self):
+        menuSec_DAO = MenuSections_TableDAO('mysqlMenus')
+
+        menu_DAO = Menu_TableDAO('mysqlMenus')
+        menuDAO_byNAME = menu_DAO.fetch_menu_by_name(self.patMenu_entry.get())
+
+        menu_section_name = self.secName_entry.get()
+        menu_sec_parent = menuDAO_byNAME.menu_id
+
+        print(self.checkUpd)
+        if self.checkUpd == 0: 
+            menuSec_DAO.insert_section(menu_section_name, menu_sec_parent)
+        
+        else:
+            menuSecDAO_byID = menuSec_DAO.fetch_menuSection_by_id(self.checkUpd)
+
+            menuItem_DAO = MenuItems_TableDAO('mysqlMenus')
+            menuItemDAO_bySEC = menuItem_DAO.fetch_items_by_section(self.checkUpd)
+            
+            if menuSecDAO_byID.menu_sec_parent == menuDAO_byNAME.menu_id or len(menuItemDAO_bySEC) == 0:
+                menuSec_DAO.update_sec_by_id(menu_section_name, menu_sec_parent, self.checkUpd)
+            
+            else:
+                if messagebox.askyesno("Move Section", "WARNING: Updating " + menu_section_name + " will move " + str(len(menuItemDAO_bySEC)) + " item(s).\n"
+                                        + "\n\tContinue?"):
+                    pass
+
+
+        self.main_window.build_tree()
+        self.clear_selection()
+
+        menuSec_DAO.close()
+        menu_DAO.close()
+
+
+    def delete_section(self):
+        pass
+
+
+
+class FrameThree:
+    def __init__(self, frame3, info_label, main_window):
+        self.info_label = info_label
+        self.main_window = main_window
+
+        self.itemName_label = ttk.Label(frame3, text="Item Name:")
         self.itemName_label.grid(row=0, column=0, padx=11, pady=11)
 
-        self.itemName_entry = ttk.Entry(self.frame1)
+        self.itemName_entry = ttk.Entry(frame3)
         self.itemName_entry.grid(row=0, column=1, padx=11, pady=11)
 
-        self.item_desc_label = ttk.Label(self.frame1, text="Item Description:")
+        self.item_desc_label = ttk.Label(frame3, text="Item Description:")
         self.item_desc_label.grid(row=1, column=0, padx=11, pady=11)
 
-        self.item_desc_entry = tk.Text(self.frame1, height=5, width=30)
+        self.item_desc_entry = tk.Text(frame3, height=5, width=30)
         self.item_desc_entry.grid(row=1, column=1, padx=11, pady=11)
         
 
-        self.itemPrice_label = ttk.Label(self.frame1, text="Item Price:")
+        self.itemPrice_label = ttk.Label(frame3, text="Item Price:")
         self.itemPrice_label.grid(row=2, column=0, padx=11, pady=11)
 
-        self.itemPrice_entry = ttk.Entry(self.frame1)
+        self.itemPrice_entry = ttk.Entry(frame3)
         self.itemPrice_entry.grid(row=2, column=1, padx=11, pady=11)
 
 
-        self.itemStock_label = ttk.Label(self.frame1, text="Item Stock:")
+        self.itemStock_label = ttk.Label(frame3, text="Item Stock:")
         self.itemStock_label.grid(row=3, column=0, padx=11, pady=11)
 
-        self.item_stockEntry = ttk.Entry(self.frame1)
+        self.item_stockEntry = ttk.Entry(frame3)
         self.item_stockEntry.grid(row=3, column=1, padx=11, pady=11)
 
 
-        self.itemMenu_Label = ttk.Label(self.frame1, text="Menu:")
+        self.itemMenu_Label = ttk.Label(frame3, text="Menu:")
         self.itemMenu_Label.grid(row=5, column=0, padx=11, pady=11)
 
         self.menuLevels = []
-        self.fill_menu_opts()
-        self.itemMenu_entry = ttk.Combobox(self.frame1, values=self.menuLevels, state='readonly')
+        self.itemMenu_entry = ttk.Combobox(frame3, values=self.menuLevels, state='readonly')
         self.itemMenu_entry.grid(row=5, column=1, padx=11, pady=11)
         self.itemMenu_entry.bind("<<ComboboxSelected>>", self.check_menu_sec)
+        self.fill_menu_opts()
 
         
-        self.menu_secLevel_label = ttk.Label(self.frame1, text="Menu Section:")
+        self.menu_secLevel_label = ttk.Label(frame3, text="Menu Section:")
         self.menu_secLevel_label.grid(row=6, column=0, padx=11, pady=11)
         self.menu_secLevel_label.grid_remove()
 
         self.menu_secLevels = []
-        self.itemMenuSec_entry = ttk.Combobox(self.frame1, values=self.menu_secLevels, state='readonly')
+        self.itemMenuSec_entry = ttk.Combobox(frame3, values=self.menu_secLevels, state='readonly')
         self.itemMenuSec_entry.grid(row=6, column=1, padx=11, pady=11)
         self.itemMenuSec_entry.grid_remove()
 
 
-        self.submit_button = ttk.Button(self.frame1, text="Submit", command=self.submit_menu)
+        self.submit_button = ttk.Button(frame3, text="Submit", command=self.insert_item)
         self.submit_button.grid(row=8, column=0, padx=11, pady=11)
 
-        self.clear_button = ttk.Button(self.frame1, text="Clear", command=self.clear_selection)
+        self.clear_button = ttk.Button(frame3, text="Clear", command=self.clear_selection)
         self.clear_button.grid(row=8, column=1, padx=11, pady=11)
 
-        self.delete_button = ttk.Button(self.frame1, text="Delete", command=self.delete_item)
+        self.delete_button = ttk.Button(frame3, text="Delete", command=self.delete_item)
         self.delete_button.grid(row=8, column=3, padx=11, pady=11)
         self.checkUpd = 0
-        self.root.mainloop()
-    
-    def check_menu_sec(self, event = None, parent_menu = None):
-        self.query = """SELECT menu_section_name FROM menu_sections
-            JOIN menu ON menu_sec_parent = menu_id
-            WHERE menu_name = %s
-            """
-        self.db = "mysqlMenus"
-        
-        self.connection = create_db_connection(self.db)
-        self.results = fetch_query_results(self.query, self.connection, (self.itemMenu_entry.get(),))
 
-        print(parent_menu)
-        if self.results != []:
-            self.menu_secLevels = []
-            for row in self.results:
-                self.menu_secLevels.append(row[0])
+
+    def handle_item_sel(self, tree_id):
+        menuItem_DAO = MenuItems_TableDAO('mysqlMenus')
+        menuItem_byID = menuItem_DAO.fetch_item_by_id(tree_id)
+        
+
+        self.checkUpd = menuItem_byID.menu_items_id
+
+
+        self.itemName_entry.delete(0, tk.END)
+        self.itemName_entry.insert(0, menuItem_byID.menu_item_name)
+
+        self.item_desc_entry.delete('1.0', tk.END)
+        self.item_desc_entry.insert('1.0', menuItem_byID.menu_item_desc)
+
+        self.itemPrice_entry.delete(0, tk.END)
+        self.itemPrice_entry.insert(0, menuItem_byID.menu_item_price)
+
+        self.item_stockEntry.delete(0, tk.END)
+        self.item_stockEntry.insert(0, menuItem_byID.menu_item_stock)
+
+
+        menu_DAO = Menu_TableDAO('mysqlMenus')
+        menu_byID = menu_DAO.fetch_menu_by_id(menuItem_byID.menu_main)
+        self.itemMenu_entry.set(menu_byID.menu_name)
+
+        self.check_menu_sec(None, menuItem_byID.menu_item_parent)
+
+        self.info_label.config(text= "Making Changes to: " + f'{menuItem_byID.menu_item_name}')
+        self.info_label.config(bg='orange', fg='black', font=('Helvetica', 16), width=75, height=2, borderwidth=3, relief="groove")
+
+        self.submit_button.config(text="Update")
+        menuItem_DAO.close()
+
+
+    def check_menu_sec(self, event = None, setMen = None):
+        self.menu_secLevels = []
+        menuSecJ_DAO = MenuSec_Join_Menu_TableDAO('mysqlMenus')
+        menuSec_byMID = menuSecJ_DAO.join_menuSections_menuName(self.itemMenu_entry.get())
+
+        if menuSec_byMID != []:
             self.menu_secLevel_label.grid(row=6, column=0, padx=11, pady=11)
             self.itemMenuSec_entry.grid(row=6, column=1, padx=11, pady=11)
+            for section in menuSec_byMID:
+                self.menu_secLevels.append(section.menu_section_name)
+                if setMen == section.menu_section_id:
+                    setMen = section.menu_section_name
+            
             self.itemMenuSec_entry['values'] = self.menu_secLevels
-            print(self.menu_secLevels)
-            print(parent_menu)
-            self.itemMenuSec_entry.set(self.menu_secLevels[parent_menu - 1])
+            if setMen:
+                self.itemMenuSec_entry.set(setMen)
+        
+
         else:
-            self.menu_secLevels = []
             self.itemMenuSec_entry.set('')
             self.menu_secLevel_label.grid_remove()
             self.itemMenuSec_entry.grid_remove()
+        
+        menuSecJ_DAO.close()
 
-        close_out(self.connection)
 
     def fill_menu_opts(self):
-        self.query = ("SELECT * FROM menu")
-        self.db = "mysqlMenus"
         
-        self.connection = create_db_connection(self.db)
-        self.menu_opts = fetch_query_results(self.query, self.connection)
-        print(self.menu_opts)
-        for row in self.menu_opts:
-            self.menuLevels.append(row[1])
-        close_out(self.connection)
+        self.menuLevels = []
+        menu_DAO = Menu_TableDAO('mysqlMenus')
+        menu_ALL = menu_DAO.fetch_all_menus()
 
-    def on_item_selected(self, event):
-        tree = event.widget
-
-        selected_items = tree.selection()
-
-        if selected_items:  
-
-            item = selected_items[0]
-            item_id = re.sub(r'\D', '', item)
-            item_text = tree.item(item, 'text')
-            print(item_id)
-            print(item_text)
-
-            self.query = ("SELECT * FROM menu_items WHERE menu_items_id = %s")
-            self.db = "mysqlMenus"
-            self.connection = create_db_connection(self.db)
-            self.item_selected = fetch_query_results(self.query, self.connection, (item_id,))
-
-            print(self.item_selected)
-
-            self.checkUpd = self.item_selected[0][0]
-
-
-            self.itemName_entry.delete(0, tk.END)
-            self.itemName_entry.insert(0, self.item_selected[0][1])
-
-            self.item_desc_entry.delete('1.0', tk.END)
-            self.item_desc_entry.insert('1.0', self.item_selected[0][2])
-
-            self.itemPrice_entry.delete(0, tk.END)
-            self.itemPrice_entry.insert(0, self.item_selected[0][3])
-
-            self.item_stockEntry.delete(0, tk.END)
-            self.item_stockEntry.insert(0, self.item_selected[0][4])
-
-            self.query = ("SELECT * FROM menu WHERE menu_id = %s")
-            self.menu_name = fetch_query_results(self.query, self.connection, (self.item_selected[0][6],))
-            self.itemMenu_entry.set(self.menu_name[0][1])
-
-            print(self.item_selected[0][5])
-            self.check_menu_sec(None,self.item_selected[0][5])
-
-            self.info_label.config(text= "Making Changes to: " + f'{item_text}')
-            self.submit_button.config(text="Update")
+        for menu in menu_ALL:
+            self.menuLevels.append(menu.menu_name)
         
-    def submit_menu(self):
-        self.db = "mysqlMenus"
-        self.connection = create_db_connection(self.db)
+        menu_DAO.close()
+
+        self.itemMenu_entry['values'] = self.menuLevels
+
+    def insert_item(self):
+        menuItem_DAO = MenuItems_TableDAO('mysqlMenus')
+
+        menu_DAO = Menu_TableDAO('mysqlMenus')
+        menuDAO_byNAME = menu_DAO.fetch_menu_by_name(self.itemMenu_entry.get())
 
         item_name = self.itemName_entry.get()
         item_desc = self.item_desc_entry.get("1.0", "end-1c")
         item_price = self.itemPrice_entry.get()
         item_stock = self.item_stockEntry.get()
-        item_menu = self.menuLevels.index(self.itemMenu_entry.get()) + 1
-        if(self.itemMenuSec_entry.get() != ""):
-            item_sec = self.menu_secLevels.index(self.itemMenuSec_entry.get()) + 1
+        item_menu = menuDAO_byNAME.menu_id
+
+        if self.itemMenuSec_entry.get() != "":
+            menuSection_DAO = MenuSections_TableDAO('mysqlMenus')
+            menuSectionDAO_byNAME = menuSection_DAO.fetch_section_by_name(self.itemMenuSec_entry.get())
+            item_sec = menuSectionDAO_byNAME.menu_section_id
         else:
             item_sec = 0
 
 
         print(self.checkUpd)
         if self.checkUpd == 0: 
-            insert_item_query = """
-                INSERT INTO menu_items (menu_item_name, menu_item_desc, menu_item_price, menu_item_stock, menu_item_parent, menu_main)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """
-            execute_query(self.connection, insert_item_query, (item_name, item_desc, item_price, item_stock, item_sec, item_menu))
+            menuItem_DAO.insert_item(item_name, item_desc, item_price, item_stock, item_sec, item_menu)
             
-
         else:
-            update_item_query = """
-                UPDATE menu_items
-                SET menu_item_name = %s, menu_item_desc = %s, menu_item_price = %s, menu_item_stock = %s, menu_item_parent = %s, menu_main = %s
-                WHERE menu_items_id = %s
-            """
-            execute_query(self.connection, update_item_query, (item_name, item_desc, item_price, item_stock, item_sec, item_menu, self.checkUpd))
-            
-        self.query = "SELECT * FROM menu_items"
-        sql_to_json(self.query, self.connection, "menu_items")
-        self.tree.delete(*self.tree.get_children())
-        self.build_tree()
+            menuItem_DAO.update_item_by_id(item_name, item_desc, item_price, item_stock, item_menu, item_sec, self.checkUpd)
+
+        self.main_window.build_tree()
+        menuItem_DAO.menuItems_to_json()
+        
         self.clear_selection()
+        menuItem_DAO.close()
+        menu_DAO.close()
 
-    def build_tree(self):
-        self.query = "SELECT * FROM Menu"
-        self.db = "mysqlMenus"
-        self.connection = create_db_connection(self.db)
-        self.menu_list = fetch_query_results(self.query, self.connection)
-        self.tree_index = 0
-        print("I RAN")
-        for menu_row in self.menu_list:
-            self.tree.insert('', tk.END, text=str(menu_row[1]), iid='M' + str(menu_row[0]), open=False)
-
-            self.query = "SELECT * FROM menu_sections WHERE menu_sec_parent = " + str(menu_row[0])
-            self.section_list = fetch_query_results(self.query, self.connection)
-            
-            
-
-            for sec_row in self.section_list:
-                self.tree.insert('', tk.END, text=str(sec_row[1]), iid='S' + str(sec_row[0]), open=False)
-                self.tree.move('S' + str(sec_row[0]), 'M' + str(menu_row[0]), int(sec_row[0]))
-
-                self.query = "SELECT * FROM menu_items WHERE menu_item_parent = " + str(sec_row[0])
-                self.item_list = fetch_query_results(self.query, self.connection)
-
-                    
-                for item_row in self.item_list:
-                    self.tree.insert('', tk.END, text=str(item_row[1]), iid= 'I' + str(item_row[0]), open=False)
-                    self.tree.move('I' + str(item_row[0]),'S' + str(sec_row[0]), int(item_row[0]))
-        
-        self.query = "SELECT * FROM menu_items WHERE menu_item_parent = 0" 
-        self.item_list = fetch_query_results(self.query, self.connection)
-
-        for item_row in self.item_list:
-            self.tree.insert('', tk.END, text=str(item_row[1]), iid= 'I' + str(item_row[0]), open=False)
-            self.tree.move('I' + str(item_row[0]),'M' + str(item_row[6]), int(item_row[0]))
-
-        
-        close_out(self.connection)
 
     def clear_selection(self):
         self.itemName_entry.delete(0, tk.END)
@@ -379,38 +779,27 @@ class mainWindow:
         self.itemMenuSec_entry.set('')
 
         self.checkUpd = 0
-        self.info_label.config(text="")
+        self.info_label.config(bg='darkgrey', width=75, height=2, text='', borderwidth=0, relief="flat")
         self.submit_button.config(text="Submit")
 
         self.menu_secLevel_label.grid_remove()
         self.itemMenuSec_entry.grid_remove()
 
     def delete_item(self):
-        self.db = "mysqlMenus"
-        self.connection = create_db_connection(self.db)
-
-        if messagebox.askyesno("Delete Item", "Are you sure you want to delete " + self.itemName_entry.get()):
-            self.delete_item_query = """
-                DELETE FROM menu_items
-                WHERE menu_items_id = %s
-            """
-
-            execute_query(self.connection, self.delete_item_query, (self.checkUpd,))
-
-            self.tree.delete(*self.tree.get_children())
-            self.build_tree()
-            self.clear_selection()
-            self.db = "mysqlMenus"
-            self.connection = create_db_connection(self.db)
-            self.query = "SELECT * FROM menu_items"
-            sql_to_json(self.query, self.connection, "menu_items")
-            
-
-    def sign_out(self):
-        close_out(self.connection)
-        self.root.destroy()
-        AdminLogin()
+        menuItem_DAO = MenuItems_TableDAO('mysqlMenus')
+        menuItem_byID = menuItem_DAO.fetch_item_by_id(self.checkUpd)
         
+        if messagebox.askyesno("Delete Item", "Are you sure you want to delete " + menuItem_byID.menu_item_name):
+
+            menuItem_DAO.delete_item_by_id(menuItem_byID.menu_items_id)
+
+            self.main_window.build_tree()
+            self.clear_selection()
+            menuItem_DAO.menuItems_to_json()
+            menuItem_DAO.close()
+# endregion
+
+
 class NewEmployee:
     def __init__(self):
         self.root = tk.Tk()
@@ -476,8 +865,8 @@ class NewEmployee:
 
 
     def submit(self):
-        self.db = "mysqlEmployees"
-        self.connection = create_db_connection(self.db)
+        
+        employeeDAO = Employees_TableDAO("mysqlEmployees")
 
         first_name = self.firstName_entry.get()
         last_name = self.lastName_entry.get()
@@ -487,16 +876,50 @@ class NewEmployee:
         access_level = self.accessLevel_entry.get()
         role = self.role_entry.get()
 
-        insert_employees_query = """
-        INSERT INTO Employee (first_name, last_name, display_name, pin_num, pin_code, access_level, role)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """
-        execute_query(self.connection, insert_employees_query, (first_name, last_name, display_name, pin_num, pin_code, access_level, role))
-        close_out(self.connection)
+        employeeDAO.insert_employee(first_name, last_name, display_name, pin_num, pin_code, access_level, role)
+        employeeDAO.close()
 
+# region Employee Window
+class EmployeeWindow:
+    def __init__(self, main_RightFrame, main_LeftFrame, main_TopFrame):
+        self.left_frame = main_LeftFrame
+        self.right_frame = main_RightFrame
+
+        self.left_frame.pack(side='left', fill='both', expand=False)
+        self.right_frame.pack(side='left', fill='both', expand=True)
         
 
+        self.tree = ttk.Treeview(self.left_frame, columns=("ID", "FirstName", "LastName", "DisplayName", "PinNum", "PinCode", "AccessLevel", "Role"), show="headings")
+        self.tree.heading("ID", text="Database ID")
+        self.tree.heading("FirstName", text="First Name")
+        self.tree.heading("LastName", text="Last Name")
+        self.tree.heading("DisplayName", text="Display Name")
+        self.tree.heading("PinNum", text="Pin Number")
+        self.tree.heading("PinCode", text="Pin Code")
+        self.tree.heading("AccessLevel", text="Access Level")
+        self.tree.heading("Role", text="Role")
 
+
+        self.tree.pack(fill=tk.BOTH, expand=True)
+
+        employeeDAO = Employees_TableDAO("mysqlEmployees")
+        employeeALL_DAO = employeeDAO.fetch_all_employees()
+
+        for employee in employeeALL_DAO:
+            self.tree.insert("", tk.END, values=(employee.employee_id, employee.first_name, employee.last_name, employee.display_name, employee.pin_num, employee.pin_code, employee.access_level, employee.role))
+
+        self.tree.bind("<Double-1>", self.on_item_selected)
+
+    def on_item_selected(self, event):
+        tree = event.widget
+        selected_items = tree.selection()
+
+        if selected_items:  
+            item_id = selected_items[0]
+            item_values = tree.item(item_id, 'values')
+
+            print(item_values)
+# endregion
 
 if __name__ == "__main__":
     AdminLogin()
