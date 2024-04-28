@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Resturant Site Switch</title>
+    <title>Resturant Site Flask</title>
     <!-- The VUE CDN ! Next version 3 -->
     <!--<script src="https://unpkg.com/vue@next"></script>-->
     <script src="https://unpkg.com/vue@3"></script>
@@ -213,8 +213,26 @@
 
 <body>
     <h1>Resturant Site Capstone Front</h1>
+ 
 
     <div id="vueRadio" class="parent">
+        <!--To select an employee to "seat" a table-->
+        <div id="tableServer" class="modal">
+            <div class="btnModalTitle">
+                <input type=" text" value="Select Employee or sign in"
+                    style="height: 50px; font-size: large; width: 200px; text-align: center;" readonly></input>
+            </div>
+            <div class="btnModalButtons">
+                <select name="TblEmp" id="TblEmp">
+                    <option v-for="emps in signedIn">[[emps.name]]</option>
+                </select>
+                <button id="btnSignInNow" @click="logEmpl">Sign in Now</button>
+                <button id="btnContinue" @click="loginContinue">Continue</button>
+                <button id="Exit" @click="modalType('cancel')">X</button>
+            </div>
+
+
+        </div>
         <button v-on:click="getTimestamp">save time</button>
         <button v-on:click="toDatabase">Send to .JSON</button>
 
@@ -224,11 +242,12 @@
                 <input type="text" :value="empValue"
                     style="height: 50px; font-size: x-large; width: 100px; text-align: center;" readonly></input>
             </div>
+            <!--Sign in for employees Pin-->
             <div class="btnModalButtons">
                 <button id="btnNums" v-for="btnum in butNums" v-on:click="handleBtn(btnum)">[[btnum]]</button>
             </div>
         </div>
-
+        <!--Verify you want to sign in as John Doe-->
         <div id="myModalAsk" class="modal">
             <h1 id="h_Ask" style="text-align: center;"></h1>
 
@@ -279,7 +298,7 @@
             <textarea name="noStock" id="btnNoStock" cols="30" rows="10"
                 style="display: grid;">These Items are out of Stock:</textarea>
         </div> -->
-        <div id="menu_table" class="child" >
+        <div id="menu_table" class="child">
             <div id="menu" class="child">
                 <h1>Menu</h1>
                 <div>
@@ -316,20 +335,21 @@
             <div class="child">
                 <h1>Out of Stock</h1>
                 <textarea v-model="noStock" :id="taNoStock" cols="30" rows="20"
-                    style="display: grid; background-color: white;" disabled = true></textarea>
+                    style="display: grid; background-color: white;" disabled=true></textarea>
             </div>
         </div> <!--ends child-->
-        
+
 
         <br />
         <br />
 
         <div class="empTab">
-            <button id="logEmpl" v-on:click="logEmpl">Employee</button>
+            <button id="logEmpl" v-on:click="logEmpl">Employee Sign-In</button>
         </div>
 
     </div><!--end of the vue div-->
-    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script>
 
         const Order = {
@@ -367,7 +387,11 @@
                     empHours: 0,
                     empValue: '',
                     clockVal: -1,
-                    noStock:[]
+                    noStock: [],
+                    signedIn: [
+                        { name: "Liam M.", pin: 909, code: 1909, clockedIn: 1 },
+                        { name: "John C.", pin: 101, code: 1101, clockedIn: 1 }
+                    ]
 
 
                 }//end return
@@ -523,7 +547,7 @@
                     this.overallTotal = this.overallTotal.toFixed(2)
                     //this.switchTable(this.currentTableId)
                     this.updateStock()
-                }, 
+                },
                 updateStock() {
                     let newStock = []
                     for (let i = 0; i < this.menu_items.length; i++) {
@@ -572,7 +596,7 @@
                     const tableSwitchFrom = this.tables.find(table => table.id === this.currentTableId);
 
                     if (this.tables[tableId - 1].status == 'open') {
-                        this.modalType('OP_table', tableId)
+                        this.modalType('serverTable', tableId)
                         return
                     }
                     else if (this.tables[tableId - 1].status == 'close') {
@@ -684,6 +708,8 @@
                             this.modalType('NF_empNum')
 
                         }
+                        
+                        
                     }
 
                     else if (this.empPin != '') {
@@ -700,10 +726,11 @@
                             this.modalType('NF_empPin')
                         }
                     }
+                 
                 },
 
                 async modalType(type, data = 0) {
-
+                    const tableServer = document.getElementById("tableServer")
                     const buttonModal = document.getElementById("buttonModal")
                     const myModalAsk = document.getElementById("myModalAsk")
                     const askModal = document.getElementById("askModal")
@@ -714,13 +741,14 @@
                     hideAll()
 
                     buttonModal.style.display = 'none'
-                    myModalAsk.style.display = 'block'
+                    //myModalAsk.style.display = 'block'
 
                     if (type == 'F_empNum') {
                         await this.check_clock()
                         console.log(this.clockVal)
                         if (this.clockVal == 0) {
                             h_Ask.innerHTML = "Log-In as " + this.empName + "?"
+
                         }
 
                         else if (this.clockVal == 1) {
@@ -807,6 +835,10 @@
                         btn_Yes.style.display = 'flex'
                         btn_Cancel.style.display = 'flex'
                     }
+                    else if (type == 'serverTable') {
+                        tableServer.style.display = 'block'
+                        let curSelection = document.getElementById("TblEmp").value
+                    }
 
 
                     function hideAll() {
@@ -816,11 +848,29 @@
                         myModalAsk.style.display = "none"
                         askModal.style.display = "none"
                         h_Ask.innerHTML = ''
+                        tableServer.style.display = "none"
                     }
                 },
+                loginContinue() {
+                    let curSelection = document.getElementById("TblEmp").value
+                    console.log(this.signedIn[0].name)
+                    for (let i = 0; i < this.signedIn.length; i++) {
+                        if (curSelection == this.signedIn[i].name) {
+                            /* this.empPin = this.signedIn[i].pin
+                            this.clockVal = 0
+                            this.empCode = this.signedIn[i].code
+                            this.empName = this.signedIn[i].name */
+                            //alert(this.empPin + " code:" + this.empCode)
+                            document.getElementById("buttonHead").innerHTML = "Enter Employee Pin"
+                            document.getElementById("buttonModal").style.display = "block"
+                            console.log(this.clockVal)
+                            this.clockEmpl()
 
+                            return
+                        }
+                    }
 
-
+                },
 
                 toDatabase() {
                     // Create a JSON object representing the orders data
@@ -874,7 +924,7 @@
         } //end Order
 
         Vue.createApp(Order).mount('#vueRadio')
-       
+
 
 
 
