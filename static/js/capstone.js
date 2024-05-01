@@ -41,17 +41,17 @@ const Order = {
     */
     mounted() {
         // Create the socket
-        this.socket = io('http://localhost:5000'); 
-        
+        this.socket = io('http://localhost:5000');
+
         // When it is created, in console lets us know
         this.socket.on('connect', () => {
             console.log('Connected to WebSocket server!');
         });
-        
+
         // Here is where it is listening for message and runs the fetchData, which just loads the data from th JSON files
         this.socket.on('JSON_Update', (data) => {
-            console.log(data.message);
-            this.fetchData(); 
+            //console.log(data.message);
+            this.fetchData();
         });
     },
 
@@ -73,11 +73,31 @@ const Order = {
                 .then(response => response.json())
                 .then(data => {
                     this.menu_items = data.menu_items;
+                    //if the menu item has a stock of 0 or below we want to add it to the array to display in the text area
+                    for (let i = 0; i < this.menu_items.length; i++) {
+                        if (this.menu_items[i].menu_item_stock <= 0) {
+                            //add that element to the array
+                            if (!this.noStock.includes(this.menu_items[i].menu_item_name))
+                                this.noStock.push(this.menu_items[i].menu_item_name)
+
+                        }
+
+                    }
+                    for (let j = 0; j < this.noStock.length; j++) {
+                        if (this.noStock[j] <= 0) {
+                            //add that element to the array
+                            document.getElementById(this.noStock[j]).style.color = red
+
+                        }
+
+                    }
+                   // console.log("nostock " + this.noStock)
                 })
             fetch('./static/data/menu.json')
                 .then(response => response.json())
                 .then(data => {
                     this.menus = data.menu;
+
 
                 })
             fetch('./static/data/menu_sections.json')
@@ -99,7 +119,6 @@ const Order = {
                 .then(data => {
                     this.tables = data.tables;
                 })
-
         },
         // When called, sends `tables` over to Flask to update the JSON file
         updateTableOrdersFlask() {
@@ -112,7 +131,7 @@ const Order = {
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Success:', data);
+                    //console.log('Success:', data);
                 })
                 .catch((error) => {
                     console.error('Error:', error);
@@ -130,7 +149,7 @@ const Order = {
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Success:', data);
+                    //console.log('Success:', data);
                 })
                 .catch((error) => {
                     console.error('Error:', error);
@@ -174,7 +193,7 @@ const Order = {
                     },
                     body: JSON.stringify(postData)
                 })
-                
+
                 // So here, it returns the hours worked and returns it to a var in the functions used to login Employee.
                 const data = await response.json()
                 console.log("Success:", data)
@@ -216,30 +235,25 @@ const Order = {
 
         /* calculate the cost of each individual item so it is easier to add to the overall bill */
         calc() {
-
             //alert("HI");
             this.indTotal = 0;
             if (this.entreChoice) {
                 this.indTotal = this.entreChoice.menu_item_price;
             }
             this.indTotal = parseFloat(this.indTotal).toFixed(2);
-
-
-
         },//end Calc 
         /* adds the input to the final order display. this function is like sending something to the 
         check. */
         addToFinal() {
             this.finalOrder += this.entreChoice.menu_item_name + " "
             this.entreChoice = []
-            console.log(this.entreChoice)
+            //console.log(this.entreChoice)
             this.overallTotal = parseFloat(this.overallTotal) + parseFloat(this.indTotal)
             this.finalOrder += this.indTotal
             this.finalOrder += "\n"
             this.overallTotal = this.overallTotal.toFixed(2)
             this.tables[this.currentTableId - 1]['tableOrder'] = this.finalOrder
             this.tables[this.currentTableId - 1]['tableTotal'] = this.overallTotal
-
             this.updateStock()
             this.updateTableOrdersFlask() // Call for Flask update
         },
@@ -249,9 +263,12 @@ const Order = {
             for (let i = 0; i < this.menu_items.length; i++) {
                 if (this.finalOrder.includes(this.menu_items[i].menu_item_name)) {
                     this.menu_items[i].menu_item_stock -= 1
-                    if (this.menu_items[i].menu_item_stock == 0) {
+                    if (this.menu_items[i].menu_item_stock <= 0 && !this.noStock.includes(this.menu_items[i].menu_item_name)) {
                         this.noStock.push(this.menu_items[i].menu_item_name)
                         alert("That was the last of " + this.menu_items[i].menu_item_name)
+                    }
+                    else if (this.menu_items[i].menu_item_stock <= 0) {
+                        alert("There is no more " + this.menu_items[i].menu_item_name + " in stock.")
                     }
                 }
             }
@@ -263,7 +280,6 @@ const Order = {
             const currentTable = this.tables.find(table => table.id === this.currentTableId);
             currentTable.tableOrder = ''
             currentTable.tableTotal = 0
-
             this.finalOrder = "";
             this.indTotal = 0;
             this.overallTotal = (0).toFixed(2);
@@ -273,11 +289,19 @@ const Order = {
         printOrder() {
             alert(this.finalOrder)
         },
-
+        /* this function helps close the table when the button is clicked to close a table */
+        closeTable() {
+            let status = this.getTableStatus(this.currentTableId)
+            if (status == "lock") {
+                this.modalTypeTable('CL_table', table)
+                console.log("table closed")
+            }
+        },
         /* This function is used to set the style of each of the table buttons in the HTML window. In short, using VUE,
             when looping to create the table buttons, it here sets the style of each one based on the status. The return of 
             each case refers to each type of style in the CSS file. 
         */
+
         tableCheck(table) {
             switch (table.status) {
                 case 'open':
@@ -343,23 +367,23 @@ const Order = {
             // If we don't check if a table is NULL, we would get an error when trying `tableSwitchFrom.id` 
             if (!tableSwitchFrom) {
                 console.log("No table on window")
-                console.log(this.tables)
+                //console.log(this.tables)
                 const tableSwitchTo = this.tables.find(table => table.id === tableId);
 
                 this.currentTableId = tableSwitchTo.id
                 this.finalOrder = tableSwitchTo.tableOrder
                 this.overallTotal = tableSwitchTo.tableTotal
             }
-            
+
             // If we click the table we currently have open, we are not going to do anything
             else if (tableSwitchFrom.id == tableId) {
-                console.log("same table switch")
+                //console.log("same table switch")
                 return
             }
 
             // When we go to a new table with a table open, similar to if there is no table open at all
             else {
-                console.log(this.tables)
+               // console.log(this.tables)
                 const tableSwitchTo = this.tables.find(table => table.id === tableId);
 
                 this.currentTableId = tableSwitchTo.id
@@ -376,7 +400,7 @@ const Order = {
         */
         async seatTable() {
             const tableToSeat = this.tables[this.seatTableCheck - 1]
-            console.log(tableToSeat)
+            //console.log(tableToSeat)
 
             // So here I ran into trouble with checking the `pin_num` and the `pin_code`
             // In the `findEmployee`, it uses the last value the employee entered in the buttonModal, `userEnterVal`
@@ -385,7 +409,7 @@ const Order = {
             if (!server) {
                 server = await this.findEmployee('pin_code')
             }
-            console.log(server)
+            //console.log(server)
 
             // Fills the `tables` that is beaing seated with all data and locks it to that employee
             tableToSeat.server = server['pin_num']
@@ -515,7 +539,7 @@ const Order = {
             function `modalTypeLogin` to display the info to the employee through the modal.
         */
         async handleEmplLog() {
-            
+
             // First we check to see if the employee is a step one (entering there 3 digit id)
             if (this.empPin == '') {
 
@@ -528,7 +552,7 @@ const Order = {
                     this.empName = employee.display_name
                     this.modalTypeLogin('F_empNum')
                 }
-                
+
                 // If we don't find an employee with the `pin_num` entered, we let them know and clear out the stored `empPin`
                 // This is done to prevent the modal asking for the `pin_code` being prompted
                 else {
@@ -546,7 +570,7 @@ const Order = {
                 // If we find an employee, we then logIn or logOut and show the modal, the `empHours` is what is returned during for logOut
                 if (employee) {
                     this.empHours = await this.clockEmpl()
-                    console.log(this.empHours)
+                    //console.log(this.empHours)
                     this.modalTypeLogin('S_login')
                 }
 
@@ -561,8 +585,8 @@ const Order = {
         // Used when neededing to check the status of the table during logIn
         async checkTableData() {
             const tableData = this.tables.find(tb => tb['id'] === parseInt(this.seatTableCheck));
-            console.log('tableData')
-            console.log(tableData)
+            //console.log('tableData')
+            //console.log(tableData)
             return tableData
 
         },
@@ -695,7 +719,7 @@ const Order = {
             // Called when employee is found based on `pin_num` and checks to see if they are clocked in or out
             if (type == 'F_empNum') {
                 await this.check_clock()
-                console.log(this.clockVal)
+                //(this.clockVal)
                 if (this.clockVal == 0) {
                     h_Ask.innerHTML = "Log-In as " + this.empName + "?"
                 }
@@ -799,7 +823,6 @@ const Order = {
             const btn_TableCancel = document.getElementById("btn_TableCancel")
             const h_Ask = document.getElementById("h_Ask")
 
-
             const clrValues = () => {
                 this.userEnterVal = ''
                 this.seatTableCheck = -1
@@ -825,7 +848,6 @@ const Order = {
             if (type == 'CL_table') {
                 h_Ask.innerHTML = `Table ${data} is closed.`
                 askTableModal.style.display = "flex"
-
                 btn_TableCancel.style.display = 'flex'
             }
 
@@ -834,7 +856,6 @@ const Order = {
             else if (type == 'OP_table') {
                 h_Ask.innerHTML = `Seat Table ${data}?`
                 askTableModal.style.display = "flex"
-
                 btn_TableYes.style.display = 'flex'
                 btn_TableCancel.style.display = 'flex'
             }
@@ -858,12 +879,9 @@ const Order = {
             // Successful Table Sat
             // Shows when we have successfully sat a table
             else if (type == 'S_tableSat') {
-
                 this.seatTable()
-
                 h_Ask.innerHTML = ` EMPL: ${this.empPin} <br> Table ${this.seatTableCheck} has been sat.`
                 askTableModal.style.display = "flex"
-
                 btn_TableCancel.style.display = 'flex'
             }
 
@@ -916,7 +934,7 @@ const Order = {
         },
         loginContinue() {
             let curSelection = document.getElementById("TblEmp").value
-            console.log(this.signedIn[0].name)
+           // console.log(this.signedIn[0].name)
             for (let i = 0; i < this.signedIn.length; i++) {
                 if (curSelection == this.signedIn[i].name) {
                     /* this.empPin = this.signedIn[i].pin
@@ -952,7 +970,7 @@ const Order = {
             // Convert the JSON object to a JSON string
             const jsonData = JSON.stringify(ordersData, null, 2);
             // Log jsonData to check if it's formatted correctly
-            console.log("jsonData:", jsonData);
+           // console.log("jsonData:", jsonData);
 
             // Save the JSON string to a file
             const filename = 'orders.json';
