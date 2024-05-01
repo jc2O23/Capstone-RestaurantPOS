@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Resturant Site Switch</title>
+    <!-- The VUE CDN ! Next version 3 -->
+    <!--<script src="https://unpkg.com/vue@next"></script>-->
+    <script src="https://unpkg.com/vue@3"></script>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/capstone.css')}}" />
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+</head>
+
+<body>
+    <h1>Resturant Site Capstone Front</h1>
+
+    <div id="vueRadio" class="parent">
+        <button v-on:click="getTimestamp">save time</button>
+        <button v-on:click="toDatabase">Send to .JSON</button>
+
+        <!-- Button Modal -->
+        <div id="buttonModal" class="modal">
+            <div class="btnModalTitle">
+                <h1 id="buttonHead"></h1>
+                <input type="text" :value="userEnterVal"
+                    style="height: 50px; font-size: x-large; width: 100px; text-align: center;" readonly></input>
+            </div>
+            <div class="btnModalButtons">
+                <button id="btnNums" v-for="btnum in butNums" v-on:click="handleBtn(btnum)">[[btnum]]</button>
+            </div>
+        </div>
+
+        <!-- Parent Modal for modalTypeTable and modalTypeLogin -->
+        <div id="myModalAsk" class="modal">
+            <h1 id="h_Ask" style="text-align: center;"></h1>
+
+            <!-- modalTypeLogin -->
+            <div id="askModal">
+                <div class="modalStyle">
+                    <input id='btn_LogYes' class='btn_ModalStyle' type="button" value="Yes"
+                        @click="modalTypeLogin('yes')"></input>
+                    <input id='btn_LogBack' class='btn_ModalStyle' type="button" value="Back"
+                        @click="modalTypeLogin('back')"></input>
+                </div>
+                <div class="modalStyle">
+                    <input id='btn_LogCancel' class='btn_ModalStyle' type="button" value="Exit"
+                        @click="modalTypeLogin('cancel')"></input>
+                </div>
+            </div>
+
+            <!-- modalTypeTable -->
+            <div id="askTableModal">
+                <div class="modalStyle">
+                    <input id='btn_TableYes' class='btn_ModalStyle' type="button" value="Yes"
+                        @click="modalTypeTable('yes')"></input>
+                    <input id='btn_TableBack' class='btn_ModalStyle' type="button" value="Back"
+                        @click="modalTypeTable('back')"></input>
+                </div>
+                <div class="modalStyle">
+                    <input id='btn_TableCancel' class='btn_ModalStyle' type="button" value="Exit"
+                        @click="modalTypeTable('cancel')"></input>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Loop and create buttons for tables -->
+        <div class="tab" style="text-align: middle;">
+            <button class="tablinks" v-for="tb in tables" :class="tableCheck(tb)" v-on:click="getTableStatus(tb.id)"
+                style="font-size: larger;">Table [[tb.id]]</button>
+        </div>
+        <div id="checkoutSide" class="child">
+            <textarea id="txaFinalOrder" :value="finalOrder" v-on:click="selLine" readonly
+                style="height:250px; width:350px; background-color: white; font-size: x-large;"></textarea>
+            <div class="child tabContent" style="display: none;">
+                <textarea :id="txaFinalOrder" :value="finalOrder"
+                    style="height:250px; width:350px; background-color: white;" disabled="readonly"></textarea>
+            </div>
+            <br />
+            <input type="button" id="btnAddOrder" v-on:click="addToFinal" value="Add To Order Final Order"
+                style="background-color: lightgrey;">
+
+            <input type="button" id="btnClearOrder" v-on:click="clearOrder" value="Clear the whole order"
+                style="background-color: lightgrey;">
+            <input type="button" id="btnPrint" v-on:click="printOrder" value="Print the whole order"
+                style="background-color: lightgrey;">
+
+
+            <!-- <button @click="sendData" style="background-color: lightgrey;">Send Data to
+                Flask</button><br></br>
+
+            <button @click="getmenus" style="background-color: lightgrey;">Get menus from
+                Flask</button><br></br> -->
+
+            <div style="width: 300px;">
+                <span style="font-size: large;">Item Description:<p>[[entreChoice.menu_item_desc]]</p></span>
+                <span style="font-size: large;">Item Price: $[[indTotal]]</span>
+                <span style="font-size:xx-large;">
+                    <p>Total: $[[overallTotal]]</p>
+                </span>
+            </div>
+        </div><!--end table 1 checkout-->
+        <!-- <div class="child">
+            <textarea name="noStock" id="btnNoStock" cols="30" rows="10"
+                style="display: grid;">These Items are out of Stock:</textarea>
+        </div> -->
+
+        <!-- Menu window that shows if we have a table selected -->
+        <div id="menu_table" class="child" v-if="currentTableId > 0">
+
+            <!-- Some info for displaying what table is open and server num -->
+            <div id="displayTableNum" v-for="tb in tables" :key="currentTableId">
+                <div class="div_displayTableNum" v-if="tb.id == currentTableId">Table Number: [[currentTableId]] | EMPL:
+                    [[tb.server]] <br>
+                    <input type="button" class='close_table' value="EXIT" v-on:click="lockTable()" style="font-size: large;
+                    background-color: rgb(223, 164, 164);
+                    text-decoration: underline;" />
+                </div>
+            </div>
+
+            <div id="menu" class="child">
+                <h1>Menu</h1>
+                <div>
+                    <span v-for="(men, index) in menus" v-if="10 > menus.length">
+                        <input type="radio" :id="men.menu_name" name="menu_RAD" v-model="sel_menu" :value="men" />
+                        <label :for="men.menu_name">[[men.menu_name]]</label>
+                    </span>
+                </div>
+            </div><!--ends entre-->
+            <div id="menu_section" class="child">
+                <h1>Sections</h1>
+                <span v-if="sel_menu" v-for="sec in menu_sections" v-show="sel_menu.menu_id == sec.menu_sec_parent">
+                    <input type="radio" :id="sec.menu_section_name" name="menSec_RAD" v-model="sel_section"
+                        :value="sec" />
+                    <label :for="sec.menu_section_name">[[ sec.menu_section_name ]]</label>
+                </span>
+
+            </div>
+            <div id="menu_items" class="child">
+                <h1>Items</h1>
+                <span v-if="sel_menu" v-for="item in menu_items"
+                    v-show="sel_section.menu_section_id == item.menu_item_parent && item.menu_main == sel_menu.menu_id">
+                    <input type="radio" :id="item.menu_item_name" name='menItem_RAD' v-model="entreChoice" :value="item"
+                        v-on:change="calc" />
+                    <label :for="item.menu_item_name">[[item.menu_item_name]] ([[item.menu_item_stock]])</label>
+                </span>
+                <span v-for="item in menu_items"
+                    v-show="sel_menu.menu_id == item.menu_main && item.menu_item_parent == 0">
+                    <input type="radio" :id="item.menu_item_name" name='menItem_RAD2' v-model="entreChoice"
+                        :value="item" v-on:change="calc" />
+                    <label :for="item.menu_item_name">[[item.menu_item_name]] ([[item.menu_item_stock]])</label>
+                </span>
+            </div>
+            <div class="child">
+                <h1>Out of Stock</h1>
+                <textarea v-model="noStock" :id="taNoStock" cols="30" rows="20"
+                    style="display: grid; background-color: white;" disabled=true></textarea>
+            </div>
+        </div> <!--ends child-->
+        <br />
+        <br />
+
+        <div class="empTab">
+            <button id="logEmpl" v-on:click="logEmpl">Employee</button>
+            <button id="adminLog" v-on:click="loadAdmin()">Admin</button>
+        </div>
+    </div><!--end of the vue div-->
+    <script src="{{ url_for('static', filename='js/capstone.js') }}"></script>
+</body>
+
+</html>

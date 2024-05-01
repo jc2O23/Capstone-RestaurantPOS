@@ -1,0 +1,84 @@
+{
+  "tables": [
+    {
+      "id": 1,
+      "tableOrder": "",
+      "tableTotal": 0,
+      "server": "",
+      "status": "open",
+      "SrtTime": ""
+    },
+    {
+      "id": 2,
+      "tableOrder": "Classic Burger 19.00\nCBLT 15.00\nSmashed Burger 18.00\nSmashed Burger 18.00\n",
+      "tableTotal": "70.00",
+      "server": 909,
+      "status": "lock",
+      "SrtTime": "2024-04-29 22:18:00"
+    },
+    {
+      "id": 3,
+      "tableOrder": "",
+      "tableTotal": 0,
+      "server": "",
+      "status": "open",
+      "SrtTime": ""
+    },
+    {
+      "id": 4,
+      "tableOrder": "",
+      "tableTotal": 0,
+      "server": "",
+      "status": "open",
+      "SrtTime": ""
+    },
+    {
+      "id": 5,
+      "tableOrder": "",
+      "tableTotal": 0,
+      "server": "",
+      "status": "open",
+      "SrtTime": ""
+    },
+    {
+      "id": 6,
+      "tableOrder": "Cowboy Burger 17.00\nnew burger 19.00\nCaesar Salad 12.00\nSoup of Day 9.00\nWings 15.00\nR7 Burger 14.00\nCowboy Burger 17.00\nCaesar Salad 12.00\n",
+      "tableTotal": "115.00",
+      "server": 101,
+      "status": "lock",
+      "SrtTime": "2024-04-29 22:17:47"
+    },
+    {
+      "id": 7,
+      "tableOrder": "",
+      "tableTotal": 0,
+      "server": "",
+      "status": "resv",
+      "SrtTime": "04/24/2024 6:30pm"
+    },
+    {
+      "id": 8,
+      "tableOrder": "",
+      "tableTotal": 0,
+      "server": "",
+      "status": "close",
+      "SrtTime": ""
+    },
+    {
+      "id": 9,
+      "tableOrder": "",
+      "tableTotal": 0,
+      "server": "",
+      "status": "close",
+      "SrtTime": ""
+    },
+    {
+      "id": 10,
+      "tableOrder": "",
+      "tableTotal": 0,
+      "server": "",
+      "status": "close",
+      "SrtTime": ""
+    }
+  ]
+}

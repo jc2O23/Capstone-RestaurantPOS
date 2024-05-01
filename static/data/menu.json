@@ -1,0 +1,46 @@
+{
+  "menu": [
+    {
+      "menu_id": 1,
+      "menu_name": "Dinner Menu",
+      "menu_start_time": "11am",
+      "menu_end_time": "11pm",
+      "menu_days": "All"
+    },
+    {
+      "menu_id": 2,
+      "menu_name": "Brunch Menu",
+      "menu_start_time": "9am",
+      "menu_end_time": "2pm",
+      "menu_days": "Sat,Sun"
+    },
+    {
+      "menu_id": 3,
+      "menu_name": "Drinks",
+      "menu_start_time": "11am",
+      "menu_end_time": "2am",
+      "menu_days": "All"
+    },
+    {
+      "menu_id": 4,
+      "menu_name": "Specials",
+      "menu_start_time": "4pm",
+      "menu_end_time": "11pm",
+      "menu_days": "Thurs,Fri,Sat,Sun"
+    },
+    {
+      "menu_id": 6,
+      "menu_name": "Item Sides",
+      "menu_start_time": "11am",
+      "menu_end_time": "11pm",
+      "menu_days": "All"
+    },
+    {
+      "menu_id": 29,
+      "menu_name": "Happy Hour",
+      "menu_start_time": "4pm",
+      "menu_end_time": "5pm",
+      "menu_days": "Mon,Tues,Wed,Thurs,Fri"
+    }
+  ]
+}

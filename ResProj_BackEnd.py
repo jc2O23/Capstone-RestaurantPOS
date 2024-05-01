@@ -4,7 +4,23 @@ from tkinter import PhotoImage
 from DB_Tables import *
 from tkinter import messagebox
 import re
+import requests
+from requests.exceptions import ConnectionError
 
+# When this function is called, instead of polling, the backend can send an request to Flask for the JSON files to be 
+# loaded again on the webpage.
+def updateJsonFiles():
+    url = 'http://localhost:5000/notify_update' 
+    try:
+        response = requests.post(url, timeout=1)
+        if response.status_code == 200:
+            print("Update was made.")
+
+    except ConnectionError:
+        print("Failed to connect to the server. The server may be offline.")
+        return 
+
+# Class that is used to create the first window that starts up, the login window
 # region Login
 class AdminLogin: 
     def __init__(self):
@@ -295,7 +311,7 @@ class Menu_Window:
         self.frame_Three.clear_selection()
 # endregion
 
-# region Menu Frames
+# region Menu Frame
 class FrameOne:
     def __init__(self, frame1, info_label, main_window):
         self.info_label = info_label
@@ -478,8 +494,9 @@ class FrameOne:
             self.clear_selection()
             Menu_DAO.menus_to_json()
             Menu_DAO.close()
+# endregion
 
-
+# region Meni Section Frame
 class FrameTwo:
     def __init__(self, frame2, info_label, main_window):
         self.info_label = info_label
@@ -595,9 +612,9 @@ class FrameTwo:
 
     def delete_section(self):
         pass
+# endregion
 
-
-
+#region Menu Items Frame
 class FrameThree:
     def __init__(self, frame3, info_label, main_window):
         self.info_label = info_label
@@ -759,11 +776,11 @@ class FrameThree:
             menuItem_DAO.insert_item(item_name, item_desc, item_price, item_stock, item_sec, item_menu)
             
         else:
-            menuItem_DAO.update_item_by_id(item_name, item_desc, item_price, item_stock, item_menu, item_sec, self.checkUpd)
+            menuItem_DAO.update_item_by_id(item_name, item_desc, item_price, item_stock,  item_sec, item_menu, self.checkUpd)
 
         self.main_window.build_tree()
         menuItem_DAO.menuItems_to_json()
-        
+        updateJsonFiles()
         self.clear_selection()
         menuItem_DAO.close()
         menu_DAO.close()
@@ -797,6 +814,7 @@ class FrameThree:
             self.clear_selection()
             menuItem_DAO.menuItems_to_json()
             menuItem_DAO.close()
+            updateJsonFiles()
 # endregion
 
 
@@ -806,78 +824,12 @@ class NewEmployee:
         self.root.title("New Employee")
         self.root.geometry("500x500")
 
-        self.fistName_label = ttk.Label(self.root, text="First Name:")
-        self.fistName_label.grid(row=0, column=0, padx=11, pady=11)
-
-        self.firstName_entry = ttk.Entry(self.root)
-        self.firstName_entry.grid(row=0, column=1, padx=11, pady=11)
-
-
-        self.lastName_label = ttk.Label(self.root, text="Last Name:")
-        self.lastName_label.grid(row=1, column=0, padx=11, pady=11)
-
-        self.lastName_entry = ttk.Entry(self.root)
-        self.lastName_entry.grid(row=1, column=1, padx=11, pady=11)
-        
-
-        self.displayName_label = ttk.Label(self.root, text="Display Name:")
-        self.displayName_label.grid(row=2, column=0, padx=11, pady=11)
-
-        self.displayName_entry = ttk.Entry(self.root)
-        self.displayName_entry.grid(row=2, column=1, padx=11, pady=11)
-
-
-        self.pinNumber_label = ttk.Label(self.root, text="Pin Number:")
-        self.pinNumber_label.grid(row=3, column=0, padx=11, pady=11)
-
-        self.pinNumber_entry = ttk.Entry(self.root)
-        self.pinNumber_entry.grid(row=3, column=1, padx=11, pady=11)
-
-
-        self.pinCode_label = ttk.Label(self.root, text="Pin Code:")
-        self.pinCode_label.grid(row=4, column=0, padx=11, pady=11)
-
-        self.pinCode_entry = ttk.Entry(self.root)
-        self.pinCode_entry.grid(row=4, column=1, padx=11, pady=11)
-
-        self.accessLevel_label = ttk.Label(self.root, text="Access Level:")
-        self.accessLevel_label.grid(row=5, column=0, padx=11, pady=11)
-
-        self.accessLevels = [1, 2, 3, 4, 5]
-        self.accessLevel_entry = ttk.Combobox(self.root, values=self.accessLevels, state='readonly')
-        self.accessLevel_entry.grid(row=5, column=1, padx=11, pady=11)
-        self.accessLevel_entry.set(1)
-
-        self.role_label = ttk.Label(self.root, text="Role:")
-        self.role_label.grid(row=6, column=0, padx=11, pady=11)
-
-        self.roles = ['Owner', 'Manager', 'Server', 'Bartender', 'Kitchen', 'Hostess']
-        self.role_entry = ttk.Entry(self.root)
-        self.role_entry.grid(row=6, column=1, padx=11, pady=11)
-
-
-        self.submit_button = ttk.Button(self.root, text="Submit", command=self.submit)
-        self.submit_button.grid(row=7, column=1, padx=11, pady=11)
-
         
         self.root.mainloop()
 
 
 
-    def submit(self):
-        
-        employeeDAO = Employees_TableDAO("mysqlEmployees")
-
-        first_name = self.firstName_entry.get()
-        last_name = self.lastName_entry.get()
-        display_name = self.displayName_entry.get()
-        pin_num = self.pinNumber_entry.get()
-        pin_code = self.pinCode_entry.get()
-        access_level = self.accessLevel_entry.get()
-        role = self.role_entry.get()
-
-        employeeDAO.insert_employee(first_name, last_name, display_name, pin_num, pin_code, access_level, role)
-        employeeDAO.close()
+    
 
 # region Employee Window
 class EmployeeWindow:
@@ -889,7 +841,7 @@ class EmployeeWindow:
         self.right_frame.pack(side='left', fill='both', expand=True)
         
 
-        self.tree = ttk.Treeview(self.left_frame, columns=("ID", "FirstName", "LastName", "DisplayName", "PinNum", "PinCode", "AccessLevel", "Role"), show="headings")
+        self.tree = ttk.Treeview(self.right_frame, columns=("ID", "FirstName", "LastName", "DisplayName", "PinNum", "PinCode", "AccessLevel", "Role"), show="headings")
         self.tree.heading("ID", text="Database ID")
         self.tree.heading("FirstName", text="First Name")
         self.tree.heading("LastName", text="Last Name")
@@ -902,13 +854,74 @@ class EmployeeWindow:
 
         self.tree.pack(fill=tk.BOTH, expand=True)
 
-        employeeDAO = Employees_TableDAO("mysqlEmployees")
-        employeeALL_DAO = employeeDAO.fetch_all_employees()
-
-        for employee in employeeALL_DAO:
-            self.tree.insert("", tk.END, values=(employee.employee_id, employee.first_name, employee.last_name, employee.display_name, employee.pin_num, employee.pin_code, employee.access_level, employee.role))
-
+        self.build_tree()
         self.tree.bind("<Double-1>", self.on_item_selected)
+        self.updateCheck = -1
+
+        self.emplInsert_label = ttk.Label(self.left_frame, text="Employee", font=('', 24), width=15,anchor='center', background='orange', borderwidth=3, relief='ridge')
+        self.emplInsert_label.grid(row=0, column=0, columnspan=2, padx=11, pady=11)
+
+
+
+        self.fistName_label = ttk.Label(self.left_frame, text="First Name:")
+        self.fistName_label.grid(row=1, column=0, padx=11, pady=11)
+
+        self.firstName_entry = ttk.Entry(self.left_frame)
+        self.firstName_entry.grid(row=1, column=1, padx=11, pady=11)
+
+
+        self.lastName_label = ttk.Label(self.left_frame, text="Last Name:")
+        self.lastName_label.grid(row=2, column=0, padx=11, pady=11)
+
+        self.lastName_entry = ttk.Entry(self.left_frame)
+        self.lastName_entry.grid(row=2, column=1, padx=11, pady=11)
+        
+
+        self.displayName_label = ttk.Label(self.left_frame, text="Display Name:")
+        self.displayName_label.grid(row=3, column=0, padx=11, pady=11)
+
+        self.displayName_entry = ttk.Entry(self.left_frame)
+        self.displayName_entry.grid(row=3, column=1, padx=11, pady=11)
+
+
+        self.pinNumber_label = ttk.Label(self.left_frame, text="Pin Number:")
+        self.pinNumber_label.grid(row=4, column=0, padx=11, pady=11)
+
+        self.pinNumber_entry = ttk.Entry(self.left_frame)
+        self.pinNumber_entry.grid(row=4, column=1, padx=11, pady=11)
+
+
+        self.pinCode_label = ttk.Label(self.left_frame, text="Pin Code:")
+        self.pinCode_label.grid(row=5, column=0, padx=11, pady=11)
+
+        self.pinCode_entry = ttk.Entry(self.left_frame)
+        self.pinCode_entry.grid(row=5, column=1, padx=11, pady=11)
+
+        self.accessLevel_label = ttk.Label(self.left_frame, text="Access Level:")
+        self.accessLevel_label.grid(row=6, column=0, padx=11, pady=11)
+
+        self.accessLevels = [1, 2, 3, 4, 5]
+        self.accessLevel_entry = ttk.Combobox(self.left_frame, values=self.accessLevels, state='readonly')
+        self.accessLevel_entry.grid(row=6, column=1, padx=11, pady=11)
+        
+
+        self.role_label = ttk.Label(self.left_frame, text="Role:")
+        self.role_label.grid(row=7, column=0, padx=11, pady=11)
+
+        self.roles = ['Owner', 'Manager', 'Server', 'Bartender', 'Kitchen', 'Hostess', 'Busser', 'Doorman', 'Barback', 'Maintenance', 'Dishwasher', 'Food-Runner', 'Expeditor']
+        self.role_entry = ttk.Combobox(self.left_frame, values=self.roles, state='readonly')
+        self.role_entry.grid(row=7, column=1, padx=11, pady=11)
+        self.role_entry.set('')
+
+
+        self.submit_button = ttk.Button(self.left_frame, text="Submit", command=self.submit)
+        self.submit_button.grid(row=8, column=0, padx=11, pady=11)
+
+        self.clr_button = ttk.Button(self.left_frame, text="Clear", command=self.clearVals)
+        self.clr_button.grid(row=8, column=1, padx=11, pady=11)
+
+        self.del_button = ttk.Button(self.left_frame, text="Delete", command=self.delEmployee)
+
 
     def on_item_selected(self, event):
         tree = event.widget
@@ -917,8 +930,103 @@ class EmployeeWindow:
         if selected_items:  
             item_id = selected_items[0]
             item_values = tree.item(item_id, 'values')
+            self.updateCheck = item_values[0]
+
+            self.submit_button.config(text='Update')
+            self.del_button.grid(row=9, column=1, padx=11, pady=11)
+
+            employeeDAO = Employees_TableDAO("mysqlEmployees")
+            employeeDAO_byID = employeeDAO.fetch_employee_by_Id(item_values[0])
+            employeeDAO.close()
+
+            self.firstName_entry.delete(0, tk.END)
+            self.firstName_entry.insert(0, employeeDAO_byID.first_name)
+
+            self.lastName_entry.delete(0, tk.END)
+            self.lastName_entry.insert(0, employeeDAO_byID.last_name)
+
+            self.displayName_entry.delete(0, tk.END)
+            self.displayName_entry.insert(0, employeeDAO_byID.display_name)
+
+            self.pinNumber_entry.delete(0, tk.END)
+            self.pinNumber_entry.insert(0, employeeDAO_byID.pin_num)
+
+            self.pinCode_entry.delete(0, tk.END)
+            self.pinCode_entry.insert(0, employeeDAO_byID.pin_code)
+
+            self.pinCode_entry.delete(0, tk.END)
+            self.pinCode_entry.insert(0, employeeDAO_byID.pin_code)
+
+            self.accessLevel_entry.set(employeeDAO_byID.access_level)
+
+            self.role_entry.set(employeeDAO_byID.role)
 
             print(item_values)
+    
+    def submit(self):
+        
+        employeeDAO = Employees_TableDAO("mysqlEmployees")
+
+        first_name = self.firstName_entry.get()
+        last_name = self.lastName_entry.get()
+        display_name = self.displayName_entry.get()
+        pin_num = self.pinNumber_entry.get()
+        pin_code = self.pinCode_entry.get()
+        access_level = self.accessLevel_entry.get()
+        role = self.role_entry.get()
+
+        if self.updateCheck == -1:
+            employeeDAO.insert_employee(first_name, last_name, display_name, pin_num, pin_code, access_level, role)
+        else:
+            employeeDAO.update_employee_by_id(first_name, last_name, display_name, pin_num, pin_code, access_level, role, self.updateCheck)
+        employeeDAO.close()
+        self.build_tree()
+        self.clearVals()
+        updateJsonFiles()
+    
+    def clearVals(self):
+        self.firstName_entry.delete(0, tk.END)
+
+        self.lastName_entry.delete(0, tk.END)
+
+        self.displayName_entry.delete(0, tk.END)
+
+        self.pinNumber_entry.delete(0, tk.END)
+
+        self.pinCode_entry.delete(0, tk.END)
+
+        self.pinCode_entry.delete(0, tk.END)
+
+        self.accessLevel_entry.set('')
+
+        self.role_entry.set('')
+
+        self.updateCheck = -1
+        self.submit_button.config(text='Submit')
+        self.del_button.grid_remove()
+
+    def delEmployee(self):
+        employeeDAO = Employees_TableDAO("mysqlEmployees")
+        employeeDAO_byID = employeeDAO.fetch_employee_by_Id(self.updateCheck)
+        
+        if messagebox.askyesno("Delete Item", "Are you sure you want to delete " + employeeDAO_byID.display_name):
+
+            employeeDAO.delete_employee_by_id(self.updateCheck)
+            employeeDAO.close()
+            self.clearVals()
+            self.build_tree()
+            updateJsonFiles()
+
+    def build_tree(self):
+        self.tree.delete(*self.tree.get_children())
+        employeeDAO = Employees_TableDAO("mysqlEmployees")
+        employeeALL_DAO = employeeDAO.fetch_all_employees()
+        employeeDAO.close()
+
+        for employee in employeeALL_DAO:
+            self.tree.insert("", tk.END, values=(employee.employee_id, employee.first_name, employee.last_name, employee.display_name, employee.pin_num, employee.pin_code, employee.access_level, employee.role))
+
+        
 # endregion
 
 if __name__ == "__main__":

@@ -250,21 +250,21 @@ class MenuItems_TableDAO:
             cursor.execute("DELETE FROM menu_items WHERE menu_items_id = %s", (menu_items_id,))
             self.connection.commit()
     
-    def insert_item(self, name, desc, price, stock, menu_section, menu_main):
+    def insert_item(self, menu_item_name, menu_item_desc, menu_item_price, menu_item_stock, menu_item_parent, menu_main):
         with self.connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO menu_items (menu_item_name, menu_item_desc, menu_item_price, menu_item_stock, menu_item_parent, menu_main)
                 VALUES (%s, %s, %s, %s, %s, %s)
-            """, (name, desc, price, stock, menu_section, menu_main,))
+            """, (menu_item_name, menu_item_desc, menu_item_price, menu_item_stock, menu_item_parent, menu_main,))
             self.connection.commit()
 
-    def update_item_by_id(self, name, desc, price, stock, menu_section, menu_main, item_id):
+    def update_item_by_id(self, menu_item_name, menu_item_desc, menu_item_price, menu_item_stock, menu_item_parent, menu_main, item_id):
         with self.connection.cursor() as cursor:
             cursor.execute("""
                 UPDATE menu_items
                 SET menu_item_name = %s, menu_item_desc = %s, menu_item_price = %s, menu_item_stock = %s, menu_item_parent = %s, menu_main = %s
                 WHERE menu_items_id = %s
-            """, (name, desc, price, stock, menu_section, menu_main, item_id,))
+            """, (menu_item_name, menu_item_desc, menu_item_price, menu_item_stock, menu_item_parent, menu_main, item_id,))
             self.connection.commit()
     
     def menuItems_to_json(self):
@@ -322,6 +322,12 @@ class Employees_TableDAO:
             cursor.execute("SELECT * FROM Employee WHERE pin_num = %s", (pin_num,))
             item = cursor.fetchone()
             return Employees_Table(*item)
+        
+    def fetch_employee_by_Id(self, employee_id):
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Employee WHERE employee_id = %s", (employee_id,))
+            item = cursor.fetchone()
+            return Employees_Table(*item)
     
     def fetch_all_employees(self):
         with self.connection.cursor() as cursor:
@@ -334,6 +340,20 @@ class Employees_TableDAO:
                     INSERT INTO Employee (first_name, last_name, display_name, pin_num, pin_code, access_level, role)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (first_name, last_name, display_name, pin_num, pin_code, access_level, role,))
+            self.connection.commit()
+
+    def update_employee_by_id(self, first_name, last_name, display_name, pin_num, pin_code, access_level, role, employee_id):
+        with self.connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE Employee
+                SET first_name = %s, last_name = %s, display_name = %s, pin_num = %s, pin_code = %s, access_level = %s, role = %s
+                WHERE employee_id = %s
+            """, (first_name, last_name, display_name, pin_num, pin_code, access_level, role, employee_id, ))
+            self.connection.commit()
+
+    def delete_employee_by_id(self, employee_id):
+        with self.connection.cursor() as cursor:
+            cursor.execute("DELETE FROM Employee WHERE employee_id = %s", (employee_id,))
             self.connection.commit()
 
     

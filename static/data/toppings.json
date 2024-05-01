@@ -1,0 +1,37 @@
+{
+  "toppings": [
+    {
+      "topping_name": "Mayo"
+    },
+    {
+      "topping_name": "Lettuce"
+    },
+    {
+      "topping_name": "Pickles"
+    },
+    {
+      "topping_name": "Tomatoes"
+    },
+    {
+      "topping_name": "Grilled Onions"
+    },
+    {
+      "topping_name": "Grilled Mushrooms"
+    },
+    {
+      "topping_name": "Ketchup"
+    },
+    {
+      "topping_name": "Mustard"
+    },
+    {
+      "topping_name": "Bacon"
+    },
+    {
+      "topping_name": "Avocado"
+    },
+    {
+      "topping_name": "Grilled Peppers"
+    }
+  ]
+}

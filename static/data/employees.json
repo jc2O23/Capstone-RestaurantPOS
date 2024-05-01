@@ -1,0 +1,114 @@
+{
+  "Employee": [
+    {
+      "employee_id": 12,
+      "first_name": "John",
+      "last_name": "Campbell",
+      "display_name": "John C.",
+      "pin_num": 101,
+      "pin_code": 1101,
+      "access_level": 1,
+      "role": "Boss"
+    },
+    {
+      "employee_id": 13,
+      "first_name": "Dave",
+      "last_name": "Smith",
+      "display_name": "Dave S.",
+      "pin_num": 123,
+      "pin_code": 1234,
+      "access_level": 3,
+      "role": "Server"
+    },
+    {
+      "employee_id": 14,
+      "first_name": "Nick",
+      "last_name": "Vog",
+      "display_name": "Nick V.",
+      "pin_num": 345,
+      "pin_code": 1345,
+      "access_level": 2,
+      "role": "Cook"
+    },
+    {
+      "employee_id": 15,
+      "first_name": "Jim",
+      "last_name": "Frank",
+      "display_name": "Jim F.",
+      "pin_num": 678,
+      "pin_code": 1678,
+      "access_level": 2,
+      "role": "Cook"
+    },
+    {
+      "employee_id": 16,
+      "first_name": "Liam",
+      "last_name": "McFaden",
+      "display_name": "Liam M.",
+      "pin_num": 909,
+      "pin_code": 1909,
+      "access_level": 1,
+      "role": "Boss"
+    },
+    {
+      "employee_id": 17,
+      "first_name": "Dan",
+      "last_name": "Sahm",
+      "display_name": "Dan S.",
+      "pin_num": 221,
+      "pin_code": 1221,
+      "access_level": 1,
+      "role": "Boss"
+    },
+    {
+      "employee_id": 18,
+      "first_name": "Mary",
+      "last_name": "Kiloa",
+      "display_name": "Mary K.",
+      "pin_num": 565,
+      "pin_code": 1565,
+      "access_level": 3,
+      "role": "Server"
+    },
+    {
+      "employee_id": 20,
+      "first_name": "Greg",
+      "last_name": "Hamton",
+      "display_name": "Greg H.",
+      "pin_num": 160,
+      "pin_code": 1160,
+      "access_level": 2,
+      "role": "Manager"
+    },
+    {
+      "employee_id": 21,
+      "first_name": "Megan",
+      "last_name": "Selre",
+      "display_name": "Megan S.",
+      "pin_num": 746,
+      "pin_code": 1746,
+      "access_level": 3,
+      "role": "Server"
+    },
+    {
+      "employee_id": 24,
+      "first_name": "Joe",
+      "last_name": "Smith",
+      "display_name": "Joe S",
+      "pin_num": 999,
+      "pin_code": 1999,
+      "access_level": 2,
+      "role": "Server"
+    },
+    {
+      "employee_id": 25,
+      "first_name": "Tom",
+      "last_name": "Smith",
+      "display_name": "Tom S.",
+      "pin_num": 545,
+      "pin_code": 1545,
+      "access_level": 3,
+      "role": "Server"
+    }
+  ]
+}

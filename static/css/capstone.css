@@ -1,0 +1,211 @@
+body {
+    background-color: cornflowerblue;
+    color: white;
+
+}
+
+/* sets the heirarchy for what elements go below it */
+.parent {
+    display: inline-block;
+    padding: 12px 20px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    vertical-align: middle;
+    font-size: 14px;
+}
+
+/*gets the divs to display next to eachother  */
+.child {
+    display: inline-block;
+    border: 1px solid white;
+    padding: 10px;
+    vertical-align: top;
+
+}
+
+/* changes the backgroun and the boxes */
+.child label,
+.child input {
+    display: grid;
+    background-color: lightcyan;
+    color: black;
+    padding: 10px 10px 10px 10px;
+
+}
+
+/* edits the actual dot for the radio button */
+.child input[type="radio"],
+.child input[type="checkbox"] {
+    opacity: 0.011;
+    z-index: 100;
+    width: 150px;
+
+
+}
+
+#menu.child,
+#menu_section.child,
+#menu_items.child {
+    width: 200px;
+}
+
+
+/*changes the color of the selected item*/
+input[type="radio"]:checked+label {
+    background: lightgrey;
+    border-radius: 4px;
+}
+
+/* Style the tab */
+.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: lightgrey;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+}
+
+
+.div_displayTableNum {
+    font-size: xx-large;
+    background-color: rgb(255, 212, 159);
+    color: black;
+    padding: 0.5em;
+    border: solid 2px black;
+    text-align: center;
+}
+
+
+
+.modal {
+    display: none;
+    position: fixed;
+    left: 400px;
+    right: auto;
+    bottom: auto;
+    background-color: rgb(184, 199, 209);
+    color: black;
+    border-style: groove;
+    padding: 20px;
+    align-items: center;
+    width: 300px;
+    z-index: 1;
+
+}
+
+.btnModalTitle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 20px;
+    /* Added padding for spacing */
+
+}
+
+.btnModalButtons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* Create three columns */
+    grid-gap: 0;
+    /* Space between rows and columns */
+    justify-items: center;
+    /* Center the buttons in the grid */
+
+}
+
+#btnNums {
+    width: 60px;
+    /* Set a fixed width for buttons */
+    height: 60px;
+    /* Set a fixed height for buttons */
+    margin: 2.5px;
+    /* Space around buttons */
+}
+
+.modalStyle {
+    display: flex;
+    justify-content: center;
+
+}
+
+.btn_ModalStyle {
+    width: 75px;
+    /* Set a fixed width for buttons */
+    height: 75px;
+    /* Set a fixed height for buttons */
+    margin: 25px;
+    /* Space around buttons */
+    padding: 10px;
+    text-align: center;
+    justify-content: center;
+}
+
+
+.myModalAsk {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    align-items: center;
+    width: 300px;
+    height: 300px;
+}
+
+#askModal,
+#askTableModal {
+    display: none;
+    justify-content: center;
+}
+
+#logEmpl {
+    padding: 6px 12px;
+    background-color: lightgrey;
+    cursor: pointer;
+    font-size: x-large;
+}
+
+.empTab button:hover {
+    color: blue;
+}
+
+.tableAval {
+    color: green;
+}
+
+.tableAval:hover {
+    color: blue;
+    background-color: aliceblue;
+}
+
+.tableLock {
+    color: yellow;
+}
+
+.tableRes {
+    color: rgb(199, 1, 199);
+}
+
+.tableClose {
+    color: rgb(129, 0, 0);
+}
+
+.tableClose:hover {
+    color: rgb(129, 0, 0);
+    cursor: not-allowed;
+}
