@@ -14,8 +14,10 @@
     <h1>Resturant Site Capstone Front</h1>
 
     <div id="vueRadio" class="parent">
-        <button v-on:click="getTimestamp">save time</button>
-        <button v-on:click="toDatabase">Send to .JSON</button>
+        <div class="empTab">
+            <button id="logEmpl" v-on:click="logEmpl">Employee</button>
+            <button id="adminLog" v-on:click="loadAdmin()">Admin</button>
+        </div>
 
         <!-- Button Modal -->
         <div id="buttonModal" class="modal">
@@ -68,6 +70,11 @@
             <button class="tablinks" v-for="tb in tables" :class="tableCheck(tb)" v-on:click="getTableStatus(tb.id)"
                 style="font-size: larger;">Table [[tb.id]]</button>
         </div>
+        <div class="child">
+            <h1>Out of Stock</h1>
+            <textarea v-model="noStock" :id="taNoStock" cols="30" rows="20"
+                style="display: grid; background-color: white;" disabled=true></textarea>
+        </div>
         <div id="checkoutSide" class="child">
             <textarea id="txaFinalOrder" :value="finalOrder" v-on:click="selLine" readonly
                 style="height:250px; width:350px; background-color: white; font-size: x-large;"></textarea>
@@ -83,6 +90,7 @@
                 style="background-color: lightgrey;">
             <input type="button" id="btnPrint" v-on:click="printOrder" value="Print the whole order"
                 style="background-color: lightgrey;">
+                <input type="button" id="btnCloseTable" v-on:click="closeTable" value="Close Table">
 
 
             <!-- <button @click="sendData" style="background-color: lightgrey;">Send Data to
@@ -99,10 +107,6 @@
                 </span>
             </div>
         </div><!--end table 1 checkout-->
-        <!-- <div class="child">
-            <textarea name="noStock" id="btnNoStock" cols="30" rows="10"
-                style="display: grid;">These Items are out of Stock:</textarea>
-        </div> -->
 
         <!-- Menu window that shows if we have a table selected -->
         <div id="menu_table" class="child" v-if="currentTableId > 0">
@@ -139,30 +143,23 @@
                 <h1>Items</h1>
                 <span v-if="sel_menu" v-for="item in menu_items"
                     v-show="sel_section.menu_section_id == item.menu_item_parent && item.menu_main == sel_menu.menu_id">
-                    <input type="radio" :id="item.menu_item_name" name='menItem_RAD' v-model="entreChoice" :value="item"
+                    <input class="" type="radio" :id="item.menu_item_name" name='menItem_RAD' v-model="entreChoice" :value="item"
                         v-on:change="calc" />
                     <label :for="item.menu_item_name">[[item.menu_item_name]] ([[item.menu_item_stock]])</label>
                 </span>
                 <span v-for="item in menu_items"
                     v-show="sel_menu.menu_id == item.menu_main && item.menu_item_parent == 0">
-                    <input type="radio" :id="item.menu_item_name" name='menItem_RAD2' v-model="entreChoice"
+                    <input type="radio"  name='menItem_RAD2' v-model="entreChoice"
                         :value="item" v-on:change="calc" />
-                    <label :for="item.menu_item_name">[[item.menu_item_name]] ([[item.menu_item_stock]])</label>
+                    <label :for="item.menu_item_name" >[[item.menu_item_name]] ([[item.menu_item_stock]])</label>
                 </span>
             </div>
-            <div class="child">
-                <h1>Out of Stock</h1>
-                <textarea v-model="noStock" :id="taNoStock" cols="30" rows="20"
-                    style="display: grid; background-color: white;" disabled=true></textarea>
-            </div>
+            
         </div> <!--ends child-->
         <br />
         <br />
 
-        <div class="empTab">
-            <button id="logEmpl" v-on:click="logEmpl">Employee</button>
-            <button id="adminLog" v-on:click="loadAdmin()">Admin</button>
-        </div>
+        
     </div><!--end of the vue div-->
     <script src="{{ url_for('static', filename='js/capstone.js') }}"></script>
 </body>
