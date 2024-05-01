@@ -173,7 +173,7 @@ input[type="radio"]:checked+label {
     justify-content: center;
 }
 
-#logEmpl {
+#logEmpl,#adminLog {
     padding: 6px 12px;
     background-color: lightgrey;
     cursor: pointer;
@@ -208,4 +208,8 @@ input[type="radio"]:checked+label {
 .tableClose:hover {
     color: rgb(129, 0, 0);
     cursor: not-allowed;
+}
+
+.noStock{
+    color: red;
 }
