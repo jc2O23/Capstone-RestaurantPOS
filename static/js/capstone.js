@@ -1,6 +1,18 @@
+/*
+order of sections for the .js file. - if you search /section it will take you to the tops of the sections
+1. data - variables used in the react/vue component
+2. mounting,destroying, creating
+3. fetching
+4.modal function/handlers
+5. employee log in/out functions
+6. open/close table and table handling
+7. add order,clear order,remove item, print order, 
+8. editing .json/flask
+
+*/
 const Order = {
     delimiters: ['[[', ']]'],
-    data() {
+    data() {//////////////////////////////////////Section data
         return {
             tables: [],
             butNums: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'CLR', 'DEL', 'OK', "X"],
@@ -27,7 +39,10 @@ const Order = {
             signedIn: [
                 { name: "Liam M.", pin: 909, code: 1909, clockedIn: 1 },
                 { name: "John C.", pin: 101, code: 1101, clockedIn: 1 }
-            ]
+            ],
+            tip15: 0,
+            tip20: 0,
+            tip25: 0,
 
         }//end return
     }, //end data property
@@ -39,7 +54,7 @@ const Order = {
         polling every 3 seconds, we create a socket to listen for a update message. Once it is it is created, we can just send 
         an update to the route, say from the back-end, telling the server that the JSON files have new data. 
     */
-    mounted() {
+    mounted() {/////////////////////////////////////Section mount,destroy, create
         // Create the socket
         this.socket = io('http://localhost:5000');
 
@@ -68,7 +83,7 @@ const Order = {
     methods: {
         // All of the JSON files are fetched and data is filled
         // Called when new data is in the JSON files
-        fetchData() {
+        fetchData() {////////////////////////////////////Section fetch
             fetch('./static/data/menu_items.json')
                 .then(response => response.json())
                 .then(data => {
@@ -91,7 +106,7 @@ const Order = {
                         }
 
                     }
-                   // console.log("nostock " + this.noStock)
+                    // console.log("nostock " + this.noStock)
                 })
             fetch('./static/data/menu.json')
                 .then(response => response.json())
@@ -120,347 +135,7 @@ const Order = {
                     this.tables = data.tables;
                 })
         },
-        // When called, sends `tables` over to Flask to update the JSON file
-        updateTableOrdersFlask() {
-            fetch('/update_tables', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(this.tables)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    //console.log('Success:', data);
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                });
-        },
-
-        // When called, sends `menu_items` over to Flask to update the JSON file
-        updateItemStockFlask() {
-            fetch('/update_stock', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(this.menu_items)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    //console.log('Success:', data);
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                });
-        },
-
-        // This was an early test with Flask, not used but still look back at when making new connections
-        /* getmenus() {
-            fetch('/get_menus')
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data['menu'])
-                    this.menus = data['menu'];
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        }, */
-
-        // When called, runs the Back-End program from Flask
-        loadAdmin() {
-            fetch('/admin_BackEnd')
-        },
-
-        /* When called, clocks the Employee in or out.
-            It sends the `empPin`, the 4 digit pincode, instead of the `empCode` since we use the `check_clock` with the `empCode`
-            so that kinda checks if the `empCode` is vaild and this checks if the empPin is vaild. It also sends the `getTimestamp` which
-            is used for the clock in/out time and the `clockVal` that is used to track if they should be clocked in or out.
-        */
-        async clockEmpl() {
-            const postData = {
-                empCode: this.empPin,
-                timestamp: this.getTimestamp(),
-                clockVal: this.clockVal
-            };
-            try {
-                const response = await fetch('/clock_Empl', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(postData)
-                })
-
-                // So here, it returns the hours worked and returns it to a var in the functions used to login Employee.
-                const data = await response.json()
-                console.log("Success:", data)
-                return data['Contents']
-
-            } catch (error) {
-                console.error("Error: ", error)
-            }
-        },
-
-        /* The function here takes the `empCode` and sends it to Flask to check if the employee is clocked in/out
-            The `userEnterVal` is the value that is entered with the employee login button modal. This is used multiple times
-            to hold both the `empCode` and `empPin`
-        */
-        async check_clock() {
-            const postData = {
-                empCode: this.userEnterVal,
-            };
-            try {
-                const response = await fetch('/check_clock', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(postData)
-                })
-
-                // Here it returns the value used to check if the employee is clocked in or out
-                const data = await response.json()
-                this.clockVal = data
-                console.log(this.clockVal)
-                console.log('Success:', data);
-
-            } catch (error) {
-                console.error('Error', error)
-            }
-        },
-
-
-        /* calculate the cost of each individual item so it is easier to add to the overall bill */
-        calc() {
-            //alert("HI");
-            this.indTotal = 0;
-            if (this.entreChoice) {
-                this.indTotal = this.entreChoice.menu_item_price;
-            }
-            this.indTotal = parseFloat(this.indTotal).toFixed(2);
-        },//end Calc 
-        /* adds the input to the final order display. this function is like sending something to the 
-        check. */
-        addToFinal() {
-            this.finalOrder += this.entreChoice.menu_item_name + " "
-            this.entreChoice = []
-            //console.log(this.entreChoice)
-            this.overallTotal = parseFloat(this.overallTotal) + parseFloat(this.indTotal)
-            this.finalOrder += this.indTotal
-            this.finalOrder += "\n"
-            this.overallTotal = this.overallTotal.toFixed(2)
-            this.tables[this.currentTableId - 1]['tableOrder'] = this.finalOrder
-            this.tables[this.currentTableId - 1]['tableTotal'] = this.overallTotal
-            this.updateStock()
-            this.updateTableOrdersFlask() // Call for Flask update
-        },
-
-        // Each time item is added to final order, its stock is calculated
-        updateStock() {
-            for (let i = 0; i < this.menu_items.length; i++) {
-                if (this.finalOrder.includes(this.menu_items[i].menu_item_name)) {
-                    this.menu_items[i].menu_item_stock -= 1
-                    if (this.menu_items[i].menu_item_stock <= 0 && !this.noStock.includes(this.menu_items[i].menu_item_name)) {
-                        this.noStock.push(this.menu_items[i].menu_item_name)
-                        alert("That was the last of " + this.menu_items[i].menu_item_name)
-                    }
-                    else if (this.menu_items[i].menu_item_stock <= 0) {
-                        alert("There is no more " + this.menu_items[i].menu_item_name + " in stock.")
-                    }
-                }
-            }
-            this.updateItemStockFlask() // Call for Flask update
-        },
-
-        // This function is used to clear the order
-        clearOrder() {
-            const currentTable = this.tables.find(table => table.id === this.currentTableId);
-            currentTable.tableOrder = ''
-            currentTable.tableTotal = 0
-            this.finalOrder = "";
-            this.indTotal = 0;
-            this.overallTotal = (0).toFixed(2);
-        },
-
-        /* our version of "printing" the recipt for the customer */
-        printOrder() {
-            alert(this.finalOrder)
-        },
-        /* this function helps close the table when the button is clicked to close a table */
-        closeTable() {
-            let status = this.getTableStatus(this.currentTableId)
-            if (status == "lock") {
-                this.modalTypeTable('CL_table', table)
-                console.log("table closed")
-            }
-        },
-        /* This function is used to set the style of each of the table buttons in the HTML window. In short, using VUE,
-            when looping to create the table buttons, it here sets the style of each one based on the status. The return of 
-            each case refers to each type of style in the CSS file. 
-        */
-
-        tableCheck(table) {
-            switch (table.status) {
-                case 'open':
-                    return 'tableAval'
-                case 'close':
-                    return 'tableClose'
-                case 'resv':
-                    return 'tableRes'
-                case 'lock':
-                    return 'tableLock'
-                default:
-                    console.error(`Table Style Error: Style: ${table.status}`)
-            }
-        },
-
-        /* With switching tables, this is called first to get the status of the table that the employee is trying to go into.
-            It uses the `tableId` of the table clicked on makes a quick check of the status of the table. The `seatTableCheck` is
-            used to keep track of what index table we are interacting with. This made it easier to have it check if when an employee
-            is trying to logIn, is it a normal logIn or a logIn with tables.
-        */
-        getTableStatus(tableId) {
-            const tableStatus = this.tables[tableId - 1].status
-            this.seatTableCheck = tableId
-
-            // Opens the function `modalTypeTable` that displays the options that are avaible with that table status
-            switch (tableStatus) {
-                case 'open':
-                    this.modalTypeTable('OP_table', tableId)
-                    break;
-                case 'close':
-                    this.modalTypeTable('CL_table', tableId)
-                    break;
-                case 'lock':
-                    this.modalTypeTable('LOCK_table', tableId)
-                    break;
-                case 'resv':
-                    this.modalTypeTable('RS_table', tableId)
-                    break;
-                default:
-                    console.error("Table get Status")
-            }
-        },
-
-        // This is used when pressing the exit button on the table display to manulally lock a table
-        lockTable() {
-            this.currentTableId = 0
-            this.seatTableCheck = -1
-            this.finalOrder = ''
-            this.overallTotal = ''
-            this.indTotal = ''
-
-        },
-
-        /* So this was orignally called when a table button was pressed, however with the table status options, there
-            had to be a few checks before switching a table. It takes the `tableId` of the one we want to open, and also
-            looks at the table that we are switching from. */
-        switchTable(tableId) {
-
-            const tableSwitchFrom = this.tables.find(table => table.id === this.currentTableId);
-            console.log(tableSwitchFrom)
-
-            // This is if we are not in a table screen, it just has to pull the data of the table we want to go to 
-            // If we don't check if a table is NULL, we would get an error when trying `tableSwitchFrom.id` 
-            if (!tableSwitchFrom) {
-                console.log("No table on window")
-                //console.log(this.tables)
-                const tableSwitchTo = this.tables.find(table => table.id === tableId);
-
-                this.currentTableId = tableSwitchTo.id
-                this.finalOrder = tableSwitchTo.tableOrder
-                this.overallTotal = tableSwitchTo.tableTotal
-            }
-
-            // If we click the table we currently have open, we are not going to do anything
-            else if (tableSwitchFrom.id == tableId) {
-                //console.log("same table switch")
-                return
-            }
-
-            // When we go to a new table with a table open, similar to if there is no table open at all
-            else {
-               // console.log(this.tables)
-                const tableSwitchTo = this.tables.find(table => table.id === tableId);
-
-                this.currentTableId = tableSwitchTo.id
-                this.finalOrder = tableSwitchTo.tableOrder
-                this.overallTotal = tableSwitchTo.tableTotal.toFixed(2)
-            }
-
-        },
-
-        /* Called when when have made it through all the steps with creating an open table. It gets the table to seat
-            by the `seatTableCheck`, but we need the index of the table not the id so we minus 1. I also found the 
-            simple solution to the problem of calling this function with checking the `empCode` or `empPin`, to just run
-            another check if one of them returns NULL. 
-        */
-        async seatTable() {
-            const tableToSeat = this.tables[this.seatTableCheck - 1]
-            //console.log(tableToSeat)
-
-            // So here I ran into trouble with checking the `pin_num` and the `pin_code`
-            // In the `findEmployee`, it uses the last value the employee entered in the buttonModal, `userEnterVal`
-            // If you are clocked in, you just need the pin, if not, it uses the code
-            let server = await this.findEmployee('pin_num')
-            if (!server) {
-                server = await this.findEmployee('pin_code')
-            }
-            //console.log(server)
-
-            // Fills the `tables` that is beaing seated with all data and locks it to that employee
-            tableToSeat.server = server['pin_num']
-            tableToSeat.SrtTime = this.getTimestamp()
-            tableToSeat.status = 'lock'
-
-            this.switchTable(this.seatTableCheck)   // Now we can switch to that table we just locked to the employee
-            this.updateTableOrdersFlask()   // Call to update Flask
-        },
-
-
-        selLine() {
-            const textarea = document.getElementById('txaFinalOrder');
-            const cursorPosition = textarea.selectionStart;
-            const lines = textarea.value.split('\n');
-            let start = 0;
-            let end = 0;
-
-            for (let i = 0; i < lines.length; i++) {
-                end = start + lines[i].length;
-                if (cursorPosition >= start && cursorPosition <= end) {
-                    // Check if the cursor is at the very end of the previous line
-                    if (cursorPosition === start && i > 0) {
-                        start--;
-                    }
-                    break;
-                }
-                start = end + 1; // Move to the start of the next line, including the newline character
-            }
-
-            // Select the entire line
-            textarea.setSelectionRange(start, end);
-        },
-
-        /* This is called to show the button modal and depending if the `empPin` is empty or not. So if
-            we succesfully enter our `empPin`, the VUE value is filled and this is called again to then 
-            prompt us to enter our code this time.
-        */
-        logEmpl() {
-            if (this.empPin != '') {
-                document.getElementById("buttonHead").innerHTML = "Enter Employee Pin"
-                document.getElementById("buttonModal").style.display = "block"
-            }
-            else if (this.empPin == '') {
-                document.getElementById("buttonHead").innerHTML = "Enter Employee Number"
-                document.getElementById("buttonModal").style.display = "block"
-            }
-            else {
-                console.error("Emp Login")
-            }
-        },
+        ////////////////////////////////////////////SECTION Modal Handlers
 
         /* This one function is used to handle all inputs of the buttonModal, it loads the buttons from the VUE
             data and takes the input of what button was pressed. 
@@ -519,171 +194,11 @@ const Order = {
 
             }
         },
-
-        /* When called, this takes a param and looks at the employee json for that employee. It is used both when looking for an
-            employee by the `empPin` and the `empCode`. It returns if it finds an employee or if none was found.
-        */
-        async findEmployee(param) {
-            const response = await fetch('./static/data/employees.json');
-            const data = await response.json()
-
-            // The param is the `pin_code` or the `pin_num
-            // I made it a seperate function in the case that we need to access employess by other params
-            const employee = data.Employee.find(emp => emp[param] === parseInt(this.userEnterVal));
-
-            return employee
-        },
-
-        /* So here is the function that is used when an employee is trying to logIn/logOUt with the employee button.
-            It is called twice to check the `empPin` and then check if the `empCode` is vaild. It works with the
-            function `modalTypeLogin` to display the info to the employee through the modal.
-        */
-        async handleEmplLog() {
-
-            // First we check to see if the employee is a step one (entering there 3 digit id)
-            if (this.empPin == '') {
-
-                // If so, pass the `pin_num` to `findEmployee` and wait for a response
-                const employee = await this.findEmployee('pin_num')
-
-                // If we find an employee, we store there name and make the modal that asks them if the want to logIn/logOut
-                // The check for if they we offer them to logIn or logOut is done in the modal
-                if (employee) {
-                    this.empName = employee.display_name
-                    this.modalTypeLogin('F_empNum')
-                }
-
-                // If we don't find an employee with the `pin_num` entered, we let them know and clear out the stored `empPin`
-                // This is done to prevent the modal asking for the `pin_code` being prompted
-                else {
-                    this.empPin = ""
-                    this.modalTypeLogin('NF_empNum')
-                }
-            }
-
-            // If we are at step 2 (Asking them for the 4 digit pass)
-            else if (this.empPin != '') {
-
-                // If so, pass the `pin_code` to `findEmployee` and wait for a response
-                const employee = await this.findEmployee('pin_code')
-
-                // If we find an employee, we then logIn or logOut and show the modal, the `empHours` is what is returned during for logOut
-                if (employee) {
-                    this.empHours = await this.clockEmpl()
-                    //console.log(this.empHours)
-                    this.modalTypeLogin('S_login')
-                }
-
-                // If they enter the wrong pin, display the modal letting them know
-                else {
-                    this.modalTypeLogin('NF_empPin')
-                }
-            }
-        },
-
-        // This function is used to return the full table info from the `tables` based on the `seatTableCheck`
-        // Used when neededing to check the status of the table during logIn
-        async checkTableData() {
-            const tableData = this.tables.find(tb => tb['id'] === parseInt(this.seatTableCheck));
-            //console.log('tableData')
-            //console.log(tableData)
-            return tableData
-
-        },
-
-        /* This function is called when the employee clicks on the table buttons and trys to seat a table. It handles an 
-            employee trying to open a table, access a locked table, and logIn an employee if they are not already before 
-            seating a table. It works closely with the function `modalTypeTable` to display the modals realted to tables.
-        */
-        async handleTableSeat() {
-
-            // Gets data about the table we are interacting with
-            const tableData = await this.checkTableData()
-
-            //If the table we are trying to go into is open
-            if (tableData['status'] == 'open') {
-
-                // If are `empPin` is empty
-                // This is here because this function is also use to logIn employess
-                // So similar to `handleEmplLog` we check to see what logIn part they are at (code or pass)
-                if (this.empPin == '') {
-
-                    // Check for employee with `pin_num`
-                    const employee = await this.findEmployee('pin_num')
-
-                    // We dont find an employee, open modal saying not found
-                    if (!employee) {
-                        this.modalTypeLogin('NF_empNum')
-                    }
-
-                    // We find them, but they do not have access, we don't let them do anything
-                    else if (employee.access_level > 2) {
-                        this.modalTypeTable("X_access")
-                        return
-                    }
-
-                    // We find an employee and they have access, we check to see if they are clocked in and update `clockVal` based on that
-                    else {
-                        await this.check_clock()
-
-                        // They are not clocked in, offer them to clock in
-                        if (this.clockVal == 0) {
-                            this.empPin = this.userEnterVal
-                            this.empName = employee.display_name
-                            this.modalTypeTable("force_Login")
-                        }
-
-                        // They are clocked in, the table is then sat
-                        else {
-                            this.empPin = this.userEnterVal
-                            this.empName = employee.display_name
-                            this.modalTypeTable("S_tableSat")
-                        }
-                    }
-                }
-
-                // Here is part 2 of the logIn process the same as part 2 of employee login but handled here for tables
-                else if (this.empPin != '') {
-                    const employee = await this.findEmployee('pin_code')
-                    if (!employee) {
-                        this.modalTypeLogin('NF_empPin')
-                    }
-
-                    // Difference is we clock them in and seat the table
-                    else if (employee) {
-                        this.empHours = await this.clockEmpl()
-                        this.modalTypeTable("S_tableSat")
-
-                    }
-                }
-            }
-
-            // If the table we clicked is locked
-            else if (tableData['status'] == 'lock') {
-
-                // Lookup employee based on `pin_num`
-                const employee = await this.findEmployee('pin_num')
-
-                // If it does not match the one in the tables data, they dont have access
-                if (!employee || employee['pin_num'] != tableData['server']) {
-                    this.modalTypeTable("X_access")
-                }
-
-                // Else, they do have access and we switch the table
-                else if (employee) {
-                    console.log(employee)
-                    this.switchTable(this.seatTableCheck)
-                    this.userEnterVal = ''
-                }
-            }
-
-        },
-
         /* Here is the modal type that is used with everything realated to performing a regular logIn/logOut
-            with the employee button. the param `data` is used in the sister table modals but not really here.
-            It first grabs anythng related to the employee modal and makes two const when called are used to hide
-            all modal objects and clear the values realted to employee logIn/LogOut.
-        */
+                    with the employee button. the param `data` is used in the sister table modals but not really here.
+                    It first grabs anythng related to the employee modal and makes two const when called are used to hide
+                    all modal objects and clear the values realted to employee logIn/LogOut.
+                */
         async modalTypeLogin(type, data = 0) {
 
             const buttonModal = document.getElementById("buttonModal")
@@ -932,28 +447,519 @@ const Order = {
             }
 
         },
-        loginContinue() {
-            let curSelection = document.getElementById("TblEmp").value
-           // console.log(this.signedIn[0].name)
-            for (let i = 0; i < this.signedIn.length; i++) {
-                if (curSelection == this.signedIn[i].name) {
-                    /* this.empPin = this.signedIn[i].pin
-                    this.clockVal = 0
-                    this.empCode = this.signedIn[i].code
-                    this.empName = this.signedIn[i].name */
-                    //alert(this.empPin + " code:" + this.empCode)
-                    document.getElementById("buttonHead").innerHTML = "Enter Employee Pin"
-                    document.getElementById("buttonModal").style.display = "block"
-                    console.log(this.clockVal)
-                    this.clockEmpl()
+        ///////////////////////////////////////////SECTION employee log in functions
 
-                    return
+        // When called, runs the Back-End program from Flask
+        loadAdmin() {
+            fetch('/admin_BackEnd')
+        },
+        /* When called, clocks the Employee in or out.
+                   It sends the `empPin`, the 4 digit pincode, instead of the `empCode` since we use the `check_clock` with the `empCode`
+                   so that kinda checks if the `empCode` is vaild and this checks if the empPin is vaild. It also sends the `getTimestamp` which
+                   is used for the clock in/out time and the `clockVal` that is used to track if they should be clocked in or out.
+               */
+        async clockEmpl() {
+            const postData = {
+                empCode: this.empPin,
+                timestamp: this.getTimestamp(),
+                clockVal: this.clockVal
+            };
+            try {
+                const response = await fetch('/clock_Empl', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(postData)
+                })
+
+                // So here, it returns the hours worked and returns it to a var in the functions used to login Employee.
+                const data = await response.json()
+                console.log("Success:", data)
+                return data['Contents']
+
+            } catch (error) {
+                console.error("Error: ", error)
+            }
+        },
+
+        /* The function here takes the `empCode` and sends it to Flask to check if the employee is clocked in/out
+            The `userEnterVal` is the value that is entered with the employee login button modal. This is used multiple times
+            to hold both the `empCode` and `empPin`
+        */
+        async check_clock() {
+            const postData = {
+                empCode: this.userEnterVal,
+            };
+            try {
+                const response = await fetch('/check_clock', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(postData)
+                })
+
+                // Here it returns the value used to check if the employee is clocked in or out
+                const data = await response.json()
+                this.clockVal = data
+                console.log(this.clockVal)
+                console.log('Success:', data);
+
+            } catch (error) {
+                console.error('Error', error)
+            }
+        },
+        logEmpl() {
+            if (this.empPin != '') {
+                document.getElementById("buttonHead").innerHTML = "Enter Employee Pin"
+                document.getElementById("buttonModal").style.display = "block"
+            }
+            else if (this.empPin == '') {
+                document.getElementById("buttonHead").innerHTML = "Enter Employee Number"
+                document.getElementById("buttonModal").style.display = "block"
+            }
+            else {
+                console.error("Emp Login")
+            }
+        },
+        /* When called, this takes a param and looks at the employee json for that employee. It is used both when looking for an
+                    employee by the `empPin` and the `empCode`. It returns if it finds an employee or if none was found.
+                */
+        async findEmployee(param) {
+            const response = await fetch('./static/data/employees.json');
+            const data = await response.json()
+
+            // The param is the `pin_code` or the `pin_num
+            // I made it a seperate function in the case that we need to access employess by other params
+            const employee = data.Employee.find(emp => emp[param] === parseInt(this.userEnterVal));
+
+            return employee
+        },
+
+        /* So here is the function that is used when an employee is trying to logIn/logOUt with the employee button.
+            It is called twice to check the `empPin` and then check if the `empCode` is vaild. It works with the
+            function `modalTypeLogin` to display the info to the employee through the modal.
+        */
+        async handleEmplLog() {
+
+            // First we check to see if the employee is a step one (entering there 3 digit id)
+            if (this.empPin == '') {
+
+                // If so, pass the `pin_num` to `findEmployee` and wait for a response
+                const employee = await this.findEmployee('pin_num')
+
+                // If we find an employee, we store there name and make the modal that asks them if the want to logIn/logOut
+                // The check for if they we offer them to logIn or logOut is done in the modal
+                if (employee) {
+                    this.empName = employee.display_name
+                    this.modalTypeLogin('F_empNum')
+                }
+
+                // If we don't find an employee with the `pin_num` entered, we let them know and clear out the stored `empPin`
+                // This is done to prevent the modal asking for the `pin_code` being prompted
+                else {
+                    this.empPin = ""
+                    this.modalTypeLogin('NF_empNum')
+                }
+            }
+
+            // If we are at step 2 (Asking them for the 4 digit pass)
+            else if (this.empPin != '') {
+
+                // If so, pass the `pin_code` to `findEmployee` and wait for a response
+                const employee = await this.findEmployee('pin_code')
+
+                // If we find an employee, we then logIn or logOut and show the modal, the `empHours` is what is returned during for logOut
+                if (employee) {
+                    this.empHours = await this.clockEmpl()
+                    //console.log(this.empHours)
+                    this.modalTypeLogin('S_login')
+                }
+
+                // If they enter the wrong pin, display the modal letting them know
+                else {
+                    this.modalTypeLogin('NF_empPin')
+                }
+            }
+        },
+
+
+
+
+
+        /////////////////////////////////////////SECTION open/close tables
+        /* this function helps close the table when the button is clicked to close a table */
+        async closeTable() {
+            let status
+            const tableData = await this.checkTableData()
+            console.log("tableData:::::::: " + tableData)
+            status = tableData[this.currentTableId].status
+            if (status == "lock") {
+                this.modalTypeTable('CL_table', table)
+                console.log("table closed")
+            }
+        },
+        /* This function is used to set the style of each of the table buttons in the HTML window. In short, using VUE,
+                   when looping to create the table buttons, it here sets the style of each one based on the status. The return of 
+                   each case refers to each type of style in the CSS file. 
+               */
+
+        tableCheck(table) {
+            switch (table.status) {
+                case 'open':
+                    return 'tableAval'
+                case 'close':
+                    return 'tableClose'
+                case 'resv':
+                    return 'tableRes'
+                case 'lock':
+                    return 'tableLock'
+                default:
+                    console.error(`Table Style Error: Style: ${table.status}`)
+            }
+        },
+
+        /* With switching tables, this is called first to get the status of the table that the employee is trying to go into.
+            It uses the `tableId` of the table clicked on makes a quick check of the status of the table. The `seatTableCheck` is
+            used to keep track of what index table we are interacting with. This made it easier to have it check if when an employee
+            is trying to logIn, is it a normal logIn or a logIn with tables.
+        */
+        getTableStatus(tableId) {
+            const tableStatus = this.tables[tableId - 1].status
+            this.seatTableCheck = tableId
+
+            // Opens the function `modalTypeTable` that displays the options that are avaible with that table status
+            switch (tableStatus) {
+                case 'open':
+                    this.modalTypeTable('OP_table', tableId)
+                    break;
+                case 'close':
+                    this.modalTypeTable('CL_table', tableId)
+                    break;
+                case 'lock':
+                    this.modalTypeTable('LOCK_table', tableId)
+                    break;
+                case 'resv':
+                    this.modalTypeTable('RS_table', tableId)
+                    break;
+                default:
+                    console.error("Table get Status")
+            }
+        },
+
+        // This is used when pressing the exit button on the table display to manulally lock a table
+        lockTable() {
+            this.currentTableId = 0
+            this.seatTableCheck = -1
+            this.finalOrder = ''
+            this.overallTotal = ''
+            this.indTotal = ''
+
+        },
+
+        /* So this was orignally called when a table button was pressed, however with the table status options, there
+            had to be a few checks before switching a table. It takes the `tableId` of the one we want to open, and also
+            looks at the table that we are switching from. */
+        switchTable(tableId) {
+
+            const tableSwitchFrom = this.tables.find(table => table.id === this.currentTableId);
+            console.log(tableSwitchFrom)
+
+            // This is if we are not in a table screen, it just has to pull the data of the table we want to go to 
+            // If we don't check if a table is NULL, we would get an error when trying `tableSwitchFrom.id` 
+            if (!tableSwitchFrom) {
+                console.log("No table on window")
+                //console.log(this.tables)
+                const tableSwitchTo = this.tables.find(table => table.id === tableId);
+
+                this.currentTableId = tableSwitchTo.id
+                this.finalOrder = tableSwitchTo.tableOrder
+                this.overallTotal = tableSwitchTo.tableTotal
+            }
+
+            // If we click the table we currently have open, we are not going to do anything
+            else if (tableSwitchFrom.id == tableId) {
+                //console.log("same table switch")
+                return
+            }
+
+            // When we go to a new table with a table open, similar to if there is no table open at all
+            else {
+                // console.log(this.tables)
+                const tableSwitchTo = this.tables.find(table => table.id === tableId);
+
+                this.currentTableId = tableSwitchTo.id
+                this.finalOrder = tableSwitchTo.tableOrder
+                this.overallTotal = tableSwitchTo.tableTotal.toFixed(2)
+            }
+
+        },
+
+        /* Called when when have made it through all the steps with creating an open table. It gets the table to seat
+            by the `seatTableCheck`, but we need the index of the table not the id so we minus 1. I also found the 
+            simple solution to the problem of calling this function with checking the `empCode` or `empPin`, to just run
+            another check if one of them returns NULL. 
+        */
+        async seatTable() {
+            const tableToSeat = this.tables[this.seatTableCheck - 1]
+            //console.log(tableToSeat)
+
+            // So here I ran into trouble with checking the `pin_num` and the `pin_code`
+            // In the `findEmployee`, it uses the last value the employee entered in the buttonModal, `userEnterVal`
+            // If you are clocked in, you just need the pin, if not, it uses the code
+            let server = await this.findEmployee('pin_num')
+            if (!server) {
+                server = await this.findEmployee('pin_code')
+            }
+            //console.log(server)
+
+            // Fills the `tables` that is beaing seated with all data and locks it to that employee
+            tableToSeat.server = server['pin_num']
+            tableToSeat.SrtTime = this.getTimestamp()
+            tableToSeat.status = 'lock'
+
+            this.switchTable(this.seatTableCheck)   // Now we can switch to that table we just locked to the employee
+            this.updateTableOrdersFlask()   // Call to update Flask
+        },
+        // This function is used to return the full table info from the `tables` based on the `seatTableCheck`
+        // Used when neededing to check the status of the table during logIn
+        async checkTableData() {
+            const tableData = this.tables.find(tb => tb['id'] === parseInt(this.seatTableCheck));
+            //console.log("table Data: " + tableData)
+            return tableData
+
+        },
+
+        /* This function is called when the employee clicks on the table buttons and trys to seat a table. It handles an 
+            employee trying to open a table, access a locked table, and logIn an employee if they are not already before 
+            seating a table. It works closely with the function `modalTypeTable` to display the modals realted to tables.
+        */
+        async handleTableSeat() {
+
+            // Gets data about the table we are interacting with
+            const tableData = await this.checkTableData()
+
+            //If the table we are trying to go into is open
+            if (tableData['status'] == 'open') {
+
+                // If are `empPin` is empty
+                // This is here because this function is also use to logIn employess
+                // So similar to `handleEmplLog` we check to see what logIn part they are at (code or pass)
+                if (this.empPin == '') {
+
+                    // Check for employee with `pin_num`
+                    const employee = await this.findEmployee('pin_num')
+
+                    // We dont find an employee, open modal saying not found
+                    if (!employee) {
+                        this.modalTypeLogin('NF_empNum')
+                    }
+
+                    // We find them, but they do not have access, we don't let them do anything
+                    else if (employee.access_level > 2) {
+                        this.modalTypeTable("X_access")
+                        return
+                    }
+
+                    // We find an employee and they have access, we check to see if they are clocked in and update `clockVal` based on that
+                    else {
+                        await this.check_clock()
+
+                        // They are not clocked in, offer them to clock in
+                        if (this.clockVal == 0) {
+                            this.empPin = this.userEnterVal
+                            this.empName = employee.display_name
+                            this.modalTypeTable("force_Login")
+                        }
+
+                        // They are clocked in, the table is then sat
+                        else {
+                            this.empPin = this.userEnterVal
+                            this.empName = employee.display_name
+                            this.modalTypeTable("S_tableSat")
+                        }
+                    }
+                }
+
+                // Here is part 2 of the logIn process the same as part 2 of employee login but handled here for tables
+                else if (this.empPin != '') {
+                    const employee = await this.findEmployee('pin_code')
+                    if (!employee) {
+                        this.modalTypeLogin('NF_empPin')
+                    }
+
+                    // Difference is we clock them in and seat the table
+                    else if (employee) {
+                        this.empHours = await this.clockEmpl()
+                        this.modalTypeTable("S_tableSat")
+
+                    }
+                }
+            }
+
+            // If the table we clicked is locked
+            else if (tableData['status'] == 'lock') {
+
+                // Lookup employee based on `pin_num`
+                const employee = await this.findEmployee('pin_num')
+
+                // If it does not match the one in the tables data, they dont have access
+                if (!employee || employee['pin_num'] != tableData['server']) {
+                    this.modalTypeTable("X_access")
+                }
+
+                // Else, they do have access and we switch the table
+                else if (employee) {
+                    console.log(employee)
+                    this.switchTable(this.seatTableCheck)
+                    this.userEnterVal = ''
                 }
             }
 
         },
 
 
+
+        ////////////////////////////////////////SECTION add,remove, clear, print, 
+        /* calculate the cost of each individual item so it is easier to add to the overall bill */
+        calc() {
+            //alert("HI");
+            this.indTotal = 0;
+            if (this.entreChoice) {
+                this.indTotal = this.entreChoice.menu_item_price;
+            }
+            this.indTotal = parseFloat(this.indTotal).toFixed(2);
+        },//end Calc 
+        /* adds the input to the final order display. this function is like sending something to the 
+        check. */
+        addToFinal() {
+            if (this.noStock.includes(this.entreChoice.menu_item_name)) {
+                alert("We ran out of " + this.entreChoice.menu_item_name + ". Please select a different item.")
+            }
+            else {
+                this.finalOrder += this.entreChoice.menu_item_name + " "
+                this.entreChoice = []
+                //console.log(this.entreChoice)
+                this.overallTotal = parseFloat(this.overallTotal) + parseFloat(this.indTotal)
+                this.finalOrder += this.indTotal
+                this.finalOrder += "\n"
+                this.overallTotal = this.overallTotal.toFixed(2)
+                this.tables[this.currentTableId - 1]['tableOrder'] = this.finalOrder
+                this.tables[this.currentTableId - 1]['tableTotal'] = this.overallTotal
+                this.updateStock("subtract_from_stock")
+                this.updateTableOrdersFlask() // Call for Flask update
+            }
+        },
+        // This function is used to clear the order
+        clearOrder() {
+            const currentTable = this.tables.find(table => table.id === this.currentTableId);
+            currentTable.tableOrder = ''
+            currentTable.tableTotal = 0
+            this.finalOrder = "";
+            this.indTotal = 0;
+            this.overallTotal = (0).toFixed(2);
+        },
+        //removes specific item from the order - calls function to increment the stock as well
+        removeFromFinal(tableId) {
+            if (this.finalOrder.includes(this.entreChoice.menu_item_name)) {
+                this.finalOrder = this.finalOrder.replace(this.entreChoice.menu_item_name, "");
+                this.finalOrder = this.finalOrder.replace(parseFloat(this.entreChoice.menu_item_price).toFixed(2), "")
+                this.overallTotal = this.overallTotal - this.entreChoice.menu_item_price
+                this.overallTotal = this.overallTotal.toFixed(2)
+                alert(this.entreChoice.menu_item_name + " was removed from the check");
+                this.switchTable(this.currentTableId);
+                this.updateStock("add_to_stock")
+            }
+            else {
+                alert(this.entreChoice.menu_item_name + " was not found on this check")
+            }
+        },
+        tip() {
+            total = this.overallTotal
+            this.tip15 = total * .15
+            this.tip20 = total * .2
+            this.tip25 = total * .25
+            this.tip15.toFixed(2)
+            this.tip20.toFixed(2)
+            this.tip25.toFixed(2)
+            tipString = "15%: " + this.tip15.toFixed(2) + "\n" + "20%: " + this.tip20.toFixed(2) + "\n" + " 25%: " + this.tip25.toFixed(2)
+            return (tipString)
+        },
+
+        /* our version of "printing" the recipt for the customer */
+        printOrder() {
+            let printable = "Final Order" + this.finalOrder + "\n" + " Your Total Is: $" + this.overallTotal +
+                "\n Suggested Tips" + "\n" + this.tip() + "\n";
+            alert(printable)
+        },
+        ///////////////////////////////////////SECTION edit .json/flask
+        // When called, sends `tables` over to Flask to update the JSON file
+        updateTableOrdersFlask() {
+            fetch('/update_tables', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.tables)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    //console.log('Success:', data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        },
+
+        // When called, sends `menu_items` over to Flask to update the JSON file
+        updateItemStockFlask() {
+            fetch('/update_stock', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.menu_items)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    //console.log('Success:', data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        },
+        // Each time item is added to final order, its stock is calculated
+        updateStock(action) {
+            if (action == 'subtract_from_stock') {
+                for (let i = 0; i < this.menu_items.length; i++) {
+                    if (this.finalOrder.includes(this.menu_items[i].menu_item_name)) {
+                        this.menu_items[i].menu_item_stock -= 1
+                        if (this.menu_items[i].menu_item_stock <= 0 && !this.noStock.includes(this.menu_items[i].menu_item_name)) {
+                            this.noStock.push(this.menu_items[i].menu_item_name)
+                            alert("That was the last of " + this.menu_items[i].menu_item_name)
+                        }
+                        else if (this.menu_items[i].menu_item_stock <= 0) {
+                            alert("There is no more " + this.menu_items[i].menu_item_name + " in stock.")
+                        }
+                    }
+                }
+            }
+            else if (action == 'add_to_stock') {
+                for (let i = 0; i < this.menu_items.length; i++) {
+                    if (this.menu_items[i].menu_item_name == this.entreChoice.name) {
+                        this.menu_items[i].menu_item_stock += 1
+                        console.log("works")
+                        if (this.noStock.includes(this.menu_items[i].menu_item_name)) {
+                            this.noStock.pop(this.menu_items[i].menu_item_name)
+                        }
+                    }
+                }
+
+            }
+
+            this.updateItemStockFlask() // Call for Flask update
+        },
         toDatabase() {
             // Create a JSON object representing the orders data
             const ordersData = {
@@ -970,7 +976,7 @@ const Order = {
             // Convert the JSON object to a JSON string
             const jsonData = JSON.stringify(ordersData, null, 2);
             // Log jsonData to check if it's formatted correctly
-           // console.log("jsonData:", jsonData);
+            // console.log("jsonData:", jsonData);
 
             // Save the JSON string to a file
             const filename = 'orders.json';
@@ -981,25 +987,6 @@ const Order = {
             link.click();
             //console.log(this.getTimestamp())
         },
-        getTimestamp() {
-            const date = new Date();
-            const month = String(date.getMonth() + 1).padStart(2, '0'); // Adding 1 because getMonth() returns zero-based month
-            const day = String(date.getDate()).padStart(2, '0');
-            const year = date.getFullYear();
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
-            /* proves that it works with the console to verify the answer */
-            console.log(`${year}-${month}-${day} ${hours}:${minutes}:${seconds}`)
-            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-        }
-        /* 
-        // Example usage
-        console.log(getFormattedTimestamp()); // Output: e.g., 03/18/2024 15:27:45
-        
-         */
-
-
 
     }//end Methods
 
