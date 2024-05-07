@@ -43,6 +43,7 @@ const Order = {
             tip15: 0,
             tip20: 0,
             tip25: 0,
+            waittime: 0,
 
         }//end return
     }, //end data property
@@ -587,17 +588,31 @@ const Order = {
 
 
 
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////SECTION open/close tables////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        /////////////////////////////////////////SECTION open/close tables
         /* this function helps close the table when the button is clicked to close a table */
         async closeTable() {
-            let status
-            const tableData = await this.checkTableData()
-            console.log("tableData:::::::: " + tableData)
-            status = tableData[this.currentTableId].status
-            if (status == "lock") {
-                this.modalTypeTable('CL_table', table)
-                console.log("table closed")
+            const tableToClose = this.tables[this.currentTableId - 1];
+            // Check if there's a server assigned to the table
+            if (tableToClose.server != "") {
+                // Unlock the table by removing the server number and setting status to open
+                //also want to clear all the data inside the order box
+                //need to print before clearing or nothing will come out of it
+                this.printOrder()
+                tableToClose.server = "";
+                tableToClose.SrtTime = ""
+                this.clearOrder()
+                this.finalOrder = ""
+                tableToClose.status = 'open';
+                //prints recipt to alert
+
+                // Update the table information
+                this.switchTable(this.currentTableId);
+                this.updateTableOrdersFlask(); // Call to update Flask
+            } else {
+                console.log("No server assigned to this table.");
             }
         },
         /* This function is used to set the style of each of the table buttons in the HTML window. In short, using VUE,
@@ -655,14 +670,35 @@ const Order = {
             this.finalOrder = ''
             this.overallTotal = ''
             this.indTotal = ''
+            this.checkWait()
 
+        },
+        /*
+        check and update the wait time
+        if all the tables are taken we have a base time of an hour. 
+        if any are open the time should be 0 minutes
+        */
+        checkWait() {
+            let open_tables = this.tables.length
+            for (let i = 1; i < this.tables.length; i++) {
+                if (this.tables[i].status != 'open') {
+                    open_tables--
+                }
+            }
+            //all the tables are full --> wait time 60 minutes
+            if (open_tables == 0) {
+                this.wait_time = 60
+            }
+            else {
+                this.wait_time = 0
+            }
         },
 
         /* So this was orignally called when a table button was pressed, however with the table status options, there
             had to be a few checks before switching a table. It takes the `tableId` of the one we want to open, and also
             looks at the table that we are switching from. */
         switchTable(tableId) {
-
+            this.checkWait() // updates the wait time
             const tableSwitchFrom = this.tables.find(table => table.id === this.currentTableId);
             console.log(tableSwitchFrom)
 
@@ -670,9 +706,7 @@ const Order = {
             // If we don't check if a table is NULL, we would get an error when trying `tableSwitchFrom.id` 
             if (!tableSwitchFrom) {
                 console.log("No table on window")
-                //console.log(this.tables)
                 const tableSwitchTo = this.tables.find(table => table.id === tableId);
-
                 this.currentTableId = tableSwitchTo.id
                 this.finalOrder = tableSwitchTo.tableOrder
                 this.overallTotal = tableSwitchTo.tableTotal
@@ -688,12 +722,10 @@ const Order = {
             else {
                 // console.log(this.tables)
                 const tableSwitchTo = this.tables.find(table => table.id === tableId);
-
                 this.currentTableId = tableSwitchTo.id
                 this.finalOrder = tableSwitchTo.tableOrder
                 this.overallTotal = tableSwitchTo.tableTotal.toFixed(2)
             }
-
         },
 
         /* Called when when have made it through all the steps with creating an open table. It gets the table to seat
@@ -959,6 +991,18 @@ const Order = {
             }
 
             this.updateItemStockFlask() // Call for Flask update
+        },
+        getTimestamp() {
+            const date = new Date();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Adding 1 because getMonth() returns zero-based month
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            /* proves that it works with the console to verify the answer */
+            console.log(`${month}/${day}/${year} ${hours}:${minutes}:${seconds}`)
+            return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
         },
         toDatabase() {
             // Create a JSON object representing the orders data
