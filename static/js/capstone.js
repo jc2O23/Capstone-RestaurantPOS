@@ -880,6 +880,7 @@ const Order = {
                 if(this.entreChoice.menu_item_name) {
                     this.updateItemStockFlask(this.entreChoice.menu_items_id, this.entreChoice.menu_item_stock) // Call for Flask update
                     this.finalOrder += this.entreChoice.menu_item_name + " "
+                    this.sentToPrinters()
                     this.entreChoice = []
                     //console.log(this.entreChoice)
                     this.overallTotal = parseFloat(this.overallTotal) + parseFloat(this.indTotal)
@@ -896,6 +897,23 @@ const Order = {
                 else {
                     console.error("Final Order: No item selected")
                 }
+            }
+        },
+        sendToPrinters() {
+            if (this.entreChoice.menu_item_parent == 1) {
+                console.log("Grill: " + this.entreChoice.menu_item_name);
+            } else if (this.entreChoice.menu_item_parent == 2) {
+                console.log("Salad station: " + this.entreChoice.menu_item_name);
+            } else if (this.entreChoice.menu_item_parent == 3) {
+                console.log("Appetizer station: " + this.entreChoice.menu_item_name);
+            } else if (this.entreChoice.menu_item_parent == 4) {
+                console.log("Wraps: " + this.entreChoice.menu_item_name);
+            } else if (this.entreChoice.menu_item_parent == 5) {
+                console.log("Main grill: " + this.entreChoice.menu_item_name);
+            } else if (this.entreChoice.menu_item_parent == 6) {
+                console.log("front of house: " + this.entreChoice.menu_item_name);
+            } else {
+                console.error(`Kitchen Printer error`);
             }
         },
         // This function is used to clear the order
