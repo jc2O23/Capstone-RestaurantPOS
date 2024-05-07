@@ -36,10 +36,6 @@ const Order = {
             clockVal: -1,
             seatTableCheck: -1,
             noStock: [],
-            signedIn: [
-                { name: "Liam M.", pin: 909, code: 1909, clockedIn: 1 },
-                { name: "John C.", pin: 101, code: 1101, clockedIn: 1 }
-            ],
             tip15: 0,
             tip20: 0,
             tip25: 0,
@@ -694,10 +690,10 @@ const Order = {
             }
             //all the tables are full --> wait time 60 minutes
             if (open_tables == 0) {
-                this.wait_time = 60
+                this.waittime = 60
             }
             else {
-                this.wait_time = 0
+                this.waittime = 0
             }
         },
 
