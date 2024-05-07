@@ -18,7 +18,7 @@
             <button id="logEmpl" v-on:click="logEmpl">Employee</button>
             <button id="adminLog" v-on:click="loadAdmin()">Admin</button>
         </div>
-        
+
         <div>
             <p>Current Wait for a table: [[waittime]] minutes</p>
         </div>
@@ -94,10 +94,9 @@
                 style="background-color: lightgrey;">
             <input type="button" id="btnPrint" v-on:click="printOrder" value="Print the whole order"
                 style="background-color: lightgrey;">
-                <input type="button" id="btnCloseTable" v-on:click="closeTable" value="Close Table"
-                    style="background-color: lightgrey;>
-                <input type="button" id="btnRemoveItem" v-on:click="removeFromFinal" value="Remove this item"
-                style="background-color: lightgrey;" >
+            <input type="button" id="btnCloseTable" v-on:click="closeTable" value="Close Table" style="background-color: lightgrey;">
+                <input type=" button" id="btnRemoveItem" v-on:click="removeFromFinal" value="Remove this item"
+                style="background-color: lightgrey;">
 
             <!-- <button @click="sendData" style="background-color: lightgrey;">Send Data to
                 Flask</button><br></br>
@@ -147,25 +146,27 @@
             </div>
             <div id="menu_items" class="child">
                 <h1>Items</h1>
-                <span v-if="sel_menu" v-for="item in menu_items" 
+                <span v-if="sel_menu" v-for="item in menu_items"
                     v-show="sel_section.menu_section_id == item.menu_item_parent && item.menu_main == sel_menu.menu_id">
-                    <input  type="radio" :id="item.menu_items_id" name='menItem_RAD' v-model="entreChoice" :value="item"
+                    <input type="radio" :id="item.menu_items_id" name='menItem_RAD' v-model="entreChoice" :value="item"
                         v-on:change="calc" />
-                    <label :for="item.menu_items_id" :class="stockCheck(item)">[[item.menu_item_name]] ([[item.menu_item_stock]])</label>
+                    <label :for="item.menu_items_id" :class="stockCheck(item)">[[item.menu_item_name]]
+                        ([[item.menu_item_stock]])</label>
                 </span>
-                <span v-for="item in menu_items" 
+                <span v-for="item in menu_items"
                     v-show="sel_menu.menu_id == item.menu_main && item.menu_item_parent == 0">
-                    <input type="radio"  :id="item.menu_items_id" name='menItem_RAD2' v-model="entreChoice"
-                        :value="item" v-on:change="calc" />
-                    <label :for="item.menu_items_id" :class="stockCheck(item)">[[item.menu_item_name]] ([[item.menu_item_stock]])</label>
+                    <input type="radio" :id="item.menu_items_id" name='menItem_RAD2' v-model="entreChoice" :value="item"
+                        v-on:change="calc" />
+                    <label :for="item.menu_items_id" :class="stockCheck(item)">[[item.menu_item_name]]
+                        ([[item.menu_item_stock]])</label>
                 </span>
             </div>
-            
+
         </div> <!--ends child-->
         <br />
         <br />
 
-        
+
     </div><!--end of the vue div-->
     <script src="{{ url_for('static', filename='js/capstone.js') }}"></script>
 </body>
