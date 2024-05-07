@@ -4,8 +4,8 @@
       "menu_items_id": 1,
       "menu_item_name": "Cowboy Burger",
       "menu_item_desc": "10oz Burger, BBQ, Cheddar Cheese",
-      "menu_item_price": 17,
-      "menu_item_stock": -1,
+      "menu_item_price": 17.0,
+      "menu_item_stock": 0,
       "menu_item_parent": 1,
       "menu_main": 1
     },
@@ -13,8 +13,8 @@
       "menu_items_id": 2,
       "menu_item_name": "Smashed Burger",
       "menu_item_desc": "2 Beef Patties, Fried Onions, Bacon, Mayo",
-      "menu_item_price": 18,
-      "menu_item_stock": 97,
+      "menu_item_price": 18.0,
+      "menu_item_stock": 15,
       "menu_item_parent": 1,
       "menu_main": 1
     },
@@ -22,8 +22,8 @@
       "menu_items_id": 3,
       "menu_item_name": "Caesar Salad",
       "menu_item_desc": "Romaine, Parmesan, Croutons, Caesar Dressing",
-      "menu_item_price": 12,
-      "menu_item_stock": 96,
+      "menu_item_price": 12.0,
+      "menu_item_stock": 95,
       "menu_item_parent": 2,
       "menu_main": 1
     },
@@ -31,8 +31,8 @@
       "menu_items_id": 4,
       "menu_item_name": "Apple Walnut",
       "menu_item_desc": "Spring Greens, Apple walnuts, crum blue cheese, apple cider vinaigrette",
-      "menu_item_price": 14,
-      "menu_item_stock": 99,
+      "menu_item_price": 14.0,
+      "menu_item_stock": 12,
       "menu_item_parent": 2,
       "menu_main": 1
     },
@@ -40,8 +40,8 @@
       "menu_items_id": 5,
       "menu_item_name": "Soup of Day",
       "menu_item_desc": "ask server",
-      "menu_item_price": 9,
-      "menu_item_stock": 96,
+      "menu_item_price": 9.0,
+      "menu_item_stock": 99,
       "menu_item_parent": 3,
       "menu_main": 1
     },
@@ -49,8 +49,8 @@
       "menu_items_id": 6,
       "menu_item_name": "Cheesesteak Eggrolls",
       "menu_item_desc": "prime beef, fried onions, american cheese, wonton skin",
-      "menu_item_price": 13,
-      "menu_item_stock": 99,
+      "menu_item_price": 13.0,
+      "menu_item_stock": 96,
       "menu_item_parent": 3,
       "menu_main": 1
     },
@@ -58,8 +58,8 @@
       "menu_items_id": 7,
       "menu_item_name": "CBLT",
       "menu_item_desc": "fried chicken, spring greens, tomatoes, bacon, cobly jack, ranch",
-      "menu_item_price": 15,
-      "menu_item_stock": 96,
+      "menu_item_price": 15.0,
+      "menu_item_stock": 99,
       "menu_item_parent": 4,
       "menu_main": 1
     },
@@ -67,8 +67,8 @@
       "menu_items_id": 8,
       "menu_item_name": "Buffalo Chicken Wrap",
       "menu_item_desc": "fried chicken, house hot, romaine, bleu cheese dressing",
-      "menu_item_price": 15,
-      "menu_item_stock": 99,
+      "menu_item_price": 15.0,
+      "menu_item_stock": 98,
       "menu_item_parent": 4,
       "menu_main": 1
     },
@@ -76,7 +76,7 @@
       "menu_items_id": 9,
       "menu_item_name": "Mango Salmon",
       "menu_item_desc": "seared salmon, pineapple rice, grilled veggies, mango-glaze",
-      "menu_item_price": 26,
+      "menu_item_price": 26.0,
       "menu_item_stock": 75,
       "menu_item_parent": 5,
       "menu_main": 1
@@ -85,7 +85,7 @@
       "menu_items_id": 10,
       "menu_item_name": "Seafood Fried Rice",
       "menu_item_desc": "lobster, shrimp, scallions, kimchi, pineapple rice, sunny side egg",
-      "menu_item_price": 31,
+      "menu_item_price": 31.0,
       "menu_item_stock": 75,
       "menu_item_parent": 5,
       "menu_main": 1
@@ -94,7 +94,7 @@
       "menu_items_id": 11,
       "menu_item_name": "Junior Cheesecake",
       "menu_item_desc": "whipped cream, chocolate drizzle",
-      "menu_item_price": 9,
+      "menu_item_price": 9.0,
       "menu_item_stock": 50,
       "menu_item_parent": 6,
       "menu_main": 1
@@ -103,7 +103,7 @@
       "menu_items_id": 12,
       "menu_item_name": "Chocolate Lava",
       "menu_item_desc": "whipped cream, vanilia ice-cream",
-      "menu_item_price": 11,
+      "menu_item_price": 11.0,
       "menu_item_stock": 50,
       "menu_item_parent": 6,
       "menu_main": 1
@@ -112,8 +112,8 @@
       "menu_items_id": 13,
       "menu_item_name": "Side Fries",
       "menu_item_desc": "",
-      "menu_item_price": 4,
-      "menu_item_stock": 99,
+      "menu_item_price": 4.0,
+      "menu_item_stock": 3,
       "menu_item_parent": 0,
       "menu_main": 6
     },
@@ -121,8 +121,8 @@
       "menu_items_id": 18,
       "menu_item_name": "Wings",
       "menu_item_desc": "Your Choice of sauce, celery, blue cheese",
-      "menu_item_price": 15,
-      "menu_item_stock": 96,
+      "menu_item_price": 15.0,
+      "menu_item_stock": 98,
       "menu_item_parent": 3,
       "menu_main": 1
     },
@@ -130,8 +130,8 @@
       "menu_items_id": 21,
       "menu_item_name": "Side Salad",
       "menu_item_desc": "Spring Greens, Tomatoes, Red Onions, Cucumbers, Your choice of dressing",
-      "menu_item_price": 6,
-      "menu_item_stock": 99,
+      "menu_item_price": 6.0,
+      "menu_item_stock": 5,
       "menu_item_parent": 0,
       "menu_main": 6
     },
@@ -139,8 +139,8 @@
       "menu_items_id": 32,
       "menu_item_name": "Side Caesar",
       "menu_item_desc": "Small side of Romaine, Parmesan, Croutons, Caesar Dressing",
-      "menu_item_price": 4,
-      "menu_item_stock": 99,
+      "menu_item_price": 4.0,
+      "menu_item_stock": 3,
       "menu_item_parent": 0,
       "menu_main": 6
     },
@@ -148,7 +148,7 @@
       "menu_items_id": 33,
       "menu_item_name": "Water",
       "menu_item_desc": "",
-      "menu_item_price": 0,
+      "menu_item_price": 0.0,
       "menu_item_stock": 99,
       "menu_item_parent": 0,
       "menu_main": 3
@@ -157,7 +157,7 @@
       "menu_items_id": 34,
       "menu_item_name": "Beer",
       "menu_item_desc": "cold, light ale",
-      "menu_item_price": 7,
+      "menu_item_price": 7.0,
       "menu_item_stock": 99,
       "menu_item_parent": 0,
       "menu_main": 3
@@ -167,7 +167,7 @@
       "menu_item_name": "Coke",
       "menu_item_desc": "",
       "menu_item_price": 2.5,
-      "menu_item_stock": 99,
+      "menu_item_stock": 98,
       "menu_item_parent": 0,
       "menu_main": 3
     },
@@ -175,8 +175,8 @@
       "menu_items_id": 41,
       "menu_item_name": "Side Sweet Fries",
       "menu_item_desc": "Side of Sweet Potatoe Fries",
-      "menu_item_price": 5,
-      "menu_item_stock": 99,
+      "menu_item_price": 5.0,
+      "menu_item_stock": 97,
       "menu_item_parent": 0,
       "menu_main": 6
     },
@@ -184,7 +184,7 @@
       "menu_items_id": 44,
       "menu_item_name": "Coffe",
       "menu_item_desc": "Light dark brewed",
-      "menu_item_price": 3,
+      "menu_item_price": 3.0,
       "menu_item_stock": 99,
       "menu_item_parent": 0,
       "menu_main": 3
@@ -193,8 +193,8 @@
       "menu_items_id": 46,
       "menu_item_name": "R7 Burger",
       "menu_item_desc": "Lettuce, Red Onions, Tomatoes",
-      "menu_item_price": 14,
-      "menu_item_stock": 96,
+      "menu_item_price": 14.0,
+      "menu_item_stock": 98,
       "menu_item_parent": 1,
       "menu_main": 1
     },
@@ -202,7 +202,7 @@
       "menu_items_id": 56,
       "menu_item_name": "Wine",
       "menu_item_desc": "",
-      "menu_item_price": 14,
+      "menu_item_price": 14.0,
       "menu_item_stock": 99,
       "menu_item_parent": 0,
       "menu_main": 3
@@ -211,7 +211,7 @@
       "menu_items_id": 60,
       "menu_item_name": "HH Wings",
       "menu_item_desc": "Happy hour Wings",
-      "menu_item_price": 8,
+      "menu_item_price": 8.0,
       "menu_item_stock": 99,
       "menu_item_parent": 0,
       "menu_main": 29
@@ -220,17 +220,17 @@
       "menu_items_id": 61,
       "menu_item_name": "HH Tacos",
       "menu_item_desc": "",
-      "menu_item_price": 8,
+      "menu_item_price": 8.0,
       "menu_item_stock": 99,
       "menu_item_parent": 0,
       "menu_main": 29
     },
     {
       "menu_items_id": 62,
-      "menu_item_name": "Classic Burger",
+      "menu_item_name": "Orignal Burger",
       "menu_item_desc": "",
-      "menu_item_price": 19,
-      "menu_item_stock": 95,
+      "menu_item_price": 19.0,
+      "menu_item_stock": 98,
       "menu_item_parent": 1,
       "menu_main": 1
     }

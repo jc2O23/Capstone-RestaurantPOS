@@ -267,6 +267,15 @@ class MenuItems_TableDAO:
             """, (menu_item_name, menu_item_desc, menu_item_price, menu_item_stock, menu_item_parent, menu_main, item_id,))
             self.connection.commit()
     
+    def update_item_stock_by_id(self, menu_item_stock, item_id):
+        with self.connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE menu_items
+                SET menu_item_stock = %s
+                WHERE menu_items_id = %s
+            """, (menu_item_stock, item_id,))
+            self.connection.commit()
+    
     def menuItems_to_json(self):
         try:
             with self.connection.cursor() as cursor:
@@ -405,6 +414,16 @@ class EmployeesShift_TableDAO:
         with self.connection.cursor() as cursor:
             cursor.execute("SELECT * FROM employee_shift")
             return [EmployeesShift_Table(*row) for row in cursor.fetchall()]
+    
+    def fetch_closed_records(self):
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM employee_shift WHERE close_record = 1")
+            return [EmployeesShift_Table(*row) for row in cursor.fetchall()]
+        
+    def fetch_open_records(self):
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM employee_shift WHERE close_record = 0")
+            return [EmployeesShift_Table(*row) for row in cursor.fetchall()]
         
     def employee_clockIN(self, clock_In, employee_id):
         with self.connection.cursor() as cursor:
@@ -433,6 +452,22 @@ class EmployeesShift_TableDAO:
                 return None
             
     def employee_clockOUT(self, clock_record_id, clock_Out):
+        with self.connection.cursor() as cursor:
+            cursor.execute("""
+                    UPDATE employee_shift SET clock_Out = %s, close_record = %s, clock_total = TIMESTAMPDIFF(MINUTE, clock_In, %s) / 60
+                           WHERE clock_record_id = %s
+            """, (clock_Out, '1', clock_Out, clock_record_id,))
+            self.connection.commit()
+    
+    def update_Now_ClockedIN(self, clock_record_id, clock_In):
+        with self.connection.cursor() as cursor:
+            cursor.execute("""
+                    UPDATE employee_shift SET clock_In = %s, clock_out = NULL, close_record = 0, clock_total = NULL
+                           WHERE clock_record_id = %s
+            """, (clock_In, clock_record_id,))
+            self.connection.commit()
+    
+    def update_Now_ClockedOUT(self, clock_record_id, clock_Out):
         with self.connection.cursor() as cursor:
             cursor.execute("""
                     UPDATE employee_shift SET clock_Out = %s, close_record = %s, clock_total = TIMESTAMPDIFF(MINUTE, clock_In, %s) / 60

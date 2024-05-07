@@ -10,11 +10,11 @@
     },
     {
       "id": 2,
-      "tableOrder": "Classic Burger 19.00\nCBLT 15.00\nSmashed Burger 18.00\nSmashed Burger 18.00\n",
-      "tableTotal": "70.00",
-      "server": 909,
-      "status": "lock",
-      "SrtTime": "2024-04-29 22:18:00"
+      "tableOrder": "",
+      "tableTotal": 0,
+      "server": "",
+      "status": "open",
+      "SrtTime": ""
     },
     {
       "id": 3,
@@ -42,11 +42,11 @@
     },
     {
       "id": 6,
-      "tableOrder": "Cowboy Burger 17.00\nnew burger 19.00\nCaesar Salad 12.00\nSoup of Day 9.00\nWings 15.00\nR7 Burger 14.00\nCowboy Burger 17.00\nCaesar Salad 12.00\n",
-      "tableTotal": "115.00",
+      "tableOrder": "",
+      "tableTotal": 0,
       "server": 101,
       "status": "lock",
-      "SrtTime": "2024-04-29 22:17:47"
+      "SrtTime": "2024-05-07 12:11:31"
     },
     {
       "id": 7,

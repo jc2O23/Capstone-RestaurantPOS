@@ -6,6 +6,8 @@ from tkinter import messagebox
 import re
 import requests
 from requests.exceptions import ConnectionError
+import webbrowser
+import datetime
 
 # When this function is called, instead of polling, the backend can send an request to Flask for the JSON files to be 
 # loaded again on the webpage.
@@ -19,6 +21,11 @@ def updateJsonFiles():
     except ConnectionError:
         print("Failed to connect to the server. The server may be offline.")
         return 
+    
+# Global button style
+
+
+
 
 # Class that is used to create the first window that starts up, the login window
 # region Login
@@ -28,6 +35,8 @@ class AdminLogin:
         self.root.geometry("300x250")
         self.root.resizable(False, False)
         self.root.title('Log-In')
+        btn_style = ttk.Style()
+        btn_style.configure('btn_style.TButton', font=('', 14))
 
 
         self.screen_width = self.root.winfo_screenwidth()
@@ -44,17 +53,17 @@ class AdminLogin:
         self.signin.pack(padx=10, pady=10, fill='x', expand=True)
 
 
-        self.user_enter_label = ttk.Label(self.signin, text="User Name:")
+        self.user_enter_label = ttk.Label(self.signin, text="User Name:", font=('', 12))
         self.user_enter_label.pack(fill='x', expand=True)
 
-        self.user_enter_field = ttk.Entry(self.signin, textvariable=self.user_enter)
+        self.user_enter_field = ttk.Entry(self.signin, textvariable=self.user_enter, font=('', 12))
         self.user_enter_field.pack(fill='x', expand=True)
         self.user_enter_field.focus()
 
-        self.password_label = ttk.Label(self.signin, text="Password:")
+        self.password_label = ttk.Label(self.signin, text="Password:", font=('', 12))
         self.password_label.pack(fill='x', expand=True)
 
-        self.password_entry = ttk.Entry(self.signin, textvariable=self.user_pass, show="*")
+        self.password_entry = ttk.Entry(self.signin, textvariable=self.user_pass, show="*", font=('', 12))
         self.password_entry.pack(fill='x', expand=True)
 
         self.login_button = ttk.Button(self.signin, text="Login", command=self.login_attempt)
@@ -96,7 +105,7 @@ class AdminLogin:
 
     def admin_logIn(self):
         self.root.destroy()
-        mainWindow("ADMIN")
+        createMain = mainWindow("ADMIN")
         return
 # endregion
 
@@ -143,8 +152,12 @@ class mainWindow:
         self.employee_button.pack(padx=10, pady=5, side='left')
 
         self.shift_image = PhotoImage(file="./images/timeMange_64x64.png")
-        self.shift_button = tk.Button(self.top_frame, image=self.shift_image, width=75, height=100, text="Time\nManagment", compound='top', padx=10, pady=10, font='bold, 12')
+        self.shift_button = tk.Button(self.top_frame, image=self.shift_image, width=75, height=100, text="Time\nManagment", compound='top', padx=10, pady=10, font='bold, 12', command=self.timeManageWindow)
         self.shift_button.pack(padx=10, pady=5, side='left')
+
+        self.frontEnd_image = PhotoImage(file="./images/frontEnd_64x64.png")
+        self.frontEnd_button = tk.Button(self.top_frame, image=self.frontEnd_image, width=75, height=100, text="Front End", compound='top', padx=10, pady=10, font='bold, 12', command=self.openFrontEnd)
+        self.frontEnd_button.pack(padx=10, pady=5, side='left')
 
         self.left_frame = tk.Frame(self.root, bg='lightgrey', width=400)  
         self.left_frame.pack(side='left', fill='both', expand=False)
@@ -168,6 +181,19 @@ class mainWindow:
 
         EmployeeWindow(self.right_frame, self.left_frame, self.top_frame)
 
+    def timeManageWindow(self):
+        if self.current_window == "timeManage":
+            return
+        else: 
+            self.current_window = "timeManage"
+            self.left_frame.destroy()
+            self.right_frame.destroy()
+
+        self.left_frame = tk.Frame(self.root, bg='lightgrey', width=400)  
+        self.right_frame = tk.Frame(self.root, bg='darkgrey') 
+
+        TimeManagment(self.right_frame, self.left_frame, self.top_frame)
+
 
     def menu_Window(self):
         if self.current_window == "menu":
@@ -182,6 +208,9 @@ class mainWindow:
 
         Menu_Window(self.root, self.top_frame, self.right_frame, self.left_frame)
 
+    def openFrontEnd(self):
+        webbrowser.open('http://127.0.0.1:5000')
+
     def sign_out(self):
         
         self.root.destroy()
@@ -191,6 +220,7 @@ class mainWindow:
 # region Menu Window
 class Menu_Window: 
     def __init__(self, main_Root, main_TopFrame, main_RightFrame, main_LeftFrame):
+
         self.top_frame = main_TopFrame
         self.root = main_Root
         self.right_frame = main_RightFrame
@@ -199,10 +229,14 @@ class Menu_Window:
         self.left_frame.pack(side='left', fill='both', expand=False)
         self.right_frame.pack(side='left', fill='both', expand=True)
 
+        self.btmLeft = tk.Frame(self.left_frame, bg='lightgray', height=10)  
+        self.btmLeft.pack(side='bottom', fill='both', expand=False)
+
 
         self.style = ttk.Style(self.root)
         self.style.configure("Treeview.Heading", font=('Helvetica', 14, 'bold'))
-        self.style.configure("Treeview", font=('Helvetica', 12), rowheight = 25)
+        self.style.configure("Treeview", font=('Helvetica', 14), rowheight = 25)
+        
 
         self.tree = ttk.Treeview(self.left_frame)
         self.tree.heading('#0', text='---- Menu Data ----', anchor=tk.CENTER)
@@ -215,6 +249,15 @@ class Menu_Window:
         self.tree.column("#0", width=300)  
 
         self.build_tree()
+
+        self.max_stock = ttk.Button(self.btmLeft, text="Max Stock", style='btn_style.TButton')
+        self.max_stock.pack(side='left')
+
+        self.refresh = ttk.Button(self.btmLeft, text="Refresh Tree", style='btn_style.TButton')
+        self.refresh.pack(side='left')
+
+        self.search = ttk.Button(self.btmLeft, text="Find Item", style='btn_style.TButton')
+        self.search.pack(side='left')
     
         self.tree.bind("<Double-1>", self.on_item_selected)
 
@@ -316,27 +359,29 @@ class FrameOne:
     def __init__(self, frame1, info_label, main_window):
         self.info_label = info_label
         self.main_window = main_window
+        btn_style = ttk.Style()
+        btn_style.configure('btn_style.TButton', font=('', 14))
 
-        self.menuName_label = ttk.Label(frame1, text="Menu Name:")
+        self.menuName_label = ttk.Label(frame1, text="Menu Name:", font=('', 12), padding=10)
         self.menuName_label.grid(row=0, column=0, padx=11, pady=11)
 
-        self.menuName_entry = ttk.Entry(frame1)
+        self.menuName_entry = ttk.Entry(frame1, font=('', 12))
         self.menuName_entry.grid(row=0, column=1, padx=11, pady=11)
 
-        self.menuStrt_label = ttk.Label(frame1, text="Menu Start/End Time:")
+        self.menuStrt_label = ttk.Label(frame1, text="Menu Start/End Time:", font=('', 12), padding=10)
         self.menuStrt_label.grid(row=1, column=0, padx=5, pady=5)
 
         self.menuStrt_levels = ['9am', '10am', '11am', '12pm', '1pm', '2pm', '3pm', '4pm', '5pm', '6pm', '7pm', '8pm', '9pm', '10pm']
-        self.menuStrt_Entry = ttk.Combobox(frame1, values=self.menuStrt_levels, width=10, state='readonly')
+        self.menuStrt_Entry = ttk.Combobox(frame1, values=self.menuStrt_levels, width=10, state='readonly', font=('', 12))
         self.menuStrt_Entry.grid(row=1, column=1, padx=5, pady=5)
         self.menuStrt_Entry.bind("<<ComboboxSelected>>", self.check_end_time)
 
         self.menuEnd_levels = []
-        self.menuEnd_Entry = ttk.Combobox(frame1, values=self.menuEnd_levels, width=10, state='readonly')
+        self.menuEnd_Entry = ttk.Combobox(frame1, values=self.menuEnd_levels, width=10, state='readonly', font=('', 12))
         self.menuEnd_Entry.grid(row=1, column=2, padx=5, pady=5)
         self.menuEnd_Entry.grid_remove()
 
-        self.menuDays_label = ttk.Label(frame1, text='Menu Days')
+        self.menuDays_label = ttk.Label(frame1, text='Menu Days', font=('', 12), padding=10)
         self.menuDays_label.grid(row=2, column=0, padx=5, pady=5)
 
         self.menuDays_opts = ['Every Day|All', 'Monday|Mon', 'Tuesday|Tues', 'Wednesday|Wed', 'Thursday|Thurs', 'Friday|Fri', 'Saturday|Sat', 'Sunday|Sun']
@@ -349,22 +394,22 @@ class FrameOne:
         for day_option in self.menuDays_opts:
             day, abbr = day_option.split('|')
             if day == 'Every Day':
-                cb = tk.Checkbutton(frame1, text=day, variable=self.everyday_var, command=self.lock_days)
+                cb = tk.Checkbutton(frame1, text=day, variable=self.everyday_var, command=self.lock_days, font=('', 12))
             else:
-                cb = tk.Checkbutton(frame1, text=day, variable=self.day_vars[day])
+                cb = tk.Checkbutton(frame1, text=day, variable=self.day_vars[day], font=('', 12))
                 self.day_checkbuttons.append(cb) 
             cb.grid(row=self.row, column=1, sticky=tk.W)
             self.row += 1
 
         
         self.checkUpd = 0
-        self.submit_button = ttk.Button(frame1, text="Submit", command=self.insert_menu)
+        self.submit_button = ttk.Button(frame1, text="Submit", style='btn_style.TButton', command=self.insert_menu)
         self.submit_button.grid(row=10, column=0, padx=11, pady=11)
 
-        self.clear_button = ttk.Button(frame1, text="Clear", command=self.clear_selection)
+        self.clear_button = ttk.Button(frame1, text="Clear", style='btn_style.TButton', command=self.clear_selection)
         self.clear_button.grid(row=10, column=1, padx=11, pady=11)
 
-        self.delete_button = ttk.Button(frame1, text="Delete", command=self.delete_menu)
+        self.delete_button = ttk.Button(frame1, text="Delete", style='btn_style.TButton', command=self.delete_menu)
         self.delete_button.grid(row=10, column=2, padx=11, pady=11)
 
 
@@ -501,28 +546,31 @@ class FrameTwo:
     def __init__(self, frame2, info_label, main_window):
         self.info_label = info_label
         self.main_window = main_window
+
+        btn_style = ttk.Style()
+        btn_style.configure('btn_style.TButton', font=('', 14))
         
-        self.secName_label = ttk.Label(frame2, text="Section Name:")
+        self.secName_label = ttk.Label(frame2, text="Section Name:", font=('', 12), padding=10)
         self.secName_label.grid(row=0, column=0, padx=11, pady=11)
 
-        self.secName_entry = ttk.Entry(frame2)
+        self.secName_entry = ttk.Entry(frame2, font=('', 12))
         self.secName_entry.grid(row=0, column=1, padx=11, pady=11)
 
-        self.parMenu_Label = ttk.Label(frame2, text="Parent Menu:")
+        self.parMenu_Label = ttk.Label(frame2, text="Parent Menu:", font=('', 12), padding=10)
         self.parMenu_Label.grid(row=1, column=0, padx=11, pady=11)
 
         self.menuLevels = []
-        self.patMenu_entry = ttk.Combobox(frame2, values=self.menuLevels, state='readonly')
+        self.patMenu_entry = ttk.Combobox(frame2, values=self.menuLevels, state='readonly', font=('', 12))
         self.patMenu_entry.grid(row=1, column=1, padx=11, pady=11)
         self.fill_menu_opts()
 
-        self.submit_button = ttk.Button(frame2, text="Submit", command=self.insert_section)
+        self.submit_button = ttk.Button(frame2, text="Submit", style='btn_style.TButton', command=self.insert_section)
         self.submit_button.grid(row=8, column=0, padx=11, pady=11)
 
-        self.clear_button = ttk.Button(frame2, text="Clear", command=self.clear_selection)
+        self.clear_button = ttk.Button(frame2, text="Clear", style='btn_style.TButton', command=self.clear_selection)
         self.clear_button.grid(row=8, column=1, padx=11, pady=11)
 
-        self.delete_button = ttk.Button(frame2, text="Delete", command=self.delete_section)
+        self.delete_button = ttk.Button(frame2, text="Delete", style='btn_style.TButton', command=self.delete_section)
         self.delete_button.grid(row=8, column=3, padx=11, pady=11)
         self.checkUpd = 0
     
@@ -620,60 +668,63 @@ class FrameThree:
         self.info_label = info_label
         self.main_window = main_window
 
-        self.itemName_label = ttk.Label(frame3, text="Item Name:")
+        btn_style = ttk.Style()
+        btn_style.configure('btn_style.TButton', font=('', 14))
+
+        self.itemName_label = ttk.Label(frame3, text="Item Name:", font=('', 12), padding=10)
         self.itemName_label.grid(row=0, column=0, padx=11, pady=11)
 
-        self.itemName_entry = ttk.Entry(frame3)
+        self.itemName_entry = ttk.Entry(frame3, font=('', 12))
         self.itemName_entry.grid(row=0, column=1, padx=11, pady=11)
 
-        self.item_desc_label = ttk.Label(frame3, text="Item Description:")
+        self.item_desc_label = ttk.Label(frame3, text="Item Description:", font=('', 12), padding=10)
         self.item_desc_label.grid(row=1, column=0, padx=11, pady=11)
 
-        self.item_desc_entry = tk.Text(frame3, height=5, width=30)
+        self.item_desc_entry = tk.Text(frame3, height=5, width=30, font=('', 12))
         self.item_desc_entry.grid(row=1, column=1, padx=11, pady=11)
         
 
-        self.itemPrice_label = ttk.Label(frame3, text="Item Price:")
+        self.itemPrice_label = ttk.Label(frame3, text="Item Price:", font=('', 12), padding=10)
         self.itemPrice_label.grid(row=2, column=0, padx=11, pady=11)
 
-        self.itemPrice_entry = ttk.Entry(frame3)
+        self.itemPrice_entry = ttk.Entry(frame3, font=('', 12))
         self.itemPrice_entry.grid(row=2, column=1, padx=11, pady=11)
 
 
-        self.itemStock_label = ttk.Label(frame3, text="Item Stock:")
+        self.itemStock_label = ttk.Label(frame3, text="Item Stock:", font=('', 12), padding=10)
         self.itemStock_label.grid(row=3, column=0, padx=11, pady=11)
 
-        self.item_stockEntry = ttk.Entry(frame3)
+        self.item_stockEntry = ttk.Entry(frame3, font=('', 12))
         self.item_stockEntry.grid(row=3, column=1, padx=11, pady=11)
 
 
-        self.itemMenu_Label = ttk.Label(frame3, text="Menu:")
+        self.itemMenu_Label = ttk.Label(frame3, text="Menu:", font=('', 12), padding=10)
         self.itemMenu_Label.grid(row=5, column=0, padx=11, pady=11)
 
         self.menuLevels = []
-        self.itemMenu_entry = ttk.Combobox(frame3, values=self.menuLevels, state='readonly')
+        self.itemMenu_entry = ttk.Combobox(frame3, values=self.menuLevels, state='readonly', font=('', 12))
         self.itemMenu_entry.grid(row=5, column=1, padx=11, pady=11)
         self.itemMenu_entry.bind("<<ComboboxSelected>>", self.check_menu_sec)
         self.fill_menu_opts()
 
         
-        self.menu_secLevel_label = ttk.Label(frame3, text="Menu Section:")
+        self.menu_secLevel_label = ttk.Label(frame3, text="Menu Section:", font=('', 12), padding=10)
         self.menu_secLevel_label.grid(row=6, column=0, padx=11, pady=11)
         self.menu_secLevel_label.grid_remove()
 
         self.menu_secLevels = []
-        self.itemMenuSec_entry = ttk.Combobox(frame3, values=self.menu_secLevels, state='readonly')
+        self.itemMenuSec_entry = ttk.Combobox(frame3, values=self.menu_secLevels, state='readonly', font=('', 12))
         self.itemMenuSec_entry.grid(row=6, column=1, padx=11, pady=11)
         self.itemMenuSec_entry.grid_remove()
 
 
-        self.submit_button = ttk.Button(frame3, text="Submit", command=self.insert_item)
+        self.submit_button = ttk.Button(frame3, text="Submit", style='btn_style.TButton', command=self.insert_item)
         self.submit_button.grid(row=8, column=0, padx=11, pady=11)
 
-        self.clear_button = ttk.Button(frame3, text="Clear", command=self.clear_selection)
+        self.clear_button = ttk.Button(frame3, text="Clear", style='btn_style.TButton', command=self.clear_selection)
         self.clear_button.grid(row=8, column=1, padx=11, pady=11)
 
-        self.delete_button = ttk.Button(frame3, text="Delete", command=self.delete_item)
+        self.delete_button = ttk.Button(frame3, text="Delete", style='btn_style.TButton', command=self.delete_item)
         self.delete_button.grid(row=8, column=3, padx=11, pady=11)
         self.checkUpd = 0
 
@@ -839,10 +890,13 @@ class EmployeeWindow:
 
         self.left_frame.pack(side='left', fill='both', expand=False)
         self.right_frame.pack(side='left', fill='both', expand=True)
+
+        btn_style = ttk.Style()
+        btn_style.configure('btn_style.TButton', font=('', 14))
         
 
         self.tree = ttk.Treeview(self.right_frame, columns=("ID", "FirstName", "LastName", "DisplayName", "PinNum", "PinCode", "AccessLevel", "Role"), show="headings")
-        self.tree.heading("ID", text="Database ID")
+        self.tree.heading("ID", text="Employee ID")
         self.tree.heading("FirstName", text="First Name")
         self.tree.heading("LastName", text="Last Name")
         self.tree.heading("DisplayName", text="Display Name")
@@ -863,64 +917,64 @@ class EmployeeWindow:
 
 
 
-        self.fistName_label = ttk.Label(self.left_frame, text="First Name:")
+        self.fistName_label = ttk.Label(self.left_frame, text="First Name:", font=('', 12), padding=10, background='light grey')
         self.fistName_label.grid(row=1, column=0, padx=11, pady=11)
 
-        self.firstName_entry = ttk.Entry(self.left_frame)
+        self.firstName_entry = ttk.Entry(self.left_frame, font=('', 12))
         self.firstName_entry.grid(row=1, column=1, padx=11, pady=11)
 
 
-        self.lastName_label = ttk.Label(self.left_frame, text="Last Name:")
+        self.lastName_label = ttk.Label(self.left_frame, text="Last Name:", font=('', 12), padding=10, background='light grey')
         self.lastName_label.grid(row=2, column=0, padx=11, pady=11)
 
-        self.lastName_entry = ttk.Entry(self.left_frame)
+        self.lastName_entry = ttk.Entry(self.left_frame, font=('', 12))
         self.lastName_entry.grid(row=2, column=1, padx=11, pady=11)
         
 
-        self.displayName_label = ttk.Label(self.left_frame, text="Display Name:")
+        self.displayName_label = ttk.Label(self.left_frame, text="Display Name:", font=('', 12), padding=10, background='light grey')
         self.displayName_label.grid(row=3, column=0, padx=11, pady=11)
 
-        self.displayName_entry = ttk.Entry(self.left_frame)
+        self.displayName_entry = ttk.Entry(self.left_frame, font=('', 12))
         self.displayName_entry.grid(row=3, column=1, padx=11, pady=11)
 
 
-        self.pinNumber_label = ttk.Label(self.left_frame, text="Pin Number:")
+        self.pinNumber_label = ttk.Label(self.left_frame, text="Pin Number:", font=('', 12), padding=10, background='light grey')
         self.pinNumber_label.grid(row=4, column=0, padx=11, pady=11)
 
-        self.pinNumber_entry = ttk.Entry(self.left_frame)
+        self.pinNumber_entry = ttk.Entry(self.left_frame, font=('', 12))
         self.pinNumber_entry.grid(row=4, column=1, padx=11, pady=11)
 
 
-        self.pinCode_label = ttk.Label(self.left_frame, text="Pin Code:")
+        self.pinCode_label = ttk.Label(self.left_frame, text="Pin Code:", font=('', 12), padding=10, background='light grey')
         self.pinCode_label.grid(row=5, column=0, padx=11, pady=11)
 
-        self.pinCode_entry = ttk.Entry(self.left_frame)
+        self.pinCode_entry = ttk.Entry(self.left_frame, font=('', 12))
         self.pinCode_entry.grid(row=5, column=1, padx=11, pady=11)
 
-        self.accessLevel_label = ttk.Label(self.left_frame, text="Access Level:")
+        self.accessLevel_label = ttk.Label(self.left_frame, text="Access Level:", font=('', 12), padding=10, background='light grey')
         self.accessLevel_label.grid(row=6, column=0, padx=11, pady=11)
 
         self.accessLevels = [1, 2, 3, 4, 5]
-        self.accessLevel_entry = ttk.Combobox(self.left_frame, values=self.accessLevels, state='readonly')
+        self.accessLevel_entry = ttk.Combobox(self.left_frame, values=self.accessLevels, state='readonly', font=('', 12))
         self.accessLevel_entry.grid(row=6, column=1, padx=11, pady=11)
         
 
-        self.role_label = ttk.Label(self.left_frame, text="Role:")
+        self.role_label = ttk.Label(self.left_frame, text="Role:", font=('', 12), padding=10, background='light grey')
         self.role_label.grid(row=7, column=0, padx=11, pady=11)
 
         self.roles = ['Owner', 'Manager', 'Server', 'Bartender', 'Kitchen', 'Hostess', 'Busser', 'Doorman', 'Barback', 'Maintenance', 'Dishwasher', 'Food-Runner', 'Expeditor']
-        self.role_entry = ttk.Combobox(self.left_frame, values=self.roles, state='readonly')
+        self.role_entry = ttk.Combobox(self.left_frame, values=self.roles, state='readonly', font=('', 12))
         self.role_entry.grid(row=7, column=1, padx=11, pady=11)
         self.role_entry.set('')
 
 
-        self.submit_button = ttk.Button(self.left_frame, text="Submit", command=self.submit)
+        self.submit_button = ttk.Button(self.left_frame, text="Submit", style='btn_style.TButton', command=self.submit)
         self.submit_button.grid(row=8, column=0, padx=11, pady=11)
 
-        self.clr_button = ttk.Button(self.left_frame, text="Clear", command=self.clearVals)
+        self.clr_button = ttk.Button(self.left_frame, text="Clear", style='btn_style.TButton', command=self.clearVals)
         self.clr_button.grid(row=8, column=1, padx=11, pady=11)
 
-        self.del_button = ttk.Button(self.left_frame, text="Delete", command=self.delEmployee)
+        self.del_button = ttk.Button(self.left_frame, text="Delete", style='btn_style.TButton', command=self.delEmployee)
 
 
     def on_item_selected(self, event):
@@ -1028,6 +1082,218 @@ class EmployeeWindow:
 
         
 # endregion
+        
+# endregion
+
+# region Time Managment
+class TimeManagment:
+    def __init__(self, main_RightFrame, main_LeftFrame, main_TopFrame):
+        self.left_frame = main_LeftFrame
+        self.right_frame = main_RightFrame
+
+        self.left_frame.pack(side='left', fill='both', expand=False)
+        self.right_frame.pack(side='left', fill='both', expand=True)
+
+        btn_style = ttk.Style()
+        btn_style.configure('btn_style.TButton', font=('', 14))
+        
+
+        self.tree = ttk.Treeview(self.right_frame, columns=("close_record_id", "clock_In", "clock_Out", "employee_id", "clock_total"), show="headings")
+        self.tree.heading("close_record_id", text="Database ID")
+        self.tree.heading("clock_In", text="Clock-IN")
+        self.tree.heading("clock_Out", text="Clock-OUT")
+        self.tree.heading("employee_id", text="Employee ID")
+        self.tree.heading("clock_total", text="Shift Hours")
+
+
+        self.tree.pack(fill=tk.BOTH, expand=True)
+
+        self.build_tree()
+        self.tree.bind("<Double-1>", self.on_item_selected)
+        self.updateCheck = -1
+
+        self.emplInsert_label = ttk.Label(self.left_frame, text="Time Management", font=('', 24), width=15,anchor='center', background='orange', borderwidth=3, relief='ridge')
+        self.emplInsert_label.grid(row=0, column=0, columnspan=2, padx=11, pady=11)
+
+        self.viewOPTS_label = ttk.Label(self.left_frame, text="Display Options:", font=('', 14), padding=10, background='light grey', relief='solid')
+        self.viewOPTS_label.grid(row=1, column=0, columnspan=2, padx=11, pady=11)
+
+        self.viewOPTS = ['All', 'Clocked-OUT', 'Clocked-IN']
+        self.viewOPTS_entry = ttk.Combobox(self.left_frame, values=self.viewOPTS, state='readonly', font=('', 12))
+        self.viewOPTS_entry.grid(row=2, column=0, columnspan=2, padx=5, pady=11)
+        self.viewOPTS_entry.set('All')
+        self.viewOPTS_entry.bind("<<ComboboxSelected>>", self.update_tree)
+
+        self.clockIn_label = ttk.Label(self.left_frame, text="Clock-In Time:\nYYYY-MM-DD HH:MI:SS", font=('', 12), padding=10, background='light grey')
+        self.clockIn_label.grid(row=3, column=0, padx=11, pady=11)
+
+        self.clockIn_entry = ttk.Entry(self.left_frame, font=('', 12))
+        self.clockIn_entry.grid(row=3, column=1, padx=11, pady=11)
+
+
+        self.clockOut_label = ttk.Label(self.left_frame, text="Clock-Out Time:\nYYYY-MM-DD HH:MI:SS", font=('', 12), padding=10, background='light grey')
+        self.clockOut_label.grid(row=4, column=0, padx=11, pady=11)
+
+        self.clockOut_entry = ttk.Entry(self.left_frame, font=('', 12))
+        self.clockOut_entry.grid(row=4, column=1, padx=11, pady=11)
+        
+
+        self.employeeID_label = ttk.Label(self.left_frame, text="Employee ID:", font=('', 12), padding=10, background='light grey')
+        self.employeeID_label.grid(row=5, column=0, padx=11, pady=11)
+
+        self.employeeID_entry = ttk.Entry(self.left_frame, font=('', 12))
+        self.employeeID_entry.grid(row=5, column=1, padx=11, pady=11)
+
+
+        self.closeRecord_label = ttk.Label(self.left_frame, text="Record Status:", font=('', 12), padding=10, background='light grey')
+        self.closeRecord_label.grid(row=6, column=0, padx=11, pady=11)
+
+        self.closeRecordOPTS = ['Open', 'Closed']
+        self.closeRecord_entry = ttk.Combobox(self.left_frame, values=self.closeRecordOPTS, state='readonly', font=('', 12))
+        self.closeRecord_entry.grid(row=6, column=1, padx=5, pady=11)
+        self.closeRecord_entry.bind("<<ComboboxSelected>>", self.clockOutStatus)
+        self.closeRecord_entry.set('')
+
+        self.submit_button = ttk.Button(self.left_frame, text="Submit", style='btn_style.TButton', command=self.submit)
+        self.submit_button.grid(row=7, column=0, padx=11, pady=11)
+
+        self.clr_button = ttk.Button(self.left_frame, text="Clear", style='btn_style.TButton', command=self.clearVals)
+        self.clr_button.grid(row=7, column=1, padx=11, pady=11)
+
+        self.del_button = ttk.Button(self.left_frame, text="Delete", style='btn_style.TButton', command=self.delEmployee)
+
+
+    def on_item_selected(self, event):
+        tree = event.widget
+        selected_items = tree.selection()
+
+        if selected_items:  
+            item_id = selected_items[0]
+            item_values = tree.item(item_id, 'values')
+            self.updateCheck = item_values[0]
+
+            self.submit_button.config(text='Update')
+            self.del_button.grid(row=8, column=1, padx=11, pady=11)
+
+            employeeShiftDAO = EmployeesShift_TableDAO("mysqlEmployees")
+            employeeShift_byID = employeeShiftDAO.fetch_record_by_REC_ID(item_values[0])
+            employeeShiftDAO.close()
+
+            self.clockIn_entry.delete(0, tk.END)
+            self.clockIn_entry.insert(0, employeeShift_byID.clock_In)
+
+            self.clockOut_entry.config(state="")
+            self.clockOut_entry.delete(0, tk.END)
+            if employeeShift_byID.clock_Out:
+                self.clockOut_entry.insert(0, employeeShift_byID.clock_Out)
+
+            else:
+                self.clockOut_entry.insert(0, 'NA')
+
+            self.employeeID_entry.delete(0, tk.END)
+            self.employeeID_entry.insert(0, employeeShift_byID.employee_id)
+            
+
+            if employeeShift_byID.clock_Out:
+                self.closeRecord_entry.set('Closed')
+            else:
+                self.closeRecord_entry.set('Open')
+            
+            self.clockOutStatus()
+
+
+            print(item_values)
+    
+    def submit(self):
+        
+        employeeShiftDAO = EmployeesShift_TableDAO("mysqlEmployees")
+
+        clock_In = self.clockIn_entry.get()
+        clock_Out = self.clockOut_entry.get()
+        employee_id = self.employeeID_entry.get()
+        close_record = self.closeRecord_entry.get()
+
+        if self.updateCheck != -1:
+            if close_record == 'Open':
+                employeeShiftDAO.update_Now_ClockedIN(self.updateCheck, clock_In)
+        else:
+            employeeShiftDAO
+
+        employeeShiftDAO.close()
+        self.build_tree()
+        self.clearVals()
+        updateJsonFiles()
+    
+    def clearVals(self):
+        self.clockIn_entry.delete(0, tk.END)
+
+        self.clockOut_entry.config(state='')
+        self.clockOut_entry.delete(0, tk.END)
+
+        self.employeeID_entry.delete(0, tk.END)
+
+        self.closeRecord_entry.delete(0, tk.END)
+
+        self.closeRecord_entry.set('')
+
+        self.updateCheck = -1
+        self.submit_button.config(text='Submit')
+        self.del_button.grid_remove()
+
+    def delEmployee(self):
+        employeeDAO = Employees_TableDAO("mysqlEmployees")
+        employeeDAO_byID = employeeDAO.fetch_employee_by_Id(self.updateCheck)
+        
+        if messagebox.askyesno("Delete Item", "Are you sure you want to delete " + employeeDAO_byID.display_name):
+
+            employeeDAO.delete_employee_by_id(self.updateCheck)
+            employeeDAO.close()
+            self.clearVals()
+            self.build_tree()
+            updateJsonFiles()
+
+    def build_tree(self):
+        self.tree.delete(*self.tree.get_children())
+        employeeShiftDAO = EmployeesShift_TableDAO("mysqlEmployees")
+        employeeShiftALL_DAO = employeeShiftDAO.fetch_all_records()
+        employeeShiftDAO.close()
+
+
+        for record in employeeShiftALL_DAO:
+            self.tree.insert("", tk.END, values=(record.clock_record_id, record.clock_In, record.clock_Out, record.employee_id, record.clock_total))
+
+    def update_tree(self, event=None):
+        self.clearVals()
+        self.tree.delete(*self.tree.get_children())
+        employeeShiftDAO = EmployeesShift_TableDAO("mysqlEmployees")
+
+        if self.viewOPTS_entry.get() == 'All':
+            self.build_tree()
+        
+        elif self.viewOPTS_entry.get() == 'Clocked-IN':
+            employeeShiftOpen_DAO = employeeShiftDAO.fetch_open_records()
+            for record in employeeShiftOpen_DAO:
+                self.tree.insert("", tk.END, values=(record.clock_record_id, record.clock_In, record.clock_Out, record.employee_id, record.clock_total))
+
+        elif self.viewOPTS_entry.get() == 'Clocked-OUT':
+            employeeShiftOpen_DAO = employeeShiftDAO.fetch_closed_records()
+            for record in employeeShiftOpen_DAO:
+                self.tree.insert("", tk.END, values=(record.clock_record_id, record.clock_In, record.clock_Out, record.employee_id, record.clock_total))
+        
+        employeeShiftDAO.close()
+    
+    def clockOutStatus(self, event=None):
+        if self.closeRecord_entry.get() == 'Open':
+            self.clockOut_entry.delete(0, tk.END)
+            self.clockOut_entry.insert(0, 'NA')
+            self.clockOut_entry.config(state='disabled')
+
+        elif self.closeRecord_entry.get() == 'Closed':
+            self.clockOut_entry.config(state='')
+
+
+        
+# endregion
 
 if __name__ == "__main__":
-    AdminLogin()
+    srtAdmin = AdminLogin()

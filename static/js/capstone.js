@@ -65,7 +65,7 @@ const Order = {
         });
 
         // Here is where it is listening for message and runs the fetchData, which just loads the data from th JSON files
-        this.socket.on('JSON_Update', (data) => {
+        this.socket.on('JSON_Update', () => {
             //console.log(data.message);
             this.fetchData();
         });
@@ -401,6 +401,12 @@ const Order = {
                 btn_TableCancel.style.display = 'flex'
             }
 
+            else if (type == 'PAID_table') {
+                h_Ask.innerHTML = ` Table: ${data} <br> Has been cleared.`
+                askTableModal.style.display = "flex"
+                btn_TableCancel.style.display = 'flex'
+            }
+
             // Yes
             // Used to start the LogIn process
             // A big difference is that `seatTableCheck` is a positive when we click this button
@@ -588,10 +594,8 @@ const Order = {
 
 
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-        /////////////////////////////////////////SECTION open/close tables////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        /////////////////////////////////////////SECTION open/close tables
         /* this function helps close the table when the button is clicked to close a table */
         async closeTable() {
             const tableToClose = this.tables[this.currentTableId - 1];
@@ -608,8 +612,11 @@ const Order = {
                 tableToClose.status = 'open';
                 //prints recipt to alert
 
+
+                this.modalTypeTable('PAID_table', this.currentTableId)
+                this.lockTable()
+
                 // Update the table information
-                this.switchTable(this.currentTableId);
                 this.updateTableOrdersFlask(); // Call to update Flask
             } else {
                 console.log("No server assigned to this table.");
@@ -706,7 +713,9 @@ const Order = {
             // If we don't check if a table is NULL, we would get an error when trying `tableSwitchFrom.id` 
             if (!tableSwitchFrom) {
                 console.log("No table on window")
+                //console.log(this.tables)
                 const tableSwitchTo = this.tables.find(table => table.id === tableId);
+
                 this.currentTableId = tableSwitchTo.id
                 this.finalOrder = tableSwitchTo.tableOrder
                 this.overallTotal = tableSwitchTo.tableTotal
@@ -722,10 +731,12 @@ const Order = {
             else {
                 // console.log(this.tables)
                 const tableSwitchTo = this.tables.find(table => table.id === tableId);
+
                 this.currentTableId = tableSwitchTo.id
                 this.finalOrder = tableSwitchTo.tableOrder
                 this.overallTotal = tableSwitchTo.tableTotal.toFixed(2)
             }
+
         },
 
         /* Called when when have made it through all the steps with creating an open table. It gets the table to seat
@@ -758,7 +769,7 @@ const Order = {
         // Used when neededing to check the status of the table during logIn
         async checkTableData() {
             const tableData = this.tables.find(tb => tb['id'] === parseInt(this.seatTableCheck));
-            //console.log("table Data: " + tableData)
+            console.log("table Data: " + tableData)
             return tableData
 
         },
@@ -870,17 +881,25 @@ const Order = {
                 alert("We ran out of " + this.entreChoice.menu_item_name + ". Please select a different item.")
             }
             else {
-                this.finalOrder += this.entreChoice.menu_item_name + " "
-                this.entreChoice = []
-                //console.log(this.entreChoice)
-                this.overallTotal = parseFloat(this.overallTotal) + parseFloat(this.indTotal)
-                this.finalOrder += this.indTotal
-                this.finalOrder += "\n"
-                this.overallTotal = this.overallTotal.toFixed(2)
-                this.tables[this.currentTableId - 1]['tableOrder'] = this.finalOrder
-                this.tables[this.currentTableId - 1]['tableTotal'] = this.overallTotal
-                this.updateStock("subtract_from_stock")
-                this.updateTableOrdersFlask() // Call for Flask update
+                if(this.entreChoice.menu_item_name) {
+                    this.updateItemStockFlask(this.entreChoice.menu_items_id, this.entreChoice.menu_item_stock) // Call for Flask update
+                    this.finalOrder += this.entreChoice.menu_item_name + " "
+                    this.entreChoice = []
+                    //console.log(this.entreChoice)
+                    this.overallTotal = parseFloat(this.overallTotal) + parseFloat(this.indTotal)
+                    this.finalOrder += this.indTotal
+                    this.finalOrder += "\n"
+                    this.overallTotal = this.overallTotal.toFixed(2)
+                    this.tables[this.currentTableId - 1]['tableOrder'] = this.finalOrder
+                    this.tables[this.currentTableId - 1]['tableTotal'] = this.overallTotal
+                    this.entreChoice = []
+                    this.updateStock("subtract_from_stock")
+                    this.updateTableOrdersFlask() // Call for Flask update
+        
+                }
+                else {
+                    console.error("Final Order: No item selected")
+                }
             }
         },
         // This function is used to clear the order
@@ -915,14 +934,14 @@ const Order = {
             this.tip15.toFixed(2)
             this.tip20.toFixed(2)
             this.tip25.toFixed(2)
-            tipString = "15%: " + this.tip15.toFixed(2) + "\n" + "20%: " + this.tip20.toFixed(2) + "\n" + " 25%: " + this.tip25.toFixed(2)
+            tipString = "15%: " + this.tip15.toFixed(2) + "\n" + "20%: " + this.tip20.toFixed(2) + "\n" + "25%: " + this.tip25.toFixed(2)
             return (tipString)
         },
 
         /* our version of "printing" the recipt for the customer */
         printOrder() {
-            let printable = "Final Order" + this.finalOrder + "\n" + " Your Total Is: $" + this.overallTotal +
-                "\n Suggested Tips" + "\n" + this.tip() + "\n";
+            let printable = "Final Order\n" + this.finalOrder + "\n" + " Your Total Is: $" + this.overallTotal +
+                "\n\n Suggested Tips" + "\n" + this.tip() + "\n";
             alert(printable)
         },
         ///////////////////////////////////////SECTION edit .json/flask
@@ -945,21 +964,27 @@ const Order = {
         },
 
         // When called, sends `menu_items` over to Flask to update the JSON file
-        updateItemStockFlask() {
-            fetch('/update_stock', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(this.menu_items)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    //console.log('Success:', data);
+        async updateItemStockFlask(item_id, stock) {
+            console.log(item_id)
+            const postData = {
+                item_id: item_id,
+                stock: stock,
+            };
+            try {
+                const response = await fetch('/update_stock', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(postData)
                 })
-                .catch((error) => {
-                    console.error('Error:', error);
-                });
+
+                const data = await response.json()
+                console.log('Success:', data);
+
+            } catch (error) {
+                console.error('Error', error)
+            }
         },
         // Each time item is added to final order, its stock is calculated
         updateStock(action) {
@@ -970,6 +995,7 @@ const Order = {
                         if (this.menu_items[i].menu_item_stock <= 0 && !this.noStock.includes(this.menu_items[i].menu_item_name)) {
                             this.noStock.push(this.menu_items[i].menu_item_name)
                             alert("That was the last of " + this.menu_items[i].menu_item_name)
+                            document.getElementById(this.menu_items[i].menu_items_id).disabled = 'true'
                         }
                         else if (this.menu_items[i].menu_item_stock <= 0) {
                             alert("There is no more " + this.menu_items[i].menu_item_name + " in stock.")
@@ -990,19 +1016,37 @@ const Order = {
 
             }
 
-            this.updateItemStockFlask() // Call for Flask update
         },
-        getTimestamp() {
-            const date = new Date();
-            const month = String(date.getMonth() + 1).padStart(2, '0'); // Adding 1 because getMonth() returns zero-based month
-            const day = String(date.getDate()).padStart(2, '0');
-            const year = date.getFullYear();
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
-            /* proves that it works with the console to verify the answer */
-            console.log(`${month}/${day}/${year} ${hours}:${minutes}:${seconds}`)
-            return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
+
+        // Updates style based on stock
+        stockCheck(stock) {
+            if (stock == null) {
+                return ''
+            }
+            else if(stock.menu_item_stock == 0) {
+                try {
+                    const itemRadioBtn = document.getElementById(stock.menu_items_id)
+                    itemRadioBtn.disabled = true
+                    return 'noStock'
+                } catch (TypeError) {
+                    return ''
+                }   
+                
+            }
+            else if(stock.menu_item_stock <= 5) {
+                return 'lowStock'
+            }
+            else {
+                try {
+                    const itemRadioBtn = document.getElementById(stock.menu_items_id)
+                    itemRadioBtn.disabled = false
+                    return 'hasStock'
+                } catch (TypeError) {
+                    return ''
+                }   
+                
+            }
+
         },
         toDatabase() {
             // Create a JSON object representing the orders data
@@ -1031,6 +1075,19 @@ const Order = {
             link.click();
             //console.log(this.getTimestamp())
         },
+
+        getTimestamp() {
+            const date = new Date();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Adding 1 because getMonth() returns zero-based month
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            /* proves that it works with the console to verify the answer */
+            console.log(`${year}-${month}-${day} ${hours}:${minutes}:${seconds}`)
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
 
     }//end Methods
 

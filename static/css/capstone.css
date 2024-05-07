@@ -210,6 +210,18 @@ input[type="radio"]:checked+label {
     cursor: not-allowed;
 }
 
-.noStock{
-    color: red;
+.child span
+.noStock {
+    display: grid;
+    background-color: rgb(219, 107, 107);
+    color: black;
+    padding: 10px 10px 10px 10px;
+}
+
+.child span
+.lowStock {
+    display: grid;
+    background-color: rgb(224, 216, 101);
+    color: black;
+    padding: 10px 10px 10px 10px;
 }

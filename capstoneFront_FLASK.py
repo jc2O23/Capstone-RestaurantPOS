@@ -10,9 +10,9 @@ import webbrowser
 # pip install flask-cors
 # pip install flask-socketio
 
-
 # Change the file dir, used to work with the JSON files
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
+    
 
 # Create app and socket
 # From what I understand, the CORS is there to check if it is a different IP
@@ -46,11 +46,13 @@ def update_tables():
 @app.route("/update_stock", methods=["POST"])
 def update_stock():
     data = request.json
-    print(data)
-    json_data = json.dumps({"menu_items": data}, indent=2)
-
-    with open("./static/data/menu_items.json", "w") as json_file:
-        json_file.write(json_data)
+    print("id?", data)
+    newStock = int(data['stock']) - 1
+    MenuItemDAO = MenuItems_TableDAO("mysqlMenus")
+    MenuItemDAO.update_item_stock_by_id(newStock, data['item_id'])
+    MenuItemDAO.menuItems_to_json()
+        
+    
     return jsonify({"message": "We did it "})
 
 # OLd not used anymore
@@ -140,6 +142,7 @@ def notify_update():
 @app.route("/admin_BackEnd")
 def admin_BackEnd():
     AdminLogin()
+    return jsonify({"message": "We did it "})
     
 if __name__ == "__main__":
     webbrowser.open('http://127.0.0.1:5000')
